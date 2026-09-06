@@ -1,0 +1,11 @@
+target/
+*.class
+.idea/
+*.iml
+.vscode/
+nbproject/private/
+nb-configuration.xml
+
+# Credenciales locales reales: no se suben al repo publico.
+# Copia db.properties.example a db.properties y pon tu password real.
+src/main/resources/db.properties

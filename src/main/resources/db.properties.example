@@ -1,0 +1,4 @@
+db.url=jdbc:mysql://localhost:3306/reposteria_jee?useSSL=false&serverTimezone=America/Lima&allowPublicKeyRetrieval=true&characterEncoding=UTF-8
+db.user=root
+db.password=CAMBIAR_PASSWORD
+db.driver=com.mysql.cj.jdbc.Driver

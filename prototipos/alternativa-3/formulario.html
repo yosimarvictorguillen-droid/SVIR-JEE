@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuevo producto - SVIR (Alternativa 3)</title>
+<link href="assets/styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="topnav">
+    <div class="brand">svir<span>.</span></div>
+    <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="tabla.html">Productos</a>
+        <a class="active" href="formulario.html">Nuevo producto</a>
+        <a href="reportes.html">Reportes</a>
+    </nav>
+    <span style="color:var(--text-dim); font-size:.9rem;">Administrador</span>
+</div>
+<div class="wrap" style="max-width:500px;">
+    <h2>Nuevo producto</h2>
+    <form onsubmit="event.preventDefault(); alert('Prototipo estatico: no guarda datos.');">
+        <div class="form-row"><label>Nombre</label><input placeholder="Torta de chocolate"></div>
+        <div class="form-row"><label>Descripcion</label><textarea rows="3"></textarea></div>
+        <div class="form-row"><label>Precio (S/)</label><input type="number" value="45.00"></div>
+        <div class="form-row"><label>Stock</label><input type="number" value="8"></div>
+        <div class="form-row"><label>Stock minimo</label><input type="number" value="3"></div>
+        <button class="btn btn-accent">Guardar</button>
+        <a href="tabla.html" class="btn btn-line">Cancelar</a>
+    </form>
+</div>
+</body>
+</html>

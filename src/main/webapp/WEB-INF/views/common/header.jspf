@@ -1,0 +1,105 @@
+<%@ page import="com.svir.jee.model.Usuario" %>
+<%@ page import="com.svir.jee.model.RolUsuario" %>
+<%
+    // Fragmento compartido: se incluye de forma estatica (include directive)
+    // al inicio de cada pantalla interna. Requiere sesion iniciada (lo exige
+    // ya AuthFilter para todo lo que cuelga de /app/*).
+    Usuario usuario = (Usuario) session.getAttribute("usuario");
+    RolUsuario rol = usuario.getRol();
+    boolean esAdmin = rol == RolUsuario.ADMIN;
+    boolean esVentas = rol == RolUsuario.VENTAS;
+    boolean esCocina = rol == RolUsuario.COCINA;
+    boolean esRepartidor = rol == RolUsuario.REPARTIDOR;
+
+    String tituloPagina = (String) request.getAttribute("tituloPagina");
+    if (tituloPagina == null) tituloPagina = "SVIR-JEE";
+    String paginaActiva = (String) request.getAttribute("paginaActiva");
+    if (paginaActiva == null) paginaActiva = "";
+    String ctx = request.getContextPath();
+%>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= tituloPagina %> - SVIR-JEE</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="<%= ctx %>/assets/css/styles.css?v=<%= application.getAttribute("iniciadoEn") %>" rel="stylesheet">
+</head>
+<body>
+<div class="svir-layout">
+    <aside class="svir-sidebar">
+        <span class="brand"><i class="bi bi-cake2-fill"></i> SVIR-JEE</span>
+        <nav class="nav flex-column">
+            <a class="nav-link <%= paginaActiva.equals("dashboard") ? "active" : "" %>" href="<%= ctx %>/app/dashboard">
+                <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+            <% if (esAdmin || esVentas) { %>
+            <a class="nav-link <%= paginaActiva.equals("productos") ? "active" : "" %>" href="<%= ctx %>/app/productos">
+                <i class="bi bi-box-seam"></i> Productos
+            </a>
+            <% } %>
+            <% if (esAdmin || esCocina) { %>
+            <a class="nav-link <%= paginaActiva.equals("ingredientes") ? "active" : "" %>" href="<%= ctx %>/app/ingredientes">
+                <i class="bi bi-basket"></i> Ingredientes
+            </a>
+            <a class="nav-link <%= paginaActiva.equals("recetas") ? "active" : "" %>" href="<%= ctx %>/app/recetas">
+                <i class="bi bi-journal-text"></i> Recetas
+            </a>
+            <a class="nav-link <%= paginaActiva.equals("producciones") ? "active" : "" %>" href="<%= ctx %>/app/producciones">
+                <i class="bi bi-fire"></i> Produccion
+            </a>
+            <% } %>
+            <% if (esAdmin || esVentas) { %>
+            <a class="nav-link <%= paginaActiva.equals("pos") ? "active" : "" %>" href="<%= ctx %>/app/pos">
+                <i class="bi bi-cash-coin"></i> Punto de Venta
+            </a>
+            <a class="nav-link <%= paginaActiva.equals("clientes") ? "active" : "" %>" href="<%= ctx %>/app/clientes">
+                <i class="bi bi-people"></i> Clientes
+            </a>
+            <a class="nav-link <%= paginaActiva.equals("pedidos") ? "active" : "" %>" href="<%= ctx %>/app/pedidos">
+                <i class="bi bi-receipt"></i> Pedidos
+            </a>
+            <% } %>
+            <% if (esAdmin || esVentas || esRepartidor) { %>
+            <a class="nav-link <%= paginaActiva.equals("repartidor") ? "active" : "" %>" href="<%= ctx %>/app/repartidor">
+                <i class="bi bi-bicycle"></i> Repartidor
+            </a>
+            <% } %>
+            <% if (esAdmin) { %>
+            <a class="nav-link <%= paginaActiva.equals("movimientos") ? "active" : "" %>" href="<%= ctx %>/app/movimientos">
+                <i class="bi bi-clock-history"></i> Movimientos
+            </a>
+            <a class="nav-link <%= paginaActiva.equals("usuarios") ? "active" : "" %>" href="<%= ctx %>/app/usuarios">
+                <i class="bi bi-person-badge"></i> Usuarios
+            </a>
+            <a class="nav-link <%= paginaActiva.equals("reportes") ? "active" : "" %>" href="<%= ctx %>/app/reportes">
+                <i class="bi bi-bar-chart-line"></i> Reportes
+            </a>
+            <% } %>
+        </nav>
+    </aside>
+
+    <div class="svir-main">
+        <header class="svir-topbar">
+            <div><h5 class="mb-0"><%= tituloPagina %></h5></div>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted small">
+                    <i class="bi bi-person-circle"></i> <%= usuario.getNombre() %> (<%= usuario.getRol() %>)
+                </span>
+                <a href="<%= ctx %>/catalogo" target="_blank" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-shop"></i> Tienda
+                </a>
+                <a href="<%= ctx %>/logout" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-box-arrow-right"></i> Salir
+                </a>
+            </div>
+        </header>
+        <main class="svir-content">
+            <% if (request.getParameter("error") != null && "sin_permiso".equals(request.getParameter("error"))) { %>
+                <div class="alert alert-warning">No tienes permiso para acceder a ese modulo.</div>
+            <% } %>
+            <% if (request.getAttribute("error") != null) { %>
+                <div class="alert alert-danger"><%= request.getAttribute("error") %></div>
+            <% } %>

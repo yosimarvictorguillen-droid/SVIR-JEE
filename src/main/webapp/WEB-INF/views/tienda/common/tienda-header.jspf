@@ -1,0 +1,84 @@
+<%@ page import="com.svir.jee.model.Cliente" %>
+<%@ page import="java.util.Map" %>
+<%
+    // Fragmento compartido de la tienda web publica (sin autenticacion de
+    // personal). Se incluye de forma estatica al inicio de cada pantalla.
+    Cliente cliente = (Cliente) session.getAttribute("cliente");
+    String ctx = request.getContextPath();
+    String tituloPagina = (String) request.getAttribute("tituloPagina");
+    if (tituloPagina == null) tituloPagina = "Tienda";
+
+    // OJO: no usar request.getRequestURI() aqui - despues de un forward()
+    // esa URI pasa a ser la ruta interna del JSP (/WEB-INF/views/...), no
+    // la URL publica que el usuario visito. Cada servlet de la tienda deja
+    // la ruta publica lista en este atributo antes de hacer forward.
+    String rutaActual = (String) request.getAttribute("rutaActual");
+    if (rutaActual == null) rutaActual = "/catalogo";
+
+    int cantidadCarrito = 0;
+    Map<Integer, Integer> carritoSesion = (Map<Integer, Integer>) session.getAttribute("carrito");
+    if (carritoSesion != null) {
+        for (Integer c : carritoSesion.values()) {
+            cantidadCarrito += c;
+        }
+    }
+
+    String authError = request.getParameter("authError");
+%>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= tituloPagina %> - Dulce Momento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="<%= ctx %>/assets/css/tienda.css?v=<%= application.getAttribute("iniciadoEn") %>" rel="stylesheet">
+</head>
+<body class="tienda-body">
+<nav class="tienda-nav">
+    <div class="container d-flex align-items-center">
+        <a class="navbar-brand" href="<%= ctx %>/home"><i class="bi bi-cake2-fill"></i> Dulce Momento</a>
+
+        <div class="nav-tabs-pill mx-auto d-none d-md-flex">
+            <a href="<%= ctx %>/home" class="<%= rutaActual.equals("/home") ? "active" : "" %>">Inicio</a>
+            <a href="<%= ctx %>/catalogo" class="<%= rutaActual.equals("/catalogo") ? "active" : "" %>">Catalogo</a>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 ms-auto">
+            <a href="<%= ctx %>/mis-pedidos" class="icon-circle-btn" title="Mis pedidos"><i class="bi bi-receipt"></i></a>
+            <a href="<%= ctx %>/carrito" class="icon-circle-btn position-relative" title="Carrito">
+                <i class="bi bi-cart3"></i>
+                <% if (cantidadCarrito > 0) { %>
+                    <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" style="font-size:.6rem;">
+                        <%= cantidadCarrito %>
+                    </span>
+                <% } %>
+            </a>
+            <% if (cliente != null) { %>
+                <span class="text-muted small d-none d-sm-inline"><%= cliente.getNombre() %></span>
+                <a href="<%= ctx %>/cliente/logout" class="btn btn-sm btn-outline-secondary">Salir</a>
+            <% } else { %>
+                <button type="button" class="btn btn-sm btn-outline-amber" data-bs-toggle="modal" data-bs-target="#authModal"
+                        onclick="mostrarTabAuth('tabLogin')">
+                    Ingresar
+                </button>
+                <button type="button" class="btn btn-sm btn-amber" data-bs-toggle="modal" data-bs-target="#authModal"
+                        onclick="mostrarTabAuth('tabRegistro')">
+                    Registrarme
+                </button>
+            <% } %>
+            <a href="<%= ctx %>/login" class="btn btn-sm btn-outline-secondary" title="Acceso para personal interno">
+                <i class="bi bi-shop"></i> Personal
+            </a>
+        </div>
+    </div>
+</nav>
+
+<% if (authError != null) { %>
+<div class="container mt-3">
+    <div class="alert alert-danger"><%= authError %></div>
+</div>
+<% } %>
+
+<div class="container py-4">

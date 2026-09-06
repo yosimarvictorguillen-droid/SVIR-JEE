@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Acta de Constitucion del Proyecto</title>
+<style>
+    @page { size: A4; margin: 1.6cm; }
+    * { box-sizing: border-box; }
+    body { font-family: Calibri, Arial, sans-serif; font-size: 10.3pt; color:#1c1917; }
+    h1 { text-align:center; font-size:17pt; color:#b45309; margin-bottom: 18px; }
+    .cabecera { width:100%; border-collapse:collapse; margin-bottom: 14px; }
+    .cabecera td { border:1px solid #78716c; padding:6px 8px; }
+    .cabecera td:first-child { font-weight:bold; background:#fef3e2; width:22%; }
+    table.canvas { width:100%; border-collapse:collapse; table-layout:fixed; }
+    table.canvas td { border:1px solid #78716c; padding:8px 10px; vertical-align:top; font-size:9.6pt; text-align:justify; }
+    .pregunta { background:#292524; color:#fff; font-weight:bold; width:15%; text-align:left; vertical-align:top; padding:8px; font-size:9.8pt; }
+    .pregunta small { display:block; font-weight:normal; font-size:8pt; color:#d6d3d1; margin-top:3px; }
+    ul { margin:2px 0; padding-left:16px; }
+    li { margin-bottom:2px; }
+    .footer-note { margin-top:16px; font-size:8.5pt; color:#78716c; text-align:center; }
+</style>
+</head>
+<body>
+
+<h1>Acta de Constitucion del Proyecto</h1>
+
+<table class="cabecera">
+    <tr><td>Nombre del Proyecto</td><td>Implementacion del sistema SVIR-JEE (Sistema de Ventas e Inventario
+    para Reposteria) para la empresa "Dulce Momento"</td></tr>
+    <tr><td>Gerente del Proyecto</td><td>Yosimar Guillen Espinoza</td></tr>
+</table>
+
+<table class="canvas">
+    <tr>
+        <td class="pregunta">¿Que?<small>¿Que entregaras o haras?</small></td>
+        <td>
+            Desarrollo de un sistema web bajo arquitectura Java EE clasica (JSP + Servlets + JDBC),
+            desplegado sobre Apache Tomcat, que incluye:
+            <ul>
+                <li>Gestion de productos, ingredientes y recetas.</li>
+                <li>Ordenes de produccion (para stock o vinculadas a un pedido).</li>
+                <li>Registro de pedidos y punto de venta presencial (POS).</li>
+                <li>Reportes de ventas por rango de fechas y de stock bajo.</li>
+                <li>Tienda web publica: catalogo, carrito, checkout (recojo o delivery) y seguimiento de pedidos.</li>
+                <li>Panel de repartidor para pedidos delivery.</li>
+            </ul>
+            <strong>Documentacion asociada:</strong> informe tecnico, diagrama Entidad-Relacion (DER),
+            prototipos de interfaz (3 alternativas), manual de usuario basico.
+        </td>
+    </tr>
+    <tr>
+        <td class="pregunta">¿Cuando?<small>¿Cuando haras la entrega?</small></td>
+        <td>
+            La entrega se realizara conforme al cronograma del ciclo 2026-II, reflejado en el diagrama de
+            Gantt del informe tecnico:
+            <ul>
+                <li><strong>Fase 1:</strong> Gestion del proyecto - Lean Canvas y Acta de Constitucion (semanas 1-2).</li>
+                <li><strong>Fase 2:</strong> Analisis y diseno - SRS, DER, prototipos de interfaz (semanas 2-4).</li>
+                <li><strong>Fase 3:</strong> Configuracion del entorno - JDK, Tomcat, MySQL, NetBeans (semanas 3-4).</li>
+                <li><strong>Fase 4:</strong> Desarrollo de todos los modulos del sistema (semanas 5-10).</li>
+                <li><strong>Fase 5:</strong> Pruebas e integracion (semanas 11-13).</li>
+                <li><strong>Fase 6:</strong> Documentacion final y sustentacion (semanas 13-15).</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td class="pregunta">¿Para quien?<small>¿Para quien estas haciendo este trabajo y quienes son tus patrocinadores?</small></td>
+        <td>
+            Es el cliente principal, es decir, la empresa donde se ejecuta el proyecto. En este caso, la
+            empresa <strong>"Dulce Momento"</strong> (pasteleria artesanal, escenario academico).<br><br>
+            <strong>Usuarios finales:</strong>
+            <ul>
+                <li>Administrador del negocio y personal de ventas.</li>
+                <li>Personal de cocina y de reparto (delivery).</li>
+                <li>Clientes de la tienda web.</li>
+            </ul>
+            <strong>Patrocinador academico:</strong> curso de Desarrollo Web Integrado, UTP.
+        </td>
+    </tr>
+    <tr>
+        <td class="pregunta">¿Por que?<small>¿Por que este proyecto es necesario?</small></td>
+        <td>
+            <strong>Problema actual:</strong>
+            <ul>
+                <li>Control manual del inventario de ingredientes y productos, con margenes de error.</li>
+                <li>Pedidos recibidos por WhatsApp de forma desordenada, sin historial ni seguimiento de estado.</li>
+                <li>Falta de reportes en tiempo real para la toma de decisiones (stock bajo, ventas del dia).</li>
+            </ul>
+            <strong>Beneficios esperados (solucion):</strong>
+            <ul>
+                <li>Reduccion de perdidas por inventario mal gestionado (mermas no registradas).</li>
+                <li>Trazabilidad completa: cada movimiento de stock queda auditado (quien, cuando, por que).</li>
+                <li>Reportes automatizados de ventas y alertas de stock bajo.</li>
+                <li>Nuevo canal de venta propio (tienda web) ademas del canal presencial.</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td class="pregunta">¿Donde?<small>¿Donde se usara el producto o servicio?</small></td>
+        <td>
+            <strong>Entorno de implementacion:</strong>
+            <ul>
+                <li>Aplicacion web accesible desde cualquier navegador moderno (personal interno y clientes).</li>
+                <li>Desplegada sobre Apache Tomcat 11, con MySQL 8 como motor de base de datos.</li>
+            </ul>
+            <strong>Requisitos tecnicos:</strong>
+            <ul>
+                <li>Servidor con JDK 21 y Apache Tomcat 11 instalados.</li>
+                <li>Base de datos MySQL 8 accesible por red local (o en la nube a futuro).</li>
+                <li>Navegador web moderno (Chrome, Edge, Firefox) del lado del cliente.</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td class="pregunta">¿Como?<small>¿Como alcanzaras los objetivos y como controlaras y haras monitoreo del proyecto?</small></td>
+        <td>
+            Mediante un equipo de desarrollo de 4 integrantes que utilizara herramientas colaborativas y una
+            metodologia de trabajo iterativa por modulos. Se consideraran riesgos como perdida de avances no
+            respaldados y errores introducidos al integrar modulos; se hara seguimiento continuo para
+            garantizar el cumplimiento de los objetivos.
+            <ul>
+                <li><strong>Enfoque de desarrollo:</strong> iterativo e incremental, un modulo a la vez
+                (productos &rarr; ingredientes &rarr; pedidos &rarr; produccion &rarr; reportes &rarr; tienda web),
+                con pruebas manuales de cada modulo antes de integrarlo al siguiente.</li>
+                <li><strong>Gestion de riesgos:</strong> respaldo del script de base de datos
+                (<code>schema.sql</code>) antes de cambios de esquema; pruebas de cada flujo transaccional
+                (venta, produccion, cancelacion) antes de darlo por terminado.</li>
+                <li><strong>Herramientas:</strong> GitHub para control de versiones; NetBeans + Maven para
+                desarrollo y build; MySQL Workbench para administracion de base de datos; el diagrama de
+                Gantt del curso para seguimiento del cronograma.</li>
+            </ul>
+        </td>
+    </tr>
+</table>
+
+<div class="footer-note">
+    Equipo: Yosimar Guillen Espinoza (Lider/PM) &middot; Johan Figueroa Hernandez (Diseno Frontend) &middot;
+    Xavier Antionini Tarrillo Carmona (Especialista BD) &middot; David Pilares Nieto (Desarrollador Java)
+    &mdash; Desarrollo Web Integrado, ciclo 2026-II
+</div>
+
+</body>
+</html>

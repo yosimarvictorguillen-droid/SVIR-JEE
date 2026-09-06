@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard - SVIR (Alternativa 2)</title>
+<link href="assets/styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="navbar">
+    <div class="brand"><span class="dot"></span> SVIR</div>
+    <nav>
+        <a class="active" href="dashboard.html">Dashboard</a>
+        <a href="tabla.html">Productos</a>
+        <a href="formulario.html">Nuevo producto</a>
+        <a href="reportes.html">Reportes</a>
+    </nav>
+    <span style="color:var(--text-dim); font-size:.9rem;">Administrador</span>
+</div>
+<div class="container">
+    <div class="kpi-grid">
+        <div class="kpi"><div class="label">Ventas de hoy</div><div class="value">S/ 248.50</div></div>
+        <div class="kpi"><div class="label">Ventas del mes</div><div class="value">S/ 5,120.00</div></div>
+        <div class="kpi"><div class="label">Pedidos de hoy</div><div class="value">12</div></div>
+        <div class="kpi warn"><div class="label">Stock bajo</div><div class="value">3</div></div>
+    </div>
+    <div class="panel">
+        <h3 style="margin-top:0;">Pedidos recientes</h3>
+        <table>
+            <thead><tr><th>#</th><th>Cliente</th><th>Total</th><th>Estado</th></tr></thead>
+            <tbody>
+                <tr><td>#101</td><td>Maria Fernandez</td><td>S/ 45.00</td><td><span class="badge success">Entregado</span></td></tr>
+                <tr><td>#100</td><td>Cliente general</td><td>S/ 12.50</td><td><span class="badge warn">Preparacion</span></td></tr>
+                <tr><td>#099</td><td>Jose Ramirez</td><td>S/ 60.00</td><td><span class="badge info">Listo</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

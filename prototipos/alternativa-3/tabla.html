@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Productos - SVIR (Alternativa 3)</title>
+<link href="assets/styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="topnav">
+    <div class="brand">svir<span>.</span></div>
+    <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a class="active" href="tabla.html">Productos</a>
+        <a href="formulario.html">Nuevo producto</a>
+        <a href="reportes.html">Reportes</a>
+    </nav>
+    <span style="color:var(--text-dim); font-size:.9rem;">Administrador</span>
+</div>
+<div class="wrap">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2>Productos</h2>
+        <a href="formulario.html" class="btn btn-accent">+ Nuevo</a>
+    </div>
+    <table>
+        <thead><tr><th>Nombre</th><th>Precio</th><th>Stock</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+            <tr><td>Torta de chocolate</td><td>S/ 45.00</td><td>8</td><td><span class="pill">Activo</span></td><td><a class="btn btn-line" style="padding:.4rem 1rem;">Editar</a></td></tr>
+            <tr><td>Mousse de maracuya <span class="pill warn">Stock bajo</span></td><td>S/ 12.50</td><td>4</td><td><span class="pill">Activo</span></td><td><a class="btn btn-line" style="padding:.4rem 1rem;">Editar</a></td></tr>
+            <tr><td>Pancitos de anis</td><td>S/ 8.00</td><td>15</td><td><span class="pill">Activo</span></td><td><a class="btn btn-line" style="padding:.4rem 1rem;">Editar</a></td></tr>
+            <tr><td>Galletas decoradas</td><td>S/ 18.00</td><td>10</td><td><span class="pill muted">Inactivo</span></td><td><a class="btn btn-line" style="padding:.4rem 1rem;">Editar</a></td></tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

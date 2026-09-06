@@ -1,0 +1,28 @@
+:root {
+    --amber: #d97706;
+    --sidebar: #2b2118;
+    --bg: #fdf8f3;
+}
+body { background: var(--bg); font-family: "Segoe UI", Arial, sans-serif; }
+
+.login-wrapper { min-height: 100vh; display: flex; }
+.login-brand {
+    flex: 1;
+    background: linear-gradient(135deg, var(--amber) 0%, #f59e0b 60%, #f97316 100%);
+    color: #fff; display: flex; flex-direction: column; justify-content: center; padding: 3rem;
+}
+.login-form-side { flex: 1; display: flex; align-items: center; justify-content: center; background: #fff; }
+.login-card { width: 100%; max-width: 380px; }
+@media (max-width: 900px) { .login-brand { display: none; } }
+
+.layout { display: flex; min-height: 100vh; }
+.sidebar { width: 240px; background: var(--sidebar); color: #f2e9dd; padding: 1.5rem 1rem; flex-shrink: 0; }
+.sidebar .brand { font-weight: 700; color: #fff; margin-bottom: 1.5rem; display: block; }
+.sidebar a { color: #e7dbca; padding: .55rem .8rem; border-radius: .5rem; margin-bottom: .15rem; display: flex; gap: .6rem; text-decoration: none; }
+.sidebar a:hover, .sidebar a.active { background: var(--amber); color: #fff; }
+.main { flex: 1; min-width: 0; }
+.topbar { background: #fff; border-bottom: 1px solid #eee; padding: .75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+.content { padding: 1.5rem; }
+.stat-card { background: #fff; border-radius: .75rem; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.stat-card .value { font-size: 1.6rem; font-weight: 700; }
+.btn-amber { background: var(--amber); border-color: var(--amber); color: #fff; }

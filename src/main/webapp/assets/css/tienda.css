@@ -1,0 +1,348 @@
+:root {
+    --amber: #d97706;
+    --amber-dark: #b45309;
+    --amber-light: #fef3e2;
+    --ink: #2b2118;
+}
+
+.tienda-body {
+    background: #fffaf5;
+}
+
+/* ---------- Botones: efecto hover en toda la tienda ---------- */
+.tienda-body .btn {
+    transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+
+.tienda-body .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(0,0,0,.12);
+}
+
+.tienda-body .icon-circle-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+}
+
+/* ---------- Navbar ---------- */
+.tienda-nav {
+    background: #fff;
+    padding: .9rem 0;
+    border-bottom: 1px solid #f1e7da;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+
+.tienda-nav .navbar-brand {
+    color: var(--amber-dark);
+    font-weight: 700;
+    font-size: 1.15rem;
+}
+
+.nav-tabs-pill {
+    background: #f6efe6;
+    border-radius: 999px;
+    padding: .3rem;
+    gap: .2rem;
+}
+
+.nav-tabs-pill a {
+    padding: .4rem 1.1rem;
+    border-radius: 999px;
+    color: #6b7280;
+    font-size: .92rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all .15s ease;
+}
+
+.nav-tabs-pill a.active {
+    background: var(--amber-light);
+    color: var(--amber-dark);
+    font-weight: 700;
+}
+
+.icon-circle-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid #e5e0d8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #57534e;
+    text-decoration: none;
+    transition: transform .15s ease;
+}
+
+.btn-amber {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: #fff;
+}
+
+.btn-amber:hover {
+    background: var(--amber-dark);
+    border-color: var(--amber-dark);
+    color: #fff;
+}
+
+.btn-outline-amber {
+    background: transparent;
+    border: 1px solid var(--amber);
+    color: var(--amber-dark);
+}
+
+.btn-outline-amber:hover {
+    background: var(--amber-light);
+    color: var(--amber-dark);
+}
+
+/* ---------- Pills / badges ---------- */
+.pill-badge, .pill-badge-light, .pill-badge-dark {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .9rem;
+    border-radius: 999px;
+    font-size: .78rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.pill-badge { background: #fde0c4; color: #9a3412; }
+.pill-badge-light { background: #f6efe6; color: var(--amber-dark); }
+.pill-badge-dark { background: rgba(255,255,255,.2); color: #fff; }
+
+/* ---------- Hero ---------- */
+.hero-v2 {
+    background: linear-gradient(135deg, #fde8d7 0%, #fcdcc4 100%);
+    border-radius: 1.5rem;
+    padding: 3.5rem 3rem;
+    margin: 2rem 0;
+}
+
+.hero-v2 h1 {
+    font-weight: 800;
+    font-size: 2.5rem;
+    color: #292524;
+    line-height: 1.15;
+}
+
+.mini-stat {
+    background: #fff;
+    border-radius: 1rem;
+    padding: .75rem 1.25rem;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    min-width: 110px;
+}
+
+.mini-stat strong {
+    display: block;
+    font-size: 1.15rem;
+    color: var(--amber-dark);
+}
+
+.mini-stat span {
+    font-size: .78rem;
+    color: #78716c;
+}
+
+.hero-collage {
+    position: relative;
+    min-height: 320px;
+}
+
+.hero-collage img {
+    position: absolute;
+    object-fit: cover;
+    border-radius: 1.25rem;
+    box-shadow: 0 15px 35px rgba(0,0,0,.18);
+    border: 4px solid #fff;
+}
+
+.hero-collage .collage-main {
+    width: 78%;
+    height: 78%;
+    left: 10%;
+    top: 10%;
+}
+
+.hero-collage .collage-top {
+    width: 42%;
+    height: 42%;
+    right: -2%;
+    top: 0;
+    transform: rotate(3deg);
+}
+
+.hero-collage .collage-bottom {
+    width: 42%;
+    height: 38%;
+    left: -2%;
+    bottom: 6%;
+    transform: rotate(-4deg);
+}
+
+.hero-collage .collage-tag {
+    position: absolute;
+    bottom: 0;
+    right: 12%;
+    background: #fff;
+    border-radius: 999px;
+    padding: .4rem 1rem;
+    font-size: .78rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    z-index: 2;
+}
+
+@media (max-width: 991px) {
+    .hero-collage { min-height: 260px; margin-top: 2rem; }
+}
+
+/* ---------- Pasos "Como funciona" ---------- */
+.step-card {
+    background: #fff;
+    border-radius: 1.25rem;
+    padding: 2rem 1.25rem 1.5rem;
+    text-align: center;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    position: relative;
+    height: 100%;
+}
+
+.step-card .step-number {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.step-card .step-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--amber), #f97316);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* ---------- Productos destacados (home) ---------- */
+.producto-card {
+    background: #fff;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    height: 100%;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.producto-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0,0,0,.1);
+}
+
+.producto-card .img-wrap {
+    aspect-ratio: 4/3;
+    background: linear-gradient(135deg, #fcd9a8, #f9b98a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #92400e;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.producto-card .body {
+    padding: 1rem;
+}
+
+/* ---------- Testimonios ---------- */
+.testimonial-card {
+    background: #fff;
+    border-radius: 1.25rem;
+    padding: 1.75rem;
+    height: 100%;
+    box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    text-align: left;
+}
+
+.testimonial-card .quote-icon {
+    color: var(--amber);
+    font-size: 1.5rem;
+}
+
+.avatar-circle {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: .9rem;
+}
+
+/* ---------- CTA banda ---------- */
+.cta-banda {
+    background: linear-gradient(120deg, #7c2d12 0%, var(--amber) 60%, #f97316 100%);
+    color: #fff;
+    border-radius: 1.5rem;
+    padding: 2.5rem 3rem;
+    margin: 3rem 0;
+}
+
+.cta-banda h3 {
+    font-weight: 700;
+}
+
+/* ---------- Footer ---------- */
+.tienda-footer {
+    padding: 1.5rem 0;
+    color: #a8a29e;
+    font-size: .85rem;
+    border-top: 1px solid #f1e7da;
+}
+
+.tienda-footer a {
+    color: #a8a29e;
+    margin-left: 1rem;
+    text-decoration: underline;
+}
+
+/* ---------- Timeline (mis-pedidos) ---------- */
+.timeline-step {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: .5rem;
+}
+
+.timeline-step .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #d1d5db;
+    flex-shrink: 0;
+}
+
+.timeline-step.done .dot {
+    background: var(--amber);
+}

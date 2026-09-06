@@ -1,0 +1,60 @@
+</div>
+
+<footer class="tienda-footer">
+    <div class="container text-center">
+        <span>&copy; Dulce Momento</span>
+        <a href="<%= ctx %>/login">Acceso personal</a>
+    </div>
+</footer>
+
+<!-- Modal de login / registro de clientes -->
+<div class="modal fade" id="authModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ingresa a tu cuenta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs mb-3" role="tablist">
+                    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabLogin">Ingresar</button></li>
+                    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabRegistro">Crear cuenta</button></li>
+                </ul>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="tabLogin">
+                        <form method="post" action="<%= ctx %>/cliente/login">
+                            <input type="hidden" name="volverA" value="<%= rutaActual %>">
+                            <div class="mb-2"><label class="form-label">DNI</label><input class="form-control" name="dni" maxlength="8" required></div>
+                            <div class="mb-3"><label class="form-label">Contrasena</label><input type="password" class="form-control" name="password" required></div>
+                            <button class="btn btn-dark w-100">Ingresar</button>
+                        </form>
+                    </div>
+                    <div class="tab-pane fade" id="tabRegistro">
+                        <form method="post" action="<%= ctx %>/cliente/registro">
+                            <input type="hidden" name="volverA" value="<%= rutaActual %>">
+                            <div class="mb-2"><label class="form-label">Nombre</label><input class="form-control" name="nombre" required></div>
+                            <div class="mb-2"><label class="form-label">DNI</label><input class="form-control" name="dni" maxlength="8" required></div>
+                            <div class="mb-2"><label class="form-label">Telefono</label><input class="form-control" name="telefono"></div>
+                            <div class="mb-2"><label class="form-label">Direccion</label><input class="form-control" name="direccion"></div>
+                            <div class="mb-2"><label class="form-label">Email</label><input type="email" class="form-control" name="email"></div>
+                            <div class="mb-3"><label class="form-label">Contrasena (min. 6 caracteres)</label><input type="password" class="form-control" name="password" minlength="6" required></div>
+                            <button class="btn btn-dark w-100">Crear cuenta</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function mostrarTabAuth(idTab) {
+        const boton = document.querySelector('#authModal button[data-bs-target="#' + idTab + '"]');
+        if (boton && window.bootstrap) {
+            new bootstrap.Tab(boton).show();
+        }
+    }
+</script>
+</body>
+</html>

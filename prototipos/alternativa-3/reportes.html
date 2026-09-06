@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reportes - SVIR (Alternativa 3)</title>
+<link href="assets/styles.css" rel="stylesheet">
+</head>
+<body>
+<div class="topnav">
+    <div class="brand">svir<span>.</span></div>
+    <nav>
+        <a href="dashboard.html">Dashboard</a>
+        <a href="tabla.html">Productos</a>
+        <a href="formulario.html">Nuevo producto</a>
+        <a class="active" href="reportes.html">Reportes</a>
+    </nav>
+    <span style="color:var(--text-dim); font-size:.9rem;">Administrador</span>
+</div>
+<div class="wrap">
+    <h2>Reporte de ventas</h2>
+    <div style="display:flex; gap:1.5rem; align-items:flex-end; margin-bottom:1.5rem;">
+        <div class="form-row" style="margin-bottom:0;"><label>Desde</label><input type="date" value="2026-09-01"></div>
+        <div class="form-row" style="margin-bottom:0;"><label>Hasta</label><input type="date" value="2026-09-04"></div>
+        <button class="btn btn-accent">Filtrar</button>
+    </div>
+    <p style="color:var(--text-dim);">Total vendido: <strong style="color:var(--text);">S/ 1,240.50</strong> (28 pedidos)</p>
+    <table>
+        <thead><tr><th>#</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Fecha</th></tr></thead>
+        <tbody>
+            <tr><td>#101</td><td>Maria Fernandez</td><td>S/ 45.00</td><td><span class="pill">Entregado</span></td><td>04/09/2026</td></tr>
+            <tr><td>#100</td><td>Cliente general</td><td>S/ 12.50</td><td><span class="pill warn">Preparacion</span></td><td>04/09/2026</td></tr>
+            <tr><td>#099</td><td>Jose Ramirez</td><td>S/ 60.00</td><td><span class="pill">Listo</span></td><td>03/09/2026</td></tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
