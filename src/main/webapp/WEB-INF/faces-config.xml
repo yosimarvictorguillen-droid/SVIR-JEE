@@ -5,6 +5,30 @@
                                   https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_0.xsd"
               version="4.0">
 
-    <!-- Las reglas de navegacion se agregaran aqui (o se usa navegacion implicita en los beans). -->
+    <application>
+        <locale-config>
+            <default-locale>es_PE</default-locale>
+        </locale-config>
+    </application>
+
+    <!-- Reglas de navegacion: los Managed Beans devuelven estos "outcomes" -->
+    <navigation-rule>
+        <from-view-id>*</from-view-id>
+        <navigation-case>
+            <from-outcome>login</from-outcome>
+            <to-view-id>/jsf/login.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>dashboard</from-outcome>
+            <to-view-id>/app/jsf/dashboard.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>productos</from-outcome>
+            <to-view-id>/app/jsf/productos.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
 
 </faces-config>

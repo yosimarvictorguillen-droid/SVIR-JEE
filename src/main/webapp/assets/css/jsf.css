@@ -1,0 +1,32 @@
+/* Estilos de las paginas Jakarta Faces (APF2): paleta de marca sobre Bootstrap 5 */
+:root {
+    --svir-amber: #d97706;
+    --svir-amber-dark: #b45309;
+    --svir-bg: #fdf8f3;
+    --svir-sidebar: #2b2118;
+}
+
+body.svir-jsf { background: var(--svir-bg); }
+
+.navbar-svir { background: var(--svir-sidebar); }
+.navbar-svir .navbar-brand { font-weight: 700; }
+
+.btn-amber {
+    background: var(--svir-amber);
+    border-color: var(--svir-amber);
+    color: #fff;
+}
+.btn-amber:hover, .btn-amber:focus {
+    background: var(--svir-amber-dark);
+    border-color: var(--svir-amber-dark);
+    color: #fff;
+}
+
+.stat-card { border: 0; box-shadow: 0 1px 4px rgba(0, 0, 0, .08); }
+.stat-card .stat-value { font-size: 1.6rem; font-weight: 700; }
+.stat-card.stat-warn { border-left: 4px solid #dc3545; }
+
+.table > :not(caption) > * > * { padding: .75rem .85rem; }
+.table thead th, .table > thead > tr > th { background: #fef3e2; color: var(--svir-amber-dark); font-weight: 600; }
+
+.modal-backdrop.show { opacity: .5; }

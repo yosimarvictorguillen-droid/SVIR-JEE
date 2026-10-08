@@ -3,7 +3,7 @@ package com.svir.jee.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Producto {
+public class Producto implements java.io.Serializable {
 
     private Integer id;
     private String nombre;

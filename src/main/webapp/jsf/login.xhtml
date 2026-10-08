@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:a="jakarta.faces.passthrough">
+<h:head>
+    <title>Ingresar (JSF) - Dulce Momento</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="#{request.contextPath}/assets/css/jsf.css?v=#{applicationScope.iniciadoEn}" rel="stylesheet"/>
+</h:head>
+<h:body styleClass="svir-jsf d-flex align-items-center min-vh-100">
+    <div class="container" style="max-width: 440px;">
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    <img src="#{request.contextPath}/assets/img/logo-mark.svg" alt="Dulce Momento" width="64" height="64"/>
+                    <h1 class="h4 mt-2 mb-0">Dulce Momento</h1>
+                    <small class="text-muted">Panel de gestión (versión JSF)</small>
+                </div>
+
+                <h:panelGroup rendered="#{not empty param.expirado}" layout="block" styleClass="alert alert-warning">
+                    Tu sesión expiró o no has iniciado sesión.
+                </h:panelGroup>
+                <h:messages globalOnly="true" layout="list" styleClass="list-unstyled"
+                            errorClass="alert alert-danger" fatalClass="alert alert-danger"/>
+
+                <h:form id="formLogin">
+                    <div class="mb-3">
+                        <h:outputLabel for="email" value="Correo electrónico" styleClass="form-label"/>
+                        <h:inputText id="email" value="#{loginBean.email}" required="true"
+                                     requiredMessage="Ingresa tu correo electrónico."
+                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}"
+                                     a:placeholder="correo@dulcemomento.com" a:autofocus="autofocus"/>
+                        <h:message for="email" styleClass="invalid-feedback d-block"/>
+                    </div>
+                    <div class="mb-4">
+                        <h:outputLabel for="password" value="Contraseña" styleClass="form-label"/>
+                        <h:inputSecret id="password" value="#{loginBean.password}" required="true"
+                                       requiredMessage="Ingresa tu contraseña."
+                                       styleClass="form-control #{component.valid ? '' : 'is-invalid'}"/>
+                        <h:message for="password" styleClass="invalid-feedback d-block"/>
+                    </div>
+                    <h:commandButton value="Ingresar" action="#{loginBean.ingresar}"
+                                     styleClass="btn btn-amber w-100"/>
+                </h:form>
+
+                <div class="text-center mt-3">
+                    <a href="#{request.contextPath}/home" class="small">Ver tienda web</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</h:body>
+</html>

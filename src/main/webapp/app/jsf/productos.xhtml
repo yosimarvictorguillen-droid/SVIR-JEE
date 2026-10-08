@@ -1,0 +1,167 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Productos</ui:define>
+
+    <ui:define name="content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h1 class="h3 mb-0">Productos <small class="text-muted fs-6">(versión JSF)</small></h1>
+            <h:form>
+                <h:commandLink action="#{productoBean.nuevo}" styleClass="btn btn-amber">
+                    <i class="bi bi-plus-lg"></i> Nuevo producto
+                </h:commandLink>
+            </h:form>
+        </div>
+
+        <!-- Filtro por nombre -->
+        <h:form id="formFiltro" styleClass="row g-2 mb-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <h:inputText id="filtro" value="#{productoBean.filtro}" styleClass="form-control"
+                             a:placeholder="Buscar por nombre..."/>
+            </div>
+            <div class="col-auto">
+                <h:commandButton value="Buscar" action="#{productoBean.buscar}" styleClass="btn btn-outline-dark"/>
+                <h:commandButton value="Limpiar" action="#{productoBean.limpiar}" immediate="true"
+                                 styleClass="btn btn-link"/>
+            </div>
+        </h:form>
+
+        <!-- Tabla de datos (h:dataTable) alimentada por ProductoDAO / JDBC, con paginacion -->
+        <div class="card">
+            <h:form id="formTabla">
+                <div class="table-responsive">
+                    <h:dataTable id="tabla" value="#{productoBean.productos}" var="p"
+                                 first="#{productoBean.primero}" rows="#{productoBean.filas}"
+                                 styleClass="table table-hover align-middle mb-0"
+                                 rendered="#{productoBean.total gt 0}">
+                        <h:column>
+                            <f:facet name="header">Imagen</f:facet>
+                            <h:panelGroup rendered="#{not empty p.imagenUrl}">
+                                <img src="#{request.contextPath}#{p.imagenUrl}" alt="" width="40" height="40"
+                                     style="object-fit: cover; border-radius: 6px;"/>
+                            </h:panelGroup>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Producto</f:facet>
+                            <strong>#{p.nombre}</strong>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Precio</f:facet>
+                            S/ <h:outputText value="#{p.precio}"><f:convertNumber pattern="#,##0.00"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Stock</f:facet>
+                            <h:outputText value="#{p.stock}"
+                                          styleClass="badge #{p.stockBajo ? 'bg-danger' : 'bg-light text-dark border'}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <h:outputText value="#{p.activo ? 'Activo' : 'Inactivo'}"
+                                          styleClass="badge #{p.activo ? 'bg-success' : 'bg-secondary'}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Acciones</f:facet>
+                            <h:commandButton value="Editar" action="#{productoBean.editar(p)}"
+                                             styleClass="btn btn-sm btn-outline-secondary me-1"/>
+                            <h:commandButton value="#{p.activo ? 'Desactivar' : 'Activar'}"
+                                             action="#{productoBean.alternarActivo(p)}"
+                                             styleClass="btn btn-sm #{p.activo ? 'btn-outline-danger' : 'btn-outline-success'}"/>
+                        </h:column>
+                    </h:dataTable>
+                </div>
+
+                <h:panelGroup rendered="#{productoBean.total eq 0}" layout="block" styleClass="p-4 text-center text-muted">
+                    No se encontraron productos.
+                </h:panelGroup>
+
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{productoBean.desde}–#{productoBean.hasta} de #{productoBean.total}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{productoBean.anterior}"
+                                         disabled="#{not productoBean.hayAnterior}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{productoBean.siguiente}"
+                                         disabled="#{not productoBean.haySiguiente}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- Modal Bootstrap (se muestra mientras productoBean.editando sea true) con validaciones visuales -->
+        <h:panelGroup rendered="#{productoBean.editando}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <h:form id="formProducto">
+                            <div class="modal-header">
+                                <h5 class="modal-title">#{empty productoBean.producto.id ? 'Nuevo producto' : 'Editar producto'}</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <h:outputLabel for="nombre" value="Nombre" styleClass="form-label"/>
+                                    <h:inputText id="nombre" value="#{productoBean.producto.nombre}" maxlength="100"
+                                                 required="true" requiredMessage="El nombre es obligatorio."
+                                                 validatorMessage="El nombre debe tener entre 3 y 100 caracteres."
+                                                 styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                        <f:validateLength minimum="3" maximum="100"/>
+                                    </h:inputText>
+                                    <h:message for="nombre" styleClass="invalid-feedback d-block"/>
+                                </div>
+                                <div class="mb-3">
+                                    <h:outputLabel for="descripcion" value="Descripción" styleClass="form-label"/>
+                                    <h:inputTextarea id="descripcion" value="#{productoBean.producto.descripcion}"
+                                                     rows="2" styleClass="form-control"/>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                        <h:outputLabel for="precio" value="Precio (S/)" styleClass="form-label"/>
+                                        <h:inputText id="precio" value="#{productoBean.producto.precio}"
+                                                     required="true" requiredMessage="Ingresa el precio."
+                                                     converterMessage="El precio debe ser un número (ej. 12.50)."
+                                                     validatorMessage="El precio debe ser mayor a 0."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateDoubleRange minimum="0.01"/>
+                                        </h:inputText>
+                                        <h:message for="precio" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                    <div class="col-4">
+                                        <h:outputLabel for="stock" value="Stock" styleClass="form-label"/>
+                                        <h:inputText id="stock" value="#{productoBean.producto.stock}"
+                                                     required="true" requiredMessage="Ingresa el stock."
+                                                     converterMessage="El stock debe ser un número entero."
+                                                     validatorMessage="El stock no puede ser negativo."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateLongRange minimum="0"/>
+                                        </h:inputText>
+                                        <h:message for="stock" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                    <div class="col-4">
+                                        <h:outputLabel for="stockMinimo" value="Stock mínimo" styleClass="form-label"/>
+                                        <h:inputText id="stockMinimo" value="#{productoBean.producto.stockMinimo}"
+                                                     required="true" requiredMessage="Ingresa el stock mínimo."
+                                                     converterMessage="Debe ser un número entero."
+                                                     validatorMessage="No puede ser negativo."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateLongRange minimum="0"/>
+                                        </h:inputText>
+                                        <h:message for="stockMinimo" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar" action="#{productoBean.cancelar}" immediate="true"
+                                                 styleClass="btn btn-outline-secondary"/>
+                                <h:commandButton value="Guardar" action="#{productoBean.guardar}"
+                                                 styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

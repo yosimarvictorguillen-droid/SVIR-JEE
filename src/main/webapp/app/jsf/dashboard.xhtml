@@ -1,0 +1,84 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Dashboard</ui:define>
+
+    <ui:define name="content">
+        <h1 class="h3 mb-4">Dashboard <small class="text-muted fs-6">(versión JSF)</small></h1>
+
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100"><div class="card-body">
+                    <div class="text-muted small">Ventas de hoy</div>
+                    <div class="stat-value">S/ <h:outputText value="#{dashboardBean.resumen.ventasHoy}"><f:convertNumber pattern="#,##0.00"/></h:outputText></div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100"><div class="card-body">
+                    <div class="text-muted small">Ventas del mes</div>
+                    <div class="stat-value">S/ <h:outputText value="#{dashboardBean.resumen.ventasMes}"><f:convertNumber pattern="#,##0.00"/></h:outputText></div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100"><div class="card-body">
+                    <div class="text-muted small">Pedidos de hoy</div>
+                    <div class="stat-value">#{dashboardBean.resumen.pedidosHoy}</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100"><div class="card-body">
+                    <div class="text-muted small">Pedidos pendientes</div>
+                    <div class="stat-value">#{dashboardBean.resumen.pedidosPendientes}</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card stat-warn h-100"><div class="card-body">
+                    <div class="text-muted small">Productos con stock bajo</div>
+                    <div class="stat-value">#{dashboardBean.resumen.productosStockBajo} / #{dashboardBean.resumen.totalProductos}</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card stat-warn h-100"><div class="card-body">
+                    <div class="text-muted small">Ingredientes con stock bajo</div>
+                    <div class="stat-value">#{dashboardBean.resumen.ingredientesStockBajo} / #{dashboardBean.resumen.totalIngredientes}</div>
+                </div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header fw-semibold">Pedidos recientes</div>
+            <div class="table-responsive">
+                <h:dataTable value="#{dashboardBean.resumen.pedidosRecientes}" var="p"
+                             styleClass="table table-hover align-middle mb-0">
+                    <h:column>
+                        <f:facet name="header">#</f:facet>
+                        #{p.id}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Cliente</f:facet>
+                        #{empty p.clienteNombre ? 'Cliente general' : p.clienteNombre}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Origen</f:facet>
+                        #{p.tipoOrigen}
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Total</f:facet>
+                        S/ <h:outputText value="#{p.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Estado</f:facet>
+                        <h:outputText value="#{p.estado}" styleClass="badge bg-secondary"/>
+                    </h:column>
+                    <h:column>
+                        <f:facet name="header">Fecha</f:facet>
+                        <h:outputText value="#{p.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText>
+                    </h:column>
+                </h:dataTable>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

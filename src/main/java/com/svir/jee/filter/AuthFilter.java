@@ -42,6 +42,9 @@ public class AuthFilter implements Filter {
         PERMISOS.put("/app/movimientos", EnumSet.of(RolUsuario.ADMIN));
         PERMISOS.put("/app/usuarios", EnumSet.of(RolUsuario.ADMIN));
         PERMISOS.put("/app/reportes", EnumSet.of(RolUsuario.ADMIN));
+        // Paginas Jakarta Faces (APF2): mismos roles que sus equivalentes JSP
+        PERMISOS.put("/app/jsf/dashboard.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS, RolUsuario.COCINA, RolUsuario.REPARTIDOR));
+        PERMISOS.put("/app/jsf/productos.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
     }
 
     @Override
@@ -52,12 +55,14 @@ public class AuthFilter implements Filter {
         HttpSession session = req.getSession(false);
         Usuario usuario = session != null ? (Usuario) session.getAttribute("usuario") : null;
 
+        String path = req.getServletPath();
+
         if (usuario == null) {
-            resp.sendRedirect(req.getContextPath() + "/login?expirado=1");
+            String login = path.startsWith("/app/jsf/") ? "/jsf/login.xhtml?expirado=1" : "/login?expirado=1";
+            resp.sendRedirect(req.getContextPath() + login);
             return;
         }
 
-        String path = req.getServletPath();
         Set<RolUsuario> rolesPermitidos = PERMISOS.get(path);
         if (rolesPermitidos != null && !rolesPermitidos.contains(usuario.getRol())) {
             resp.sendRedirect(req.getContextPath() + "/app/dashboard?error=sin_permiso");
