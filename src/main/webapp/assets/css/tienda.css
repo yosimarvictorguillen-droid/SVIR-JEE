@@ -37,6 +37,13 @@
     color: var(--amber-dark);
     font-weight: 700;
     font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+}
+.tienda-nav .navbar-brand img {
+    width: 30px;
+    height: 30px;
 }
 
 .nav-tabs-pill {

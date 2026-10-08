@@ -81,8 +81,7 @@ queda a medias en la base de datos.
 ```
 SVIR-JEE/
 ├── pom.xml
-├── docs/
-│   └── schema.sql                    # DER completo (11 tablas) + datos semilla
+├── schema.sql                        # DER completo (11 tablas) + datos semilla
 ├── prototipos/                       # 3 alternativas de UI estáticas (rúbrica cap. 3)
 │   ├── alternativa-1/  (Bootstrap clásico, ámbar)
 │   ├── alternativa-2/  (panel oscuro estilo SaaS)
@@ -112,7 +111,7 @@ SVIR-JEE/
 ### 1. Base de datos
 
 ```bash
-mysql -u root -p < docs/schema.sql
+mysql -u root -p < schema.sql
 ```
 
 Esto crea la base `reposteria_jee` con las 11 tablas, datos semilla

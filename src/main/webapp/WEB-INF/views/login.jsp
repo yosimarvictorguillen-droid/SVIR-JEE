@@ -22,7 +22,7 @@
 <div class="login-wrapper">
     <div class="login-shell">
         <div class="login-brand">
-            <div class="login-logo">DM</div>
+            <div class="login-logo"><img src="<%= ctx %>/assets/img/logo-mark-white.svg" alt="Dulce Momento" style="width:38px;height:38px;"></div>
             <h1>Dulce Momento</h1>
             <p class="opacity-75 mb-0">Sistema integral para reposteria artesanal.</p>
 

@@ -30,7 +30,7 @@
 <body>
 <div class="svir-layout">
     <aside class="svir-sidebar">
-        <span class="brand"><i class="bi bi-cake2-fill"></i> SVIR-JEE</span>
+        <span class="brand"><img src="<%= ctx %>/assets/img/logo-mark.svg" alt="Dulce Momento"> SVIR-JEE</span>
         <nav class="nav flex-column">
             <a class="nav-link <%= paginaActiva.equals("dashboard") ? "active" : "" %>" href="<%= ctx %>/app/dashboard">
                 <i class="bi bi-speedometer2"></i> Dashboard

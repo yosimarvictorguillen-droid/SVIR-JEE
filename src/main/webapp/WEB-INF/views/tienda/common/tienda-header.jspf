@@ -38,7 +38,7 @@
 <body class="tienda-body">
 <nav class="tienda-nav">
     <div class="container d-flex align-items-center">
-        <a class="navbar-brand" href="<%= ctx %>/home"><i class="bi bi-cake2-fill"></i> Dulce Momento</a>
+        <a class="navbar-brand" href="<%= ctx %>/home"><img src="<%= ctx %>/assets/img/logo-mark.svg" alt="Dulce Momento"> Dulce Momento</a>
 
         <div class="nav-tabs-pill mx-auto d-none d-md-flex">
             <a href="<%= ctx %>/home" class="<%= rutaActual.equals("/home") ? "active" : "" %>">Inicio</a>

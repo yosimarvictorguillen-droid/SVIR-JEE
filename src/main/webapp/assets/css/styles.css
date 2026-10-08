@@ -208,7 +208,13 @@ body {
     font-size: 1.1rem;
     color: #fff;
     margin-bottom: 1.5rem;
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.svir-sidebar .brand img {
+    width: 28px;
+    height: 28px;
 }
 
 .svir-sidebar a.nav-link {
