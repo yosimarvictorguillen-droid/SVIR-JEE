@@ -16,6 +16,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jbcrypt.version>0.4</jbcrypt.version>
         <mysql.version>8.4.0</mysql.version>
+        <faces.version>4.1.17</faces.version>
+        <weld.version>6.0.4.Final</weld.version>
         <junit.version>5.10.2</junit.version>
     </properties>
 
@@ -34,6 +36,28 @@
             <artifactId>jakarta.servlet.jsp-api</artifactId>
             <version>3.1.1</version>
             <scope>provided</scope>
+        </dependency>
+
+        <!-- Jakarta Faces (JSF) - implementacion Mojarra 4.1 (Jakarta EE 11, igual que Tomcat 11).
+             Tomcat NO trae JSF ni CDI: ambos se empaquetan dentro del .war. -->
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>jakarta.faces</artifactId>
+            <version>${faces.version}</version>
+            <exclusions>
+                <!-- Tomcat ya trae jakarta.annotation (annotations-api.jar) -->
+                <exclusion>
+                    <groupId>jakarta.annotation</groupId>
+                    <artifactId>jakarta.annotation-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- CDI (Weld) - necesario para los Managed Beans con @Named y sus scopes en Tomcat -->
+        <dependency>
+            <groupId>org.jboss.weld.servlet</groupId>
+            <artifactId>weld-servlet-shaded</artifactId>
+            <version>${weld.version}</version>
         </dependency>
 
         <!-- Driver JDBC de MySQL -->
