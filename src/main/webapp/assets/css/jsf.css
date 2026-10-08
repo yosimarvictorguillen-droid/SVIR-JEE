@@ -30,3 +30,10 @@ body.svir-jsf { background: var(--svir-bg); }
 .table thead th, .table > thead > tr > th { background: #fef3e2; color: var(--svir-amber-dark); font-weight: 600; }
 
 .modal-backdrop.show { opacity: .5; }
+
+/* Enlaces de la barra superior con buen contraste sobre el fondo oscuro */
+.navbar-svir .nav-link,
+.navbar-svir .nav-link:visited { color: rgba(255, 255, 255, .85); }
+.navbar-svir .nav-link:hover,
+.navbar-svir .nav-link:focus { color: #fff; }
+.navbar-svir .navbar-text { color: rgba(255, 255, 255, .85); }
