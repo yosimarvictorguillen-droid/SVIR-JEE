@@ -83,6 +83,9 @@
                 <a href="<%= ctx %>/home" class="btn btn-outline-secondary w-100 mt-2">
                     <i class="bi bi-shop"></i> Ver tienda web
                 </a>
+                <a href="<%= ctx %>/jsf/login.xhtml" class="btn btn-outline-secondary w-100 mt-2">
+                    <i class="bi bi-lightning-charge"></i> Ingresar a la version JSF (APF2)
+                </a>
             </form>
 
             <p class="text-center text-muted mt-4 mb-0" style="font-size:.78rem;">

@@ -275,3 +275,11 @@ body {
 .table-actions a, .table-actions button {
     margin-right: .25rem;
 }
+
+.svir-sidebar .nav-section-title {
+    margin: 1rem .75rem .25rem;
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: #a89684;
+}
