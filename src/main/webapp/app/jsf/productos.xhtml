@@ -96,7 +96,7 @@
             <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
-                        <h:form id="formProducto">
+                        <h:form id="formProducto" enctype="multipart/form-data">
                             <div class="modal-header">
                                 <h5 class="modal-title">#{empty productoBean.producto.id ? 'Nuevo producto' : 'Editar producto'}</h5>
                             </div>
@@ -150,6 +150,19 @@
                                         </h:inputText>
                                         <h:message for="stockMinimo" styleClass="invalid-feedback d-block"/>
                                     </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h:outputLabel for="imagen" value="Imagen del producto" styleClass="form-label"/>
+                                    <h:panelGroup rendered="#{not empty productoBean.producto.imagenUrl}" layout="block" styleClass="mb-2">
+                                        <img src="#{request.contextPath}#{productoBean.producto.imagenUrl}" alt="" height="60"
+                                             style="border-radius: 6px;"/>
+                                        <small class="text-muted ms-2">Imagen actual (sube otra para reemplazarla)</small>
+                                    </h:panelGroup>
+                                    <h:inputFile id="imagen" value="#{productoBean.imagen}"
+                                                 validator="#{productoBean.validarImagen}"
+                                                 a:accept="image/*"
+                                                 styleClass="form-control #{component.valid ? '' : 'is-invalid'}"/>
+                                    <h:message for="imagen" styleClass="invalid-feedback d-block"/>
                                 </div>
                             </div>
                             <div class="modal-footer">

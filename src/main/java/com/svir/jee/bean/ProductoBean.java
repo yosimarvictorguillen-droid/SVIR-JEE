@@ -2,12 +2,17 @@ package com.svir.jee.bean;
 
 import com.svir.jee.dao.ProductoDAO;
 import com.svir.jee.model.Producto;
+import com.svir.jee.util.AlmacenImagenes;
 
 import jakarta.faces.application.FacesMessage;
+import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
+import jakarta.faces.validator.ValidatorException;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
+import jakarta.servlet.http.Part;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
@@ -33,6 +38,7 @@ public class ProductoBean implements Serializable {
 
     private boolean editando;
     private Producto producto;
+    private transient Part imagen;
 
     private transient List<Producto> cache;
 
@@ -110,18 +116,44 @@ public class ProductoBean implements Serializable {
     public void guardar() {
         try {
             boolean esNuevo = producto.getId() == null;
+            String imagenAnterior = null;
             if (esNuevo) {
                 DAO.crear(producto);
             } else {
+                imagenAnterior = DAO.buscarPorId(producto.getId()).map(Producto::getImagenUrl).orElse(null);
                 DAO.actualizar(producto);
             }
+
+            if (imagen != null && imagen.getSize() > 0) {
+                AlmacenImagenes.borrarPorUrl(imagenAnterior);
+                String nombreArchivo = AlmacenImagenes.guardar(imagen, producto.getId());
+                DAO.actualizarImagen(producto.getId(), "/uploads/productos/" + nombreArchivo);
+            }
+
             mensaje(FacesMessage.SEVERITY_INFO,
                     "Producto \"" + producto.getNombre() + "\" " + (esNuevo ? "creado" : "actualizado") + " correctamente.");
             editando = false;
             producto = null;
+            imagen = null;
             cache = null;
-        } catch (SQLException e) {
+        } catch (SQLException | IOException e) {
             mensaje(FacesMessage.SEVERITY_ERROR, "No se pudo guardar el producto.");
+        }
+    }
+
+    /** Validador de h:inputFile: solo imagenes de hasta 5 MB. */
+    public void validarImagen(FacesContext contexto, UIComponent componente, Object valor) {
+        if (!(valor instanceof Part archivo) || archivo.getSize() == 0) {
+            return;
+        }
+        String tipo = archivo.getContentType();
+        if (tipo == null || !tipo.startsWith("image/")) {
+            throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "El archivo debe ser una imagen (JPG, PNG, WEBP...).", null));
+        }
+        if (archivo.getSize() > 5L * 1024 * 1024) {
+            throw new ValidatorException(new FacesMessage(FacesMessage.SEVERITY_ERROR,
+                    "La imagen no puede superar los 5 MB.", null));
         }
     }
 
@@ -148,4 +180,6 @@ public class ProductoBean implements Serializable {
     public int getFilas() { return filas; }
     public boolean isEditando() { return editando; }
     public Producto getProducto() { return producto; }
+    public Part getImagen() { return imagen; }
+    public void setImagen(Part imagen) { this.imagen = imagen; }
 }
