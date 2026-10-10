@@ -1,0 +1,220 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Pedidos</ui:define>
+
+    <ui:define name="content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h1 class="h3 mb-0">Pedidos <small class="text-muted fs-6">(versión JSF)</small></h1>
+            <h:form>
+                <h:commandLink action="#{pedidoBean.nuevo}" styleClass="btn btn-amber">
+                    <i class="bi bi-plus-lg"></i> Nuevo pedido
+                </h:commandLink>
+            </h:form>
+        </div>
+
+        <h:form id="formFiltro" styleClass="row g-2 mb-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <h:inputText id="filtro" value="#{pedidoBean.filtro}" styleClass="form-control"
+                             a:placeholder="Buscar por N°, cliente, estado u origen..."/>
+            </div>
+            <div class="col-auto">
+                <h:commandButton value="Buscar" action="#{pedidoBean.buscar}" styleClass="btn btn-outline-dark"/>
+                <h:commandButton value="Limpiar" action="#{pedidoBean.limpiar}" styleClass="btn btn-link"/>
+            </div>
+        </h:form>
+
+        <div class="card">
+            <h:form id="formTabla">
+                <div class="table-responsive">
+                    <h:dataTable value="#{pedidoBean.items}" var="p"
+                                 first="#{pedidoBean.primero}" rows="#{pedidoBean.filas}"
+                                 styleClass="table table-hover align-middle mb-0"
+                                 rendered="#{pedidoBean.total gt 0}">
+                        <h:column>
+                            <f:facet name="header">#</f:facet>
+                            <strong>#{p.id}</strong>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Cliente</f:facet>
+                            #{empty p.clienteNombre ? 'Cliente general' : p.clienteNombre}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Origen</f:facet>
+                            #{p.tipoOrigen}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Total</f:facet>
+                            S/ <h:outputText value="#{p.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <h:outputText value="#{p.estado}" styleClass="badge bg-secondary"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Fecha</f:facet>
+                            <h:outputText value="#{p.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Acciones</f:facet>
+                            <h:commandButton value="Ver" action="#{pedidoBean.ver(p)}"
+                                             styleClass="btn btn-sm btn-outline-secondary me-1"/>
+                            <h:commandButton value="En camino" action="#{pedidoBean.marcarEnCamino(p)}"
+                                             rendered="#{pedidoBean.puedeSalirAReparto(p)}"
+                                             styleClass="btn btn-sm btn-outline-primary me-1"/>
+                            <h:commandButton value="Entregar" action="#{pedidoBean.entregar(p)}"
+                                             rendered="#{not pedidoBean.esTerminal(p)}"
+                                             styleClass="btn btn-sm btn-outline-success me-1"/>
+                            <h:commandButton value="Cancelar" action="#{pedidoBean.cancelarPedido(p)}"
+                                             rendered="#{not pedidoBean.esTerminal(p)}"
+                                             onclick="return confirm('Se devolverá el stock atendido. ¿Cancelar este pedido?');"
+                                             styleClass="btn btn-sm btn-outline-danger"/>
+                        </h:column>
+                    </h:dataTable>
+                </div>
+
+                <h:panelGroup rendered="#{pedidoBean.total eq 0}" layout="block" styleClass="p-4 text-center text-muted">
+                    No se encontraron pedidos.
+                </h:panelGroup>
+
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{pedidoBean.desde}–#{pedidoBean.hasta} de #{pedidoBean.total}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{pedidoBean.anterior}"
+                                         disabled="#{not pedidoBean.hayAnterior}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{pedidoBean.siguiente}"
+                                         disabled="#{not pedidoBean.haySiguiente}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- Modal: detalle del pedido -->
+        <h:panelGroup rendered="#{pedidoBean.viendo}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <h:form id="formDetalle">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Pedido ##{pedidoBean.detalle.id}</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Cliente:</strong> #{empty pedidoBean.detalle.clienteNombre ? 'Cliente general' : pedidoBean.detalle.clienteNombre}</p>
+                                        <p class="mb-1"><strong>Origen:</strong> #{pedidoBean.detalle.tipoOrigen}</p>
+                                        <p class="mb-0"><strong>Atendió:</strong> #{pedidoBean.detalle.usuarioNombre}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Estado:</strong>
+                                            <h:outputText value="#{pedidoBean.detalle.estado}" styleClass="badge bg-secondary"/></p>
+                                        <p class="mb-1"><strong>Total:</strong> S/ <h:outputText value="#{pedidoBean.detalle.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></p>
+                                        <p class="mb-0"><strong>Observación:</strong> #{pedidoBean.detalle.observacion}</p>
+                                    </div>
+                                </div>
+                                <h:dataTable value="#{pedidoBean.detalle.detalles}" var="d" styleClass="table table-sm align-middle mb-0">
+                                    <h:column><f:facet name="header">Producto</f:facet>#{d.productoNombre}</h:column>
+                                    <h:column><f:facet name="header">Cant.</f:facet>#{d.cantidad}</h:column>
+                                    <h:column><f:facet name="header">Atendida</f:facet>#{d.cantidadAtendida}</h:column>
+                                    <h:column><f:facet name="header">P. unit.</f:facet>
+                                        <h:outputText value="#{d.precioUnitario}"><f:convertNumber pattern="#,##0.00"/></h:outputText></h:column>
+                                    <h:column><f:facet name="header">Subtotal</f:facet>
+                                        <h:outputText value="#{d.subtotal}"><f:convertNumber pattern="#,##0.00"/></h:outputText></h:column>
+                                    <h:column><f:facet name="header">Estado</f:facet>
+                                        <h:outputText value="#{d.estado}" styleClass="badge bg-light text-dark"/></h:column>
+                                </h:dataTable>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar pedido" action="#{pedidoBean.cancelarPedido(pedidoBean.detalle)}"
+                                                 rendered="#{not pedidoBean.esTerminal(pedidoBean.detalle)}"
+                                                 onclick="return confirm('Se devolverá el stock atendido. ¿Cancelar este pedido?');"
+                                                 styleClass="btn btn-outline-danger me-auto"/>
+                                <h:commandButton value="Cerrar" action="#{pedidoBean.cerrarDetalle}"
+                                                 styleClass="btn btn-outline-secondary"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <!-- Modal: pedido nuevo (varias lineas) -->
+        <h:panelGroup rendered="#{pedidoBean.creando}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <h:form id="formPedido">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Nuevo pedido</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-5">
+                                        <h:outputLabel for="cliente" value="Cliente" styleClass="form-label"/>
+                                        <h:selectOneMenu id="cliente" value="#{pedidoBean.clienteId}" styleClass="form-select">
+                                            <f:selectItem itemLabel="Cliente general" itemValue="" noSelectionOption="true"/>
+                                            <f:selectItems value="#{pedidoBean.clientes}" var="c" itemValue="#{c.id}" itemLabel="#{c.nombre}"/>
+                                        </h:selectOneMenu>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <h:outputLabel for="origen" value="Origen" styleClass="form-label"/>
+                                        <h:selectOneMenu id="origen" value="#{pedidoBean.tipoOrigen}" styleClass="form-select">
+                                            <f:selectItems value="#{pedidoBean.origenes}" var="o" itemValue="#{o}" itemLabel="#{o}"/>
+                                        </h:selectOneMenu>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h:outputLabel for="observacion" value="Observación" styleClass="form-label"/>
+                                        <h:inputText id="observacion" value="#{pedidoBean.observacion}" maxlength="255" styleClass="form-control"/>
+                                    </div>
+                                </div>
+
+                                <h:dataTable value="#{pedidoBean.lineas}" var="l" styleClass="table table-sm align-middle">
+                                    <h:column>
+                                        <f:facet name="header">Producto</f:facet>
+                                        <h:selectOneMenu value="#{l.productoId}" styleClass="form-select form-select-sm">
+                                            <f:selectItem itemLabel="— Selecciona —" itemValue="" noSelectionOption="true"/>
+                                            <f:selectItems value="#{pedidoBean.productos}" var="p" itemValue="#{p.id}"
+                                                           itemLabel="#{p.nombre} — S/ #{p.precio} (stock #{p.stock})"/>
+                                        </h:selectOneMenu>
+                                    </h:column>
+                                    <h:column>
+                                        <f:facet name="header">Cantidad</f:facet>
+                                        <h:inputText id="cantidad" value="#{l.cantidad}" size="4"
+                                                     converterMessage="Número entero."
+                                                     validatorMessage="Mínimo 1."
+                                                     styleClass="form-control form-control-sm #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateLongRange minimum="1"/>
+                                        </h:inputText>
+                                        <h:message for="cantidad" styleClass="invalid-feedback d-block"/>
+                                    </h:column>
+                                    <h:column>
+                                        <h:commandButton value="Quitar" action="#{pedidoBean.quitarLinea(l)}"
+                                                         styleClass="btn btn-sm btn-outline-danger"/>
+                                    </h:column>
+                                </h:dataTable>
+                                <h:commandButton value="+ Agregar producto" action="#{pedidoBean.agregarLinea}"
+                                                 styleClass="btn btn-sm btn-outline-secondary"/>
+                                <p class="text-end fs-5 mb-0">
+                                    Total estimado:
+                                    <strong>S/ <h:outputText value="#{pedidoBean.totalNuevo}"><f:convertNumber pattern="#,##0.00"/></h:outputText></strong>
+                                </p>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar" action="#{pedidoBean.cancelarNuevo}" immediate="true"
+                                                 styleClass="btn btn-outline-secondary"/>
+                                <h:commandButton value="Registrar pedido" action="#{pedidoBean.guardar}"
+                                                 styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

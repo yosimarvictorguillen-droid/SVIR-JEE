@@ -1,0 +1,153 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Punto de venta</ui:define>
+
+    <ui:define name="content">
+        <h1 class="h3 mb-3">Punto de venta <small class="text-muted fs-6">(versión JSF)</small></h1>
+
+        <h:form id="formFiltro" styleClass="row g-2 mb-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <h:inputText id="filtro" value="#{posBean.filtro}" styleClass="form-control"
+                             a:placeholder="Buscar producto..."/>
+            </div>
+            <div class="col-auto">
+                <h:commandButton value="Buscar" action="#{posBean.buscar}" styleClass="btn btn-outline-dark"/>
+                <h:commandButton value="Limpiar" action="#{posBean.limpiar}" styleClass="btn btn-link"/>
+            </div>
+        </h:form>
+
+        <h:form id="formPos">
+            <div class="row g-3">
+                <!-- Catalogo -->
+                <div class="col-lg-8">
+                    <div class="row g-3">
+                        <ui:repeat value="#{posBean.productos}" var="p">
+                            <div class="col-6 col-md-4">
+                                <div class="card h-100">
+                                    <h:panelGroup rendered="#{not empty p.imagenUrl}">
+                                        <img src="#{request.contextPath}#{p.imagenUrl}" alt="" class="card-img-top"
+                                             style="height: 110px; object-fit: cover;"/>
+                                    </h:panelGroup>
+                                    <div class="card-body p-2 d-flex flex-column">
+                                        <div class="fw-semibold small">#{p.nombre}</div>
+                                        <div class="small">S/ <h:outputText value="#{p.precio}"><f:convertNumber pattern="#,##0.00"/></h:outputText></div>
+                                        <div class="mb-2">
+                                            <h:outputText value="Stock #{p.stock}"
+                                                          styleClass="badge #{p.stockBajo ? 'bg-danger' : 'bg-light text-dark border'}"/>
+                                        </div>
+                                        <h:commandButton value="Agregar" action="#{posBean.agregar(p)}"
+                                                         styleClass="btn btn-sm btn-amber mt-auto"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </ui:repeat>
+                    </div>
+                </div>
+
+                <!-- Carrito -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header fw-semibold">Carrito</div>
+                        <div class="card-body">
+                            <h:panelGroup rendered="#{empty posBean.carrito}" layout="block" styleClass="text-muted small mb-2">
+                                Agrega productos desde el catálogo.
+                            </h:panelGroup>
+
+                            <h:dataTable value="#{posBean.carrito}" var="i" styleClass="table table-sm align-middle"
+                                         rendered="#{not empty posBean.carrito}">
+                                <h:column>
+                                    <f:facet name="header">Producto</f:facet>
+                                    <span class="small">#{i.nombre}</span>
+                                </h:column>
+                                <h:column>
+                                    <f:facet name="header">Cant.</f:facet>
+                                    <h:inputText id="cantidad" value="#{i.cantidad}" size="3"
+                                                 converterMessage="Número entero."
+                                                 validatorMessage="Mínimo 1."
+                                                 styleClass="form-control form-control-sm #{component.valid ? '' : 'is-invalid'}">
+                                        <f:validateLongRange minimum="1"/>
+                                    </h:inputText>
+                                    <h:message for="cantidad" styleClass="invalid-feedback d-block"/>
+                                </h:column>
+                                <h:column>
+                                    <f:facet name="header">Subtotal</f:facet>
+                                    <h:outputText value="#{i.subtotal}"><f:convertNumber pattern="#,##0.00"/></h:outputText>
+                                </h:column>
+                                <h:column>
+                                    <h:commandButton value="×" action="#{posBean.quitar(i)}" title="Quitar"
+                                                     styleClass="btn btn-sm btn-outline-danger"/>
+                                </h:column>
+                            </h:dataTable>
+
+                            <p class="text-end fs-5 mb-3">
+                                Total: <strong>S/ <h:outputText value="#{posBean.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></strong>
+                            </p>
+
+                            <div class="mb-2">
+                                <h:outputLabel for="comprobante" value="Comprobante" styleClass="form-label small"/>
+                                <h:selectOneMenu id="comprobante" value="#{posBean.tipoComprobante}" styleClass="form-select form-select-sm">
+                                    <f:selectItem itemValue="BOLETA_SIMPLE" itemLabel="Boleta simple"/>
+                                    <f:selectItem itemValue="BOLETA_DNI" itemLabel="Boleta con DNI"/>
+                                    <f:selectItem itemValue="FACTURA" itemLabel="Factura con RUC"/>
+                                </h:selectOneMenu>
+                            </div>
+                            <div class="mb-2">
+                                <h:inputText id="documento" value="#{posBean.documento}" maxlength="11"
+                                             styleClass="form-control form-control-sm" a:placeholder="DNI o RUC (opcional)"/>
+                            </div>
+                            <div class="mb-3">
+                                <h:inputText id="razonSocial" value="#{posBean.razonSocial}" maxlength="150"
+                                             styleClass="form-control form-control-sm" a:placeholder="Nombre / Razón social (opcional)"/>
+                            </div>
+
+                            <h:commandButton value="Cobrar" action="#{posBean.cobrar}" styleClass="btn btn-amber w-100 mb-2"/>
+                            <h:commandButton value="Vaciar carrito" action="#{posBean.vaciar}" styleClass="btn btn-outline-secondary w-100 btn-sm"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </h:form>
+
+        <!-- Modal: ticket de venta -->
+        <h:panelGroup rendered="#{posBean.mostrandoTicket}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered modal-sm">
+                    <div class="modal-content">
+                        <h:form id="formTicket">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Venta registrada</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center mb-2">
+                                    <strong>Dulce Momento</strong><br/>
+                                    <small class="text-muted">Ticket ##{posBean.ticket.id}</small><br/>
+                                    <small class="text-muted"><h:outputText value="#{posBean.ticket.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText></small>
+                                </div>
+                                <h:dataTable value="#{posBean.ticket.detalles}" var="d" styleClass="table table-sm mb-2">
+                                    <h:column><f:facet name="header">Producto</f:facet><span class="small">#{d.productoNombre}</span></h:column>
+                                    <h:column><f:facet name="header">Cant.</f:facet>#{d.cantidad}</h:column>
+                                    <h:column><f:facet name="header">Subt.</f:facet>
+                                        <h:outputText value="#{d.subtotal}"><f:convertNumber pattern="#,##0.00"/></h:outputText></h:column>
+                                </h:dataTable>
+                                <p class="text-end fs-5 mb-1">
+                                    <strong>Total: S/ <h:outputText value="#{posBean.ticket.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></strong>
+                                </p>
+                                <p class="small text-muted mb-0">#{posBean.ticket.observacion}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-dark" onclick="window.print();">Imprimir</button>
+                                <h:commandButton value="Nueva venta" action="#{posBean.nuevaVenta}" styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

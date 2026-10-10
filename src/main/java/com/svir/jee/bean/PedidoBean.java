@@ -1,0 +1,259 @@
+package com.svir.jee.bean;
+
+import com.svir.jee.dao.ClienteDAO;
+import com.svir.jee.dao.PedidoDAO;
+import com.svir.jee.dao.ProductoDAO;
+import com.svir.jee.model.Cliente;
+import com.svir.jee.model.DetallePedido;
+import com.svir.jee.model.EstadoPedido;
+import com.svir.jee.model.Pedido;
+import com.svir.jee.model.Producto;
+import com.svir.jee.model.TipoOrigenPedido;
+import com.svir.jee.model.Usuario;
+
+import jakarta.faces.context.FacesContext;
+import jakarta.faces.view.ViewScoped;
+import jakarta.inject.Named;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Managed Bean de Pedidos: listado con filtro/paginacion, detalle, cambio de estado,
+ * cancelacion (devuelve stock) y alta de pedidos con varias lineas de producto.
+ * La logica transaccional vive en PedidoDAO (JDBC).
+ */
+@Named
+@ViewScoped
+public class PedidoBean extends ListadoBase<Pedido> {
+
+    private static final long serialVersionUID = 1L;
+    private static final PedidoDAO DAO = new PedidoDAO();
+    private static final ProductoDAO DAO_PRODUCTO = new ProductoDAO();
+    private static final ClienteDAO DAO_CLIENTE = new ClienteDAO();
+
+    /** Una fila del pedido nuevo (producto + cantidad). */
+    public static class Linea implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private Integer productoId;
+        private Integer cantidad = 1;
+
+        public Integer getProductoId() { return productoId; }
+        public void setProductoId(Integer productoId) { this.productoId = productoId; }
+        public Integer getCantidad() { return cantidad; }
+        public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
+    }
+
+    // detalle
+    private boolean viendo;
+    private Pedido detalle;
+
+    // pedido nuevo
+    private boolean creando;
+    private Integer clienteId;
+    private TipoOrigenPedido tipoOrigen = TipoOrigenPedido.PRESENCIAL;
+    private String observacion;
+    private List<Linea> lineas = new ArrayList<>();
+
+    private transient List<Producto> productos;
+    private transient List<Cliente> clientes;
+
+    @Override
+    protected List<Pedido> cargar() throws SQLException {
+        return DAO.listarTodos();
+    }
+
+    @Override
+    protected String textoBusqueda(Pedido p) {
+        return p.getId() + " " + texto(p.getClienteNombre()) + " " + p.getEstado() + " " + p.getTipoOrigen();
+    }
+
+    // ---- reglas de visibilidad de botones (mismas que el panel JSP) ----
+
+    public boolean esTerminal(Pedido p) {
+        return p.getEstado() == EstadoPedido.ENTREGADO || p.getEstado() == EstadoPedido.CANCELADO;
+    }
+
+    public boolean puedeSalirAReparto(Pedido p) {
+        return p.getTipoOrigen() == TipoOrigenPedido.DELIVERY && p.getEstado() == EstadoPedido.LISTO;
+    }
+
+    // ---- detalle ----
+
+    public void ver(Pedido p) {
+        try {
+            detalle = DAO.buscarPorId(p.getId()).orElse(p);
+            viendo = true;
+        } catch (SQLException e) {
+            Mensajes.error("No se pudo leer el detalle del pedido.");
+        }
+    }
+
+    public void cerrarDetalle() {
+        viendo = false;
+        detalle = null;
+    }
+
+    // ---- cambios de estado ----
+
+    public void marcarEnCamino(Pedido p) {
+        cambiarEstado(p, EstadoPedido.EN_CAMINO, "marcado como en camino");
+    }
+
+    public void entregar(Pedido p) {
+        cambiarEstado(p, EstadoPedido.ENTREGADO, "entregado");
+    }
+
+    private void cambiarEstado(Pedido p, EstadoPedido estado, String texto) {
+        try {
+            DAO.cambiarEstado(p.getId(), estado);
+            Mensajes.info("Pedido #" + p.getId() + " " + texto + ".");
+            recargar();
+        } catch (SQLException e) {
+            Mensajes.error("No se pudo cambiar el estado: " + e.getMessage());
+        }
+    }
+
+    public void cancelarPedido(Pedido p) {
+        try {
+            DAO.cancelar(p.getId(), usuarioActual().getId());
+            Mensajes.info("Pedido #" + p.getId() + " cancelado. El stock atendido fue devuelto al inventario.");
+            viendo = false;
+            detalle = null;
+            recargar();
+        } catch (SQLException e) {
+            Mensajes.error("No se pudo cancelar el pedido: " + e.getMessage());
+        }
+    }
+
+    // ---- pedido nuevo ----
+
+    public void nuevo() {
+        Formularios.resetear("formPedido");
+        clienteId = null;
+        tipoOrigen = TipoOrigenPedido.PRESENCIAL;
+        observacion = null;
+        lineas = new ArrayList<>();
+        lineas.add(new Linea());
+        creando = true;
+    }
+
+    public void agregarLinea() {
+        lineas.add(new Linea());
+    }
+
+    public void quitarLinea(Linea l) {
+        lineas.remove(l);
+        if (lineas.isEmpty()) {
+            lineas.add(new Linea());
+        }
+    }
+
+    public void cancelarNuevo() {
+        Formularios.resetear("formPedido");
+        creando = false;
+    }
+
+    public void guardar() {
+        Map<Integer, Producto> porId = new HashMap<>();
+        for (Producto p : getProductos()) {
+            porId.put(p.getId(), p);
+        }
+
+        Pedido pedido = new Pedido();
+        pedido.setClienteId(clienteId);
+        pedido.setTipoOrigen(tipoOrigen);
+        pedido.setObservacion(observacion);
+        for (Linea l : lineas) {
+            Producto producto = l.getProductoId() == null ? null : porId.get(l.getProductoId());
+            if (producto == null || l.getCantidad() == null || l.getCantidad() <= 0) {
+                continue;
+            }
+            DetallePedido d = new DetallePedido();
+            d.setProductoId(producto.getId());
+            d.setCantidad(l.getCantidad());
+            d.setPrecioUnitario(producto.getPrecio());
+            pedido.getDetalles().add(d);
+        }
+
+        if (pedido.getDetalles().isEmpty()) {
+            Mensajes.error("Debes agregar al menos un producto válido al pedido.");
+            return;
+        }
+
+        try {
+            Pedido creado = DAO.crear(pedido, usuarioActual().getId());
+            Mensajes.info("Pedido #" + creado.getId() + " registrado correctamente.");
+            Formularios.resetear("formPedido");
+            creando = false;
+            recargar();
+            detalle = DAO.buscarPorId(creado.getId()).orElse(creado);
+            viendo = true;
+        } catch (SQLException e) {
+            Mensajes.error("No se pudo registrar el pedido: " + e.getMessage());
+        }
+    }
+
+    /** Total estimado del pedido nuevo segun los precios actuales. */
+    public BigDecimal getTotalNuevo() {
+        BigDecimal total = BigDecimal.ZERO;
+        for (Linea l : lineas) {
+            if (l.getProductoId() == null || l.getCantidad() == null || l.getCantidad() <= 0) {
+                continue;
+            }
+            for (Producto p : getProductos()) {
+                if (p.getId().equals(l.getProductoId())) {
+                    total = total.add(p.getPrecio().multiply(BigDecimal.valueOf(l.getCantidad())));
+                    break;
+                }
+            }
+        }
+        return total;
+    }
+
+    public List<Producto> getProductos() {
+        if (productos == null) {
+            try {
+                productos = DAO_PRODUCTO.listarActivos();
+            } catch (SQLException e) {
+                Mensajes.error("No se pudo leer la lista de productos.");
+                productos = List.of();
+            }
+        }
+        return productos;
+    }
+
+    public List<Cliente> getClientes() {
+        if (clientes == null) {
+            try {
+                clientes = DAO_CLIENTE.listarActivos();
+            } catch (SQLException e) {
+                Mensajes.error("No se pudo leer la lista de clientes.");
+                clientes = List.of();
+            }
+        }
+        return clientes;
+    }
+
+    private static Usuario usuarioActual() {
+        return (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuario");
+    }
+
+    public TipoOrigenPedido[] getOrigenes() { return TipoOrigenPedido.values(); }
+
+    public boolean isViendo() { return viendo; }
+    public Pedido getDetalle() { return detalle; }
+    public boolean isCreando() { return creando; }
+    public Integer getClienteId() { return clienteId; }
+    public void setClienteId(Integer clienteId) { this.clienteId = clienteId; }
+    public TipoOrigenPedido getTipoOrigen() { return tipoOrigen; }
+    public void setTipoOrigen(TipoOrigenPedido tipoOrigen) { this.tipoOrigen = tipoOrigen; }
+    public String getObservacion() { return observacion; }
+    public void setObservacion(String observacion) { this.observacion = observacion; }
+    public List<Linea> getLineas() { return lineas; }
+}

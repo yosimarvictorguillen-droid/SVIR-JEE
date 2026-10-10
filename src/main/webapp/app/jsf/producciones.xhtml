@@ -1,0 +1,240 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Producción</ui:define>
+
+    <ui:define name="content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h1 class="h3 mb-0">Órdenes de producción <small class="text-muted fs-6">(versión JSF)</small></h1>
+            <h:form styleClass="d-flex gap-2">
+                <h:commandLink action="#{produccionBean.abrirPorPedido}" styleClass="btn btn-outline-secondary">
+                    <i class="bi bi-receipt"></i> Producir por pedido
+                </h:commandLink>
+                <h:commandLink action="#{produccionBean.nueva}" styleClass="btn btn-amber">
+                    <i class="bi bi-plus-lg"></i> Nueva producción
+                </h:commandLink>
+            </h:form>
+        </div>
+
+        <h:form id="formFiltro" styleClass="row g-2 mb-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <h:inputText id="filtro" value="#{produccionBean.filtro}" styleClass="form-control"
+                             a:placeholder="Buscar por N°, tipo, estado o responsable..."/>
+            </div>
+            <div class="col-auto">
+                <h:commandButton value="Buscar" action="#{produccionBean.buscar}" styleClass="btn btn-outline-dark"/>
+                <h:commandButton value="Limpiar" action="#{produccionBean.limpiar}" styleClass="btn btn-link"/>
+            </div>
+        </h:form>
+
+        <div class="card">
+            <h:form id="formTabla">
+                <div class="table-responsive">
+                    <h:dataTable value="#{produccionBean.items}" var="p"
+                                 first="#{produccionBean.primero}" rows="#{produccionBean.filas}"
+                                 styleClass="table table-hover align-middle mb-0"
+                                 rendered="#{produccionBean.total gt 0}">
+                        <h:column>
+                            <f:facet name="header">#</f:facet>
+                            <strong>#{p.id}</strong>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Tipo</f:facet>
+                            #{p.tipo}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Pedido</f:facet>
+                            #{empty p.pedidoId ? '—' : p.pedidoId}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <h:outputText value="#{p.estado}" styleClass="badge bg-secondary"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Responsable</f:facet>
+                            #{p.usuarioNombre}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Inicio</f:facet>
+                            <h:outputText value="#{p.fechaInicio}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Acciones</f:facet>
+                            <h:commandButton value="Ver" action="#{produccionBean.ver(p)}"
+                                             styleClass="btn btn-sm btn-outline-secondary"/>
+                        </h:column>
+                    </h:dataTable>
+                </div>
+
+                <h:panelGroup rendered="#{produccionBean.total eq 0}" layout="block" styleClass="p-4 text-center text-muted">
+                    No hay órdenes de producción.
+                </h:panelGroup>
+
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{produccionBean.desde}–#{produccionBean.hasta} de #{produccionBean.total}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{produccionBean.anterior}"
+                                         disabled="#{not produccionBean.hayAnterior}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{produccionBean.siguiente}"
+                                         disabled="#{not produccionBean.haySiguiente}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- Modal: detalle de la orden (terminar / cancelar) -->
+        <h:panelGroup rendered="#{produccionBean.viendo}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <h:form id="formDetalle">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Orden de producción ##{produccionBean.detalle.id}</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Tipo:</strong> #{produccionBean.detalle.tipo}
+                                            <h:panelGroup rendered="#{not empty produccionBean.detalle.pedidoId}">(pedido ##{produccionBean.detalle.pedidoId})</h:panelGroup></p>
+                                        <p class="mb-0"><strong>Responsable:</strong> #{produccionBean.detalle.usuarioNombre}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Estado:</strong>
+                                            <h:outputText value="#{produccionBean.detalle.estado}" styleClass="badge bg-secondary"/></p>
+                                        <p class="mb-0"><strong>Observación:</strong> #{produccionBean.detalle.observacion}</p>
+                                    </div>
+                                </div>
+
+                                <h:dataTable value="#{produccionBean.filasDetalle}" var="f" styleClass="table table-sm align-middle mb-0">
+                                    <h:column><f:facet name="header">Producto</f:facet>#{f.producto}</h:column>
+                                    <h:column><f:facet name="header">Planificado</f:facet>#{f.planificada}</h:column>
+                                    <h:column>
+                                        <f:facet name="header">Producido</f:facet>
+                                        <h:inputText id="producida" value="#{f.producida}" size="4"
+                                                     rendered="#{produccionBean.puedeGestionar(produccionBean.detalle)}"
+                                                     required="true" requiredMessage="Indica la cantidad."
+                                                     converterMessage="Número entero."
+                                                     validatorMessage="Entre 0 y lo planificado."
+                                                     styleClass="form-control form-control-sm #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateLongRange minimum="0" maximum="#{f.planificada}"/>
+                                        </h:inputText>
+                                        <h:message for="producida" styleClass="invalid-feedback d-block"/>
+                                        <h:outputText value="#{f.producida}"
+                                                      rendered="#{not produccionBean.puedeGestionar(produccionBean.detalle)}"/>
+                                    </h:column>
+                                </h:dataTable>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar orden" action="#{produccionBean.cancelarOrden}" immediate="true"
+                                                 rendered="#{produccionBean.puedeGestionar(produccionBean.detalle)}"
+                                                 onclick="return confirm('Se devolverán los ingredientes descontados. ¿Cancelar esta orden?');"
+                                                 styleClass="btn btn-outline-danger me-auto"/>
+                                <h:commandButton value="Cerrar" action="#{produccionBean.cerrarDetalle}" immediate="true"
+                                                 styleClass="btn btn-outline-secondary"/>
+                                <h:commandButton value="Terminar orden" action="#{produccionBean.terminar}"
+                                                 rendered="#{produccionBean.puedeGestionar(produccionBean.detalle)}"
+                                                 styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <!-- Modal: nueva produccion para stock -->
+        <h:panelGroup rendered="#{produccionBean.creando}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <h:form id="formNueva">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Nueva producción (para stock)</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted small">Se descontarán los ingredientes según la receta de cada producto.</p>
+                                <h:dataTable value="#{produccionBean.lineas}" var="l" styleClass="table table-sm align-middle">
+                                    <h:column>
+                                        <f:facet name="header">Producto</f:facet>
+                                        <h:selectOneMenu value="#{l.productoId}" styleClass="form-select form-select-sm">
+                                            <f:selectItem itemLabel="— Selecciona —" itemValue="" noSelectionOption="true"/>
+                                            <f:selectItems value="#{produccionBean.productos}" var="p" itemValue="#{p.id}"
+                                                           itemLabel="#{p.nombre} (stock #{p.stock})"/>
+                                        </h:selectOneMenu>
+                                    </h:column>
+                                    <h:column>
+                                        <f:facet name="header">Cantidad</f:facet>
+                                        <h:inputText id="cantidad" value="#{l.cantidad}" size="4"
+                                                     converterMessage="Número entero."
+                                                     validatorMessage="Mínimo 1."
+                                                     styleClass="form-control form-control-sm #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateLongRange minimum="1"/>
+                                        </h:inputText>
+                                        <h:message for="cantidad" styleClass="invalid-feedback d-block"/>
+                                    </h:column>
+                                    <h:column>
+                                        <h:commandButton value="Quitar" action="#{produccionBean.quitarLinea(l)}"
+                                                         styleClass="btn btn-sm btn-outline-danger"/>
+                                    </h:column>
+                                </h:dataTable>
+                                <h:commandButton value="+ Agregar producto" action="#{produccionBean.agregarLinea}"
+                                                 styleClass="btn btn-sm btn-outline-secondary"/>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar" action="#{produccionBean.cancelarNueva}" immediate="true"
+                                                 styleClass="btn btn-outline-secondary"/>
+                                <h:commandButton value="Crear orden" action="#{produccionBean.guardarNueva}"
+                                                 styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <!-- Modal: pedidos con faltante -->
+        <h:panelGroup rendered="#{produccionBean.porPedido}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <h:form id="formPorPedido">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Pedidos con faltante de stock</h5>
+                            </div>
+                            <div class="modal-body">
+                                <h:panelGroup rendered="#{empty produccionBean.pedidosConFaltante}" layout="block" styleClass="text-muted">
+                                    No hay pedidos pendientes de producción.
+                                </h:panelGroup>
+                                <h:dataTable value="#{produccionBean.pedidosConFaltante}" var="p"
+                                             rendered="#{not empty produccionBean.pedidosConFaltante}"
+                                             styleClass="table table-sm align-middle mb-0">
+                                    <h:column><f:facet name="header">#</f:facet>#{p.id}</h:column>
+                                    <h:column><f:facet name="header">Cliente</f:facet>
+                                        #{empty p.clienteNombre ? 'Cliente general' : p.clienteNombre}</h:column>
+                                    <h:column><f:facet name="header">Total</f:facet>
+                                        S/ <h:outputText value="#{p.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></h:column>
+                                    <h:column><f:facet name="header">Estado</f:facet>
+                                        <h:outputText value="#{p.estado}" styleClass="badge bg-secondary"/></h:column>
+                                    <h:column>
+                                        <h:commandButton value="Generar orden" action="#{produccionBean.generarPorPedido(p)}"
+                                                         styleClass="btn btn-sm btn-amber"/>
+                                    </h:column>
+                                </h:dataTable>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cerrar" action="#{produccionBean.cerrarPorPedido}"
+                                                 styleClass="btn btn-outline-secondary"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>
