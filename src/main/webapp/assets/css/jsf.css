@@ -1,14 +1,17 @@
-/* Estilos de las paginas Jakarta Faces (APF2): paleta de marca sobre Bootstrap 5 */
+/* Estilos de las paginas Jakarta Faces (APF2): paleta "Slate + ambar" sobre Bootstrap 5 */
 :root {
     --svir-amber: #d97706;
     --svir-amber-dark: #b45309;
-    --svir-bg: #fdf8f3;
-    --svir-sidebar: #2b2118;
+    --svir-bg: #f8fafc;
+    --svir-nav: #1e293b;
+    --svir-ink: #1e293b;
+    --svir-th-bg: #f1f5f9;
+    --svir-th-text: #334155;
 }
 
-body.svir-jsf { background: var(--svir-bg); }
+body.svir-jsf { background: var(--svir-bg); color: #1f2937; }
 
-.navbar-svir { background: var(--svir-sidebar); }
+.navbar-svir { background: var(--svir-nav); }
 .navbar-svir .navbar-brand { font-weight: 700; }
 
 .btn-amber {
@@ -22,12 +25,16 @@ body.svir-jsf { background: var(--svir-bg); }
     color: #fff;
 }
 
-.stat-card { border: 0; box-shadow: 0 1px 4px rgba(0, 0, 0, .08); }
-.stat-card .stat-value { font-size: 1.6rem; font-weight: 700; }
+.stat-card { border: 0; box-shadow: 0 1px 4px rgba(15, 23, 42, .10); }
+.stat-card .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--svir-ink); }
 .stat-card.stat-warn { border-left: 4px solid #dc3545; }
 
 .table > :not(caption) > * > * { padding: .75rem .85rem; }
-.table thead th, .table > thead > tr > th { background: #fef3e2; color: var(--svir-amber-dark); font-weight: 600; }
+.table thead th, .table > thead > tr > th {
+    background: var(--svir-th-bg);
+    color: var(--svir-th-text);
+    font-weight: 600;
+}
 
 .modal-backdrop.show { opacity: .5; }
 
