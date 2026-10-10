@@ -180,8 +180,16 @@
                                         <h:selectOneMenu value="#{l.productoId}" styleClass="form-select form-select-sm">
                                             <f:selectItem itemLabel="— Selecciona —" itemValue="" noSelectionOption="true"/>
                                             <f:selectItems value="#{pedidoBean.productos}" var="p" itemValue="#{p.id}"
-                                                           itemLabel="#{p.nombre} — S/ #{p.precio} (stock #{p.stock})"/>
+                                                           itemLabel="#{p.nombre} (stock #{p.stock})"/>
+                                            <f:ajax event="valueChange" execute="@this" render="@form"/>
                                         </h:selectOneMenu>
+                                    </h:column>
+                                    <h:column>
+                                        <f:facet name="header">P. unitario</f:facet>
+                                        <h:panelGroup rendered="#{not empty l.productoId}">
+                                            S/ <h:outputText value="#{pedidoBean.precioDe(l)}"><f:convertNumber pattern="#,##0.00"/></h:outputText>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{empty l.productoId}"><span class="text-muted">—</span></h:panelGroup>
                                     </h:column>
                                     <h:column>
                                         <f:facet name="header">Cantidad</f:facet>
@@ -190,8 +198,13 @@
                                                      validatorMessage="Mínimo 1."
                                                      styleClass="form-control form-control-sm #{component.valid ? '' : 'is-invalid'}">
                                             <f:validateLongRange minimum="1"/>
+                                            <f:ajax event="valueChange" execute="@this" render="@form"/>
                                         </h:inputText>
                                         <h:message for="cantidad" styleClass="invalid-feedback d-block"/>
+                                    </h:column>
+                                    <h:column>
+                                        <f:facet name="header">Subtotal</f:facet>
+                                        S/ <h:outputText value="#{pedidoBean.subtotalDe(l)}"><f:convertNumber pattern="#,##0.00"/></h:outputText>
                                     </h:column>
                                     <h:column>
                                         <h:commandButton value="Quitar" action="#{pedidoBean.quitarLinea(l)}"

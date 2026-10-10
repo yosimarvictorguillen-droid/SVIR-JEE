@@ -71,6 +71,7 @@
                                                  validatorMessage="Mínimo 1."
                                                  styleClass="form-control form-control-sm #{component.valid ? '' : 'is-invalid'}">
                                         <f:validateLongRange minimum="1"/>
+                                        <f:ajax event="valueChange" execute="@this" render="@form"/>
                                     </h:inputText>
                                     <h:message for="cantidad" styleClass="invalid-feedback d-block"/>
                                 </h:column>

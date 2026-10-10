@@ -199,19 +199,33 @@ public class PedidoBean extends ListadoBase<Pedido> {
         }
     }
 
+    /** Precio unitario actual del producto elegido en la linea (null si aun no eligio uno). */
+    public BigDecimal precioDe(Linea l) {
+        if (l.getProductoId() == null) {
+            return null;
+        }
+        for (Producto p : getProductos()) {
+            if (p.getId().equals(l.getProductoId())) {
+                return p.getPrecio();
+            }
+        }
+        return null;
+    }
+
+    /** Subtotal de la linea = precio unitario x cantidad (0 si falta producto o cantidad valida). */
+    public BigDecimal subtotalDe(Linea l) {
+        BigDecimal precio = precioDe(l);
+        if (precio == null || l.getCantidad() == null || l.getCantidad() <= 0) {
+            return BigDecimal.ZERO;
+        }
+        return precio.multiply(BigDecimal.valueOf(l.getCantidad()));
+    }
+
     /** Total estimado del pedido nuevo segun los precios actuales. */
     public BigDecimal getTotalNuevo() {
         BigDecimal total = BigDecimal.ZERO;
         for (Linea l : lineas) {
-            if (l.getProductoId() == null || l.getCantidad() == null || l.getCantidad() <= 0) {
-                continue;
-            }
-            for (Producto p : getProductos()) {
-                if (p.getId().equals(l.getProductoId())) {
-                    total = total.add(p.getPrecio().multiply(BigDecimal.valueOf(l.getCantidad())));
-                    break;
-                }
-            }
+            total = total.add(subtotalDe(l));
         }
         return total;
     }
