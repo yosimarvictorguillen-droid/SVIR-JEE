@@ -79,13 +79,13 @@
             </a>
             <% } %>
 
-            <div class="nav-section-title">Version JSF (APF2)</div>
+            <div class="nav-section-title">Nuevo panel</div>
             <a class="nav-link" href="<%= ctx %>/app/jsf/dashboard.xhtml">
-                <i class="bi bi-lightning-charge"></i> Dashboard JSF
+                <i class="bi bi-lightning-charge"></i> Dashboard
             </a>
             <% if (esAdmin || esVentas) { %>
             <a class="nav-link" href="<%= ctx %>/app/jsf/productos.xhtml">
-                <i class="bi bi-lightning-charge"></i> Productos JSF
+                <i class="bi bi-lightning-charge"></i> Productos
             </a>
             <% } %>
         </nav>

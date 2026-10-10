@@ -84,7 +84,7 @@
                     <i class="bi bi-shop"></i> Ver tienda web
                 </a>
                 <a href="<%= ctx %>/jsf/login.xhtml" class="btn btn-outline-secondary w-100 mt-2">
-                    <i class="bi bi-lightning-charge"></i> Ingresar a la version JSF (APF2)
+                    <i class="bi bi-lightning-charge"></i> Ingresar al nuevo panel
                 </a>
             </form>
 
