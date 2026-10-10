@@ -1,0 +1,165 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Clientes</ui:define>
+
+    <ui:define name="content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h1 class="h3 mb-0">Clientes <small class="text-muted fs-6">(versión JSF)</small></h1>
+            <h:form>
+                <h:commandLink action="#{clienteBean.nuevo}" styleClass="btn btn-amber">
+                    <i class="bi bi-plus-lg"></i> Nuevo cliente
+                </h:commandLink>
+            </h:form>
+        </div>
+
+        <h:form id="formFiltro" styleClass="row g-2 mb-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <h:inputText id="filtro" value="#{clienteBean.filtro}" styleClass="form-control"
+                             a:placeholder="Buscar por nombre, DNI, RUC o teléfono..."/>
+            </div>
+            <div class="col-auto">
+                <h:commandButton value="Buscar" action="#{clienteBean.buscar}" styleClass="btn btn-outline-dark"/>
+                <h:commandButton value="Limpiar" action="#{clienteBean.limpiar}" styleClass="btn btn-link"/>
+            </div>
+        </h:form>
+
+        <div class="card">
+            <h:form id="formTabla">
+                <div class="table-responsive">
+                    <h:dataTable value="#{clienteBean.items}" var="c"
+                                 first="#{clienteBean.primero}" rows="#{clienteBean.filas}"
+                                 styleClass="table table-hover align-middle mb-0"
+                                 rendered="#{clienteBean.total gt 0}">
+                        <h:column>
+                            <f:facet name="header">Cliente</f:facet>
+                            <strong>#{c.nombre}</strong>
+                            <div class="small text-muted">#{c.email}</div>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">DNI</f:facet>
+                            #{c.dni}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">RUC</f:facet>
+                            #{c.ruc}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Teléfono</f:facet>
+                            #{c.telefono}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <h:outputText value="#{c.activo ? 'Activo' : 'Inactivo'}"
+                                          styleClass="badge #{c.activo ? 'bg-success' : 'bg-secondary'}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Acciones</f:facet>
+                            <h:commandButton value="Editar" action="#{clienteBean.editar(c)}"
+                                             styleClass="btn btn-sm btn-outline-secondary me-1"/>
+                            <h:commandButton value="#{c.activo ? 'Desactivar' : 'Activar'}"
+                                             action="#{clienteBean.alternarActivo(c)}"
+                                             styleClass="btn btn-sm #{c.activo ? 'btn-outline-danger' : 'btn-outline-success'}"/>
+                        </h:column>
+                    </h:dataTable>
+                </div>
+
+                <h:panelGroup rendered="#{clienteBean.total eq 0}" layout="block" styleClass="p-4 text-center text-muted">
+                    No se encontraron clientes.
+                </h:panelGroup>
+
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{clienteBean.desde}–#{clienteBean.hasta} de #{clienteBean.total}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{clienteBean.anterior}"
+                                         disabled="#{not clienteBean.hayAnterior}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{clienteBean.siguiente}"
+                                         disabled="#{not clienteBean.haySiguiente}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <h:panelGroup rendered="#{clienteBean.editando}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <h:form id="formCliente">
+                            <div class="modal-header">
+                                <h5 class="modal-title">#{empty clienteBean.cliente.id ? 'Nuevo cliente' : 'Editar cliente'}</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <h:outputLabel for="nombre" value="Nombre completo / Razón social" styleClass="form-label"/>
+                                    <h:inputText id="nombre" value="#{clienteBean.cliente.nombre}" maxlength="150"
+                                                 required="true" requiredMessage="El nombre es obligatorio."
+                                                 validatorMessage="El nombre debe tener al menos 3 caracteres."
+                                                 styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                        <f:validateLength minimum="3" maximum="150"/>
+                                    </h:inputText>
+                                    <h:message for="nombre" styleClass="invalid-feedback d-block"/>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <h:outputLabel for="dni" value="DNI" styleClass="form-label"/>
+                                        <h:inputText id="dni" value="#{clienteBean.cliente.dni}" maxlength="8"
+                                                     validatorMessage="El DNI debe tener 8 dígitos."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateRegex pattern="\d{8}"/>
+                                        </h:inputText>
+                                        <h:message for="dni" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <h:outputLabel for="ruc" value="RUC" styleClass="form-label"/>
+                                        <h:inputText id="ruc" value="#{clienteBean.cliente.ruc}" maxlength="11"
+                                                     validatorMessage="El RUC debe tener 11 dígitos."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateRegex pattern="\d{11}"/>
+                                        </h:inputText>
+                                        <h:message for="ruc" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <h:outputLabel for="telefono" value="Teléfono" styleClass="form-label"/>
+                                        <h:inputText id="telefono" value="#{clienteBean.cliente.telefono}" maxlength="20"
+                                                     validatorMessage="Ingresa solo números, espacios, + o guiones."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateRegex pattern="[0-9+\- ]{6,20}"/>
+                                        </h:inputText>
+                                        <h:message for="telefono" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <h:outputLabel for="email" value="Correo" styleClass="form-label"/>
+                                        <h:inputText id="email" value="#{clienteBean.cliente.email}" maxlength="150"
+                                                     validatorMessage="Ingresa un correo válido."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateRegex pattern=".+@.+\..+"/>
+                                        </h:inputText>
+                                        <h:message for="email" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h:outputLabel for="direccion" value="Dirección" styleClass="form-label"/>
+                                    <h:inputText id="direccion" value="#{clienteBean.cliente.direccion}" maxlength="255"
+                                                 styleClass="form-control"/>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar" action="#{clienteBean.cancelar}" immediate="true"
+                                                 styleClass="btn btn-outline-secondary"/>
+                                <h:commandButton value="Guardar" action="#{clienteBean.guardar}"
+                                                 styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

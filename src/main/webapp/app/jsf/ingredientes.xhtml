@@ -1,0 +1,210 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Ingredientes</ui:define>
+
+    <ui:define name="content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h1 class="h3 mb-0">Ingredientes <small class="text-muted fs-6">(versión JSF)</small></h1>
+            <h:form>
+                <h:commandLink action="#{ingredienteBean.nuevo}" styleClass="btn btn-amber">
+                    <i class="bi bi-plus-lg"></i> Nuevo ingrediente
+                </h:commandLink>
+            </h:form>
+        </div>
+
+        <h:form id="formFiltro" styleClass="row g-2 mb-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <h:inputText id="filtro" value="#{ingredienteBean.filtro}" styleClass="form-control"
+                             a:placeholder="Buscar por nombre..."/>
+            </div>
+            <div class="col-auto">
+                <h:commandButton value="Buscar" action="#{ingredienteBean.buscar}" styleClass="btn btn-outline-dark"/>
+                <h:commandButton value="Limpiar" action="#{ingredienteBean.limpiar}" styleClass="btn btn-link"/>
+            </div>
+        </h:form>
+
+        <div class="card">
+            <h:form id="formTabla">
+                <div class="table-responsive">
+                    <h:dataTable value="#{ingredienteBean.items}" var="i"
+                                 first="#{ingredienteBean.primero}" rows="#{ingredienteBean.filas}"
+                                 styleClass="table table-hover align-middle mb-0"
+                                 rendered="#{ingredienteBean.total gt 0}">
+                        <h:column>
+                            <f:facet name="header">Ingrediente</f:facet>
+                            <strong>#{i.nombre}</strong>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Unidad</f:facet>
+                            #{i.unidadMedida}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Stock</f:facet>
+                            <h:outputText value="#{i.stock}" styleClass="badge #{i.stockBajo ? 'bg-danger' : 'bg-light text-dark border'}">
+                                <f:convertNumber pattern="#,##0.##"/>
+                            </h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Stock mínimo</f:facet>
+                            <h:outputText value="#{i.stockMinimo}"><f:convertNumber pattern="#,##0.##"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <h:outputText value="#{i.activo ? 'Activo' : 'Inactivo'}"
+                                          styleClass="badge #{i.activo ? 'bg-success' : 'bg-secondary'}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Acciones</f:facet>
+                            <h:commandButton value="Movimiento" action="#{ingredienteBean.abrirMovimiento(i)}"
+                                             styleClass="btn btn-sm btn-outline-primary me-1"/>
+                            <h:commandButton value="Editar" action="#{ingredienteBean.editar(i)}"
+                                             styleClass="btn btn-sm btn-outline-secondary me-1"/>
+                            <h:commandButton value="#{i.activo ? 'Desactivar' : 'Activar'}"
+                                             action="#{ingredienteBean.alternarActivo(i)}"
+                                             styleClass="btn btn-sm #{i.activo ? 'btn-outline-danger' : 'btn-outline-success'}"/>
+                        </h:column>
+                    </h:dataTable>
+                </div>
+
+                <h:panelGroup rendered="#{ingredienteBean.total eq 0}" layout="block" styleClass="p-4 text-center text-muted">
+                    No se encontraron ingredientes.
+                </h:panelGroup>
+
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{ingredienteBean.desde}–#{ingredienteBean.hasta} de #{ingredienteBean.total}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{ingredienteBean.anterior}"
+                                         disabled="#{not ingredienteBean.hayAnterior}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{ingredienteBean.siguiente}"
+                                         disabled="#{not ingredienteBean.haySiguiente}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- Modal: alta / edicion -->
+        <h:panelGroup rendered="#{ingredienteBean.editando}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <h:form id="formIngrediente">
+                            <div class="modal-header">
+                                <h5 class="modal-title">#{empty ingredienteBean.ingrediente.id ? 'Nuevo ingrediente' : 'Editar ingrediente'}</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <h:outputLabel for="nombre" value="Nombre" styleClass="form-label"/>
+                                    <h:inputText id="nombre" value="#{ingredienteBean.ingrediente.nombre}" maxlength="100"
+                                                 required="true" requiredMessage="El nombre es obligatorio."
+                                                 validatorMessage="El nombre debe tener al menos 2 caracteres."
+                                                 styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                        <f:validateLength minimum="2" maximum="100"/>
+                                    </h:inputText>
+                                    <h:message for="nombre" styleClass="invalid-feedback d-block"/>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                        <h:outputLabel for="unidad" value="Unidad" styleClass="form-label"/>
+                                        <h:inputText id="unidad" value="#{ingredienteBean.ingrediente.unidadMedida}" maxlength="20"
+                                                     required="true" requiredMessage="Indica la unidad."
+                                                     a:list="listaUnidades"
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}"/>
+                                        <datalist id="listaUnidades">
+                                            <option value="kg"/><option value="g"/><option value="l"/><option value="ml"/><option value="unidad"/>
+                                        </datalist>
+                                        <h:message for="unidad" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                    <div class="col-4">
+                                        <h:outputLabel for="stock" value="Stock" styleClass="form-label"/>
+                                        <h:inputText id="stock" value="#{ingredienteBean.ingrediente.stock}"
+                                                     required="true" requiredMessage="Ingresa el stock."
+                                                     converterMessage="Debe ser un número (ej. 2.5)."
+                                                     validatorMessage="No puede ser negativo."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateDoubleRange minimum="0"/>
+                                        </h:inputText>
+                                        <h:message for="stock" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                    <div class="col-4">
+                                        <h:outputLabel for="stockMinimo" value="Stock mínimo" styleClass="form-label"/>
+                                        <h:inputText id="stockMinimo" value="#{ingredienteBean.ingrediente.stockMinimo}"
+                                                     required="true" requiredMessage="Ingresa el mínimo."
+                                                     converterMessage="Debe ser un número."
+                                                     validatorMessage="No puede ser negativo."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateDoubleRange minimum="0"/>
+                                        </h:inputText>
+                                        <h:message for="stockMinimo" styleClass="invalid-feedback d-block"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar" action="#{ingredienteBean.cancelar}" immediate="true"
+                                                 styleClass="btn btn-outline-secondary"/>
+                                <h:commandButton value="Guardar" action="#{ingredienteBean.guardar}"
+                                                 styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+
+        <!-- Modal: movimiento de stock -->
+        <h:panelGroup rendered="#{ingredienteBean.registrandoMovimiento}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <h:form id="formMovimiento">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Movimiento de stock: #{ingredienteBean.ingredienteMovimiento.nombre}</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted small mb-3">
+                                    Stock actual: <strong>#{ingredienteBean.ingredienteMovimiento.stock} #{ingredienteBean.ingredienteMovimiento.unidadMedida}</strong>
+                                </p>
+                                <div class="mb-3">
+                                    <h:outputLabel for="tipo" value="Tipo" styleClass="form-label"/>
+                                    <h:selectOneMenu id="tipo" value="#{ingredienteBean.tipo}" styleClass="form-select">
+                                        <f:selectItems value="#{ingredienteBean.tipos}" var="t" itemValue="#{t}" itemLabel="#{t}"/>
+                                    </h:selectOneMenu>
+                                    <small class="text-muted">ENTRADA suma, SALIDA resta, AJUSTE fija el stock exacto.</small>
+                                </div>
+                                <div class="mb-3">
+                                    <h:outputLabel for="motivo" value="Motivo" styleClass="form-label"/>
+                                    <h:selectOneMenu id="motivo" value="#{ingredienteBean.motivo}" styleClass="form-select">
+                                        <f:selectItems value="#{ingredienteBean.motivos}" var="m" itemValue="#{m}" itemLabel="#{m}"/>
+                                    </h:selectOneMenu>
+                                </div>
+                                <div>
+                                    <h:outputLabel for="cantidad" value="Cantidad" styleClass="form-label"/>
+                                    <h:inputText id="cantidad" value="#{ingredienteBean.cantidad}"
+                                                 required="true" requiredMessage="Ingresa la cantidad."
+                                                 converterMessage="Debe ser un número (ej. 1.5)."
+                                                 validatorMessage="La cantidad no puede ser negativa."
+                                                 styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                        <f:validateDoubleRange minimum="0"/>
+                                    </h:inputText>
+                                    <h:message for="cantidad" styleClass="invalid-feedback d-block"/>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar" action="#{ingredienteBean.cancelarMovimiento}" immediate="true"
+                                                 styleClass="btn btn-outline-secondary"/>
+                                <h:commandButton value="Registrar" action="#{ingredienteBean.registrarMovimiento}"
+                                                 styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

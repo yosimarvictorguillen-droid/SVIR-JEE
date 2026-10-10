@@ -1,0 +1,151 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Usuarios</ui:define>
+
+    <ui:define name="content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h1 class="h3 mb-0">Usuarios <small class="text-muted fs-6">(versión JSF)</small></h1>
+            <h:form>
+                <h:commandLink action="#{usuarioBean.nuevo}" styleClass="btn btn-amber">
+                    <i class="bi bi-plus-lg"></i> Nuevo usuario
+                </h:commandLink>
+            </h:form>
+        </div>
+
+        <h:form id="formFiltro" styleClass="row g-2 mb-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <h:inputText id="filtro" value="#{usuarioBean.filtro}" styleClass="form-control"
+                             a:placeholder="Buscar por nombre, correo o rol..."/>
+            </div>
+            <div class="col-auto">
+                <h:commandButton value="Buscar" action="#{usuarioBean.buscar}" styleClass="btn btn-outline-dark"/>
+                <h:commandButton value="Limpiar" action="#{usuarioBean.limpiar}" styleClass="btn btn-link"/>
+            </div>
+        </h:form>
+
+        <div class="card">
+            <h:form id="formTabla">
+                <div class="table-responsive">
+                    <h:dataTable value="#{usuarioBean.items}" var="u"
+                                 first="#{usuarioBean.primero}" rows="#{usuarioBean.filas}"
+                                 styleClass="table table-hover align-middle mb-0"
+                                 rendered="#{usuarioBean.total gt 0}">
+                        <h:column>
+                            <f:facet name="header">Nombre</f:facet>
+                            <strong>#{u.nombre}</strong>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Correo</f:facet>
+                            #{u.email}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Rol</f:facet>
+                            <h:outputText value="#{u.rol}" styleClass="badge bg-dark"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Teléfono</f:facet>
+                            #{u.telefono}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <h:outputText value="#{u.activo ? 'Activo' : 'Inactivo'}"
+                                          styleClass="badge #{u.activo ? 'bg-success' : 'bg-secondary'}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Acciones</f:facet>
+                            <h:commandButton value="Editar" action="#{usuarioBean.editar(u)}"
+                                             styleClass="btn btn-sm btn-outline-secondary me-1"/>
+                            <h:commandButton value="#{u.activo ? 'Desactivar' : 'Activar'}"
+                                             action="#{usuarioBean.alternarActivo(u)}"
+                                             styleClass="btn btn-sm #{u.activo ? 'btn-outline-danger' : 'btn-outline-success'}"/>
+                        </h:column>
+                    </h:dataTable>
+                </div>
+
+                <h:panelGroup rendered="#{usuarioBean.total eq 0}" layout="block" styleClass="p-4 text-center text-muted">
+                    No se encontraron usuarios.
+                </h:panelGroup>
+
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{usuarioBean.desde}–#{usuarioBean.hasta} de #{usuarioBean.total}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{usuarioBean.anterior}"
+                                         disabled="#{not usuarioBean.hayAnterior}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{usuarioBean.siguiente}"
+                                         disabled="#{not usuarioBean.haySiguiente}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <h:panelGroup rendered="#{usuarioBean.editando}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <h:form id="formUsuario">
+                            <div class="modal-header">
+                                <h5 class="modal-title">#{empty usuarioBean.usuario.id ? 'Nuevo usuario' : 'Editar usuario'}</h5>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <h:outputLabel for="nombre" value="Nombre" styleClass="form-label"/>
+                                    <h:inputText id="nombre" value="#{usuarioBean.usuario.nombre}" maxlength="100"
+                                                 required="true" requiredMessage="El nombre es obligatorio."
+                                                 styleClass="form-control #{component.valid ? '' : 'is-invalid'}"/>
+                                    <h:message for="nombre" styleClass="invalid-feedback d-block"/>
+                                </div>
+                                <div class="mb-3">
+                                    <h:outputLabel for="email" value="Correo" styleClass="form-label"/>
+                                    <h:inputText id="email" value="#{usuarioBean.usuario.email}" maxlength="150"
+                                                 required="true" requiredMessage="El correo es obligatorio."
+                                                 validatorMessage="Ingresa un correo válido."
+                                                 styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                        <f:validateRegex pattern=".+@.+\..+"/>
+                                    </h:inputText>
+                                    <h:message for="email" styleClass="invalid-feedback d-block"/>
+                                </div>
+                                <div class="row g-3 mb-3">
+                                    <div class="col-6">
+                                        <h:outputLabel for="rol" value="Rol" styleClass="form-label"/>
+                                        <h:selectOneMenu id="rol" value="#{usuarioBean.usuario.rol}" styleClass="form-select">
+                                            <f:selectItems value="#{usuarioBean.roles}" var="r" itemValue="#{r}" itemLabel="#{r}"/>
+                                        </h:selectOneMenu>
+                                    </div>
+                                    <div class="col-6">
+                                        <h:outputLabel for="telefono" value="Teléfono" styleClass="form-label"/>
+                                        <h:inputText id="telefono" value="#{usuarioBean.usuario.telefono}" maxlength="20"
+                                                     styleClass="form-control"/>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h:outputLabel for="password" value="#{empty usuarioBean.usuario.id ? 'Contraseña' : 'Nueva contraseña (opcional)'}"
+                                                   styleClass="form-label"/>
+                                    <h:inputSecret id="password" value="#{usuarioBean.password}"
+                                                   required="#{empty usuarioBean.usuario.id}"
+                                                   requiredMessage="La contraseña es obligatoria para un usuario nuevo."
+                                                   validatorMessage="La contraseña debe tener al menos 6 caracteres."
+                                                   styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                                        <f:validateLength minimum="6" maximum="72"/>
+                                    </h:inputSecret>
+                                    <h:message for="password" styleClass="invalid-feedback d-block"/>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar" action="#{usuarioBean.cancelar}" immediate="true"
+                                                 styleClass="btn btn-outline-secondary"/>
+                                <h:commandButton value="Guardar" action="#{usuarioBean.guardar}"
+                                                 styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

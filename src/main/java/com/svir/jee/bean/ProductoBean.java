@@ -89,12 +89,14 @@ public class ProductoBean implements Serializable {
     // ---- alta / edicion (modal) ----
 
     public void nuevo() {
+        Formularios.resetear("formProducto");
         producto = new Producto();
         producto.setActivo(true);
         editando = true;
     }
 
     public void editar(Producto p) {
+        Formularios.resetear("formProducto");
         Producto copia = new Producto();
         copia.setId(p.getId());
         copia.setNombre(p.getNombre());
@@ -109,6 +111,7 @@ public class ProductoBean implements Serializable {
     }
 
     public void cancelar() {
+        Formularios.resetear("formProducto");
         editando = false;
         producto = null;
     }

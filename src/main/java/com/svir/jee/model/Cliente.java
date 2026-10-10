@@ -2,7 +2,7 @@ package com.svir.jee.model;
 
 import java.time.LocalDateTime;
 
-public class Cliente {
+public class Cliente implements java.io.Serializable {
 
     private Integer id;
     private String nombre;

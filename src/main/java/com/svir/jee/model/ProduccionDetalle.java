@@ -1,6 +1,6 @@
 package com.svir.jee.model;
 
-public class ProduccionDetalle {
+public class ProduccionDetalle implements java.io.Serializable {
 
     private Integer id;
     private Integer produccionId;

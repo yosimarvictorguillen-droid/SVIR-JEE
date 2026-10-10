@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Produccion {
+public class Produccion implements java.io.Serializable {
 
     private Integer id;
     private TipoProduccion tipo;

@@ -29,6 +29,56 @@
             <to-view-id>/app/jsf/productos.xhtml</to-view-id>
             <redirect/>
         </navigation-case>
+        <navigation-case>
+            <from-outcome>clientes</from-outcome>
+            <to-view-id>/app/jsf/clientes.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>ingredientes</from-outcome>
+            <to-view-id>/app/jsf/ingredientes.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>recetas</from-outcome>
+            <to-view-id>/app/jsf/recetas.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>producciones</from-outcome>
+            <to-view-id>/app/jsf/producciones.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>pedidos</from-outcome>
+            <to-view-id>/app/jsf/pedidos.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>pos</from-outcome>
+            <to-view-id>/app/jsf/pos.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>repartidor</from-outcome>
+            <to-view-id>/app/jsf/repartidor.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>movimientos</from-outcome>
+            <to-view-id>/app/jsf/movimientos.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>usuarios</from-outcome>
+            <to-view-id>/app/jsf/usuarios.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
+            <from-outcome>reportes</from-outcome>
+            <to-view-id>/app/jsf/reportes.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
     </navigation-rule>
 
 </faces-config>

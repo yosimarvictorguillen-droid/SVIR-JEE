@@ -3,7 +3,7 @@ package com.svir.jee.model;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public class Ingrediente {
+public class Ingrediente implements java.io.Serializable {
 
     private Integer id;
     private String nombre;

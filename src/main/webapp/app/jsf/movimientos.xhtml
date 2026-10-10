@@ -1,0 +1,115 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Movimientos</ui:define>
+
+    <ui:define name="content">
+        <h1 class="h3 mb-1">Movimientos de stock <small class="text-muted fs-6">(versión JSF)</small></h1>
+        <p class="text-muted">Auditoría de cada entrada, salida y ajuste de inventario.</p>
+
+        <!-- Movimientos de productos -->
+        <div class="card mb-4">
+            <div class="card-header fw-semibold">Productos</div>
+            <h:form id="formProductos">
+                <div class="table-responsive">
+                    <h:dataTable value="#{movimientoBean.productos}" var="m"
+                                 first="#{movimientoBean.primeroProducto}" rows="#{movimientoBean.filas}"
+                                 styleClass="table table-sm table-hover align-middle mb-0">
+                        <h:column>
+                            <f:facet name="header">Fecha</f:facet>
+                            <h:outputText value="#{m.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Producto</f:facet>
+                            <strong>#{m.productoNombre}</strong>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Tipo</f:facet>
+                            <h:outputText value="#{m.tipo}" styleClass="badge bg-secondary"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Motivo</f:facet>
+                            #{m.motivo}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Cantidad</f:facet>
+                            #{m.cantidad}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Stock</f:facet>
+                            #{m.stockAnterior} → #{m.stockNuevo}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Usuario</f:facet>
+                            #{m.usuarioNombre}
+                        </h:column>
+                    </h:dataTable>
+                </div>
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{movimientoBean.desdeProducto}–#{movimientoBean.hastaProducto} de #{movimientoBean.productos.size()}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{movimientoBean.anteriorProducto}"
+                                         disabled="#{not movimientoBean.hayAnteriorProducto}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{movimientoBean.siguienteProducto}"
+                                         disabled="#{not movimientoBean.haySiguienteProducto}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- Movimientos de ingredientes -->
+        <div class="card">
+            <div class="card-header fw-semibold">Ingredientes</div>
+            <h:form id="formIngredientes">
+                <div class="table-responsive">
+                    <h:dataTable value="#{movimientoBean.ingredientes}" var="m"
+                                 first="#{movimientoBean.primeroIngrediente}" rows="#{movimientoBean.filas}"
+                                 styleClass="table table-sm table-hover align-middle mb-0">
+                        <h:column>
+                            <f:facet name="header">Fecha</f:facet>
+                            <h:outputText value="#{m.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Ingrediente</f:facet>
+                            <strong>#{m.ingredienteNombre}</strong>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Tipo</f:facet>
+                            <h:outputText value="#{m.tipo}" styleClass="badge bg-secondary"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Motivo</f:facet>
+                            #{m.motivo}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Cantidad</f:facet>
+                            <h:outputText value="#{m.cantidad}"><f:convertNumber pattern="#,##0.##"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Stock</f:facet>
+                            <h:outputText value="#{m.stockAnterior}"><f:convertNumber pattern="#,##0.##"/></h:outputText>
+                            →
+                            <h:outputText value="#{m.stockNuevo}"><f:convertNumber pattern="#,##0.##"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Usuario</f:facet>
+                            #{m.usuarioNombre}
+                        </h:column>
+                    </h:dataTable>
+                </div>
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{movimientoBean.desdeIngrediente}–#{movimientoBean.hastaIngrediente} de #{movimientoBean.ingredientes.size()}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{movimientoBean.anteriorIngrediente}"
+                                         disabled="#{not movimientoBean.hayAnteriorIngrediente}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{movimientoBean.siguienteIngrediente}"
+                                         disabled="#{not movimientoBean.haySiguienteIngrediente}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

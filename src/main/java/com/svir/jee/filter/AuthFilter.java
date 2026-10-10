@@ -45,6 +45,16 @@ public class AuthFilter implements Filter {
         // Paginas Jakarta Faces (APF2): mismos roles que sus equivalentes JSP
         PERMISOS.put("/app/jsf/dashboard.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS, RolUsuario.COCINA, RolUsuario.REPARTIDOR));
         PERMISOS.put("/app/jsf/productos.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
+        PERMISOS.put("/app/jsf/clientes.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
+        PERMISOS.put("/app/jsf/pedidos.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
+        PERMISOS.put("/app/jsf/pos.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
+        PERMISOS.put("/app/jsf/ingredientes.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.COCINA));
+        PERMISOS.put("/app/jsf/recetas.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.COCINA));
+        PERMISOS.put("/app/jsf/producciones.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.COCINA));
+        PERMISOS.put("/app/jsf/repartidor.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS, RolUsuario.REPARTIDOR));
+        PERMISOS.put("/app/jsf/movimientos.xhtml", EnumSet.of(RolUsuario.ADMIN));
+        PERMISOS.put("/app/jsf/usuarios.xhtml", EnumSet.of(RolUsuario.ADMIN));
+        PERMISOS.put("/app/jsf/reportes.xhtml", EnumSet.of(RolUsuario.ADMIN));
     }
 
     @Override

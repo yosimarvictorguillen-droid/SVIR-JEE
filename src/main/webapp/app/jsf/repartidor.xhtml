@@ -1,0 +1,60 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Reparto</ui:define>
+
+    <ui:define name="content">
+        <h1 class="h3 mb-3">Panel de reparto <small class="text-muted fs-6">(versión JSF)</small></h1>
+
+        <h:form id="formReparto">
+            <div class="row g-3">
+                <!-- Para recoger -->
+                <div class="col-md-4">
+                    <h2 class="h6">Para recoger (#{repartidorBean.paraRecoger.size()})</h2>
+                    <ui:repeat value="#{repartidorBean.paraRecoger}" var="p">
+                        <div class="card mb-2"><div class="card-body">
+                            <p class="mb-1"><strong>Pedido ##{p.id}</strong></p>
+                            <ui:repeat value="#{repartidorBean.partes(p)}" var="parte">
+                                <div class="small text-muted">#{parte}</div>
+                            </ui:repeat>
+                            <p class="mb-2 mt-2"><strong>Total: S/ <h:outputText value="#{p.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></strong></p>
+                            <h:commandButton value="Salir a repartir" action="#{repartidorBean.marcarEnCamino(p)}"
+                                             styleClass="btn btn-sm btn-amber w-100"/>
+                        </div></div>
+                    </ui:repeat>
+                </div>
+
+                <!-- En camino -->
+                <div class="col-md-4">
+                    <h2 class="h6">En camino (#{repartidorBean.enCamino.size()})</h2>
+                    <ui:repeat value="#{repartidorBean.enCamino}" var="p">
+                        <div class="card mb-2"><div class="card-body">
+                            <p class="mb-1"><strong>Pedido ##{p.id}</strong></p>
+                            <ui:repeat value="#{repartidorBean.partes(p)}" var="parte">
+                                <div class="small text-muted">#{parte}</div>
+                            </ui:repeat>
+                            <p class="mb-2 mt-2"><strong>Total: S/ <h:outputText value="#{p.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></strong></p>
+                            <h:commandButton value="Marcar entregado" action="#{repartidorBean.marcarEntregado(p)}"
+                                             styleClass="btn btn-sm btn-success w-100"/>
+                        </div></div>
+                    </ui:repeat>
+                </div>
+
+                <!-- Entregados -->
+                <div class="col-md-4">
+                    <h2 class="h6">Entregados (#{repartidorBean.entregados.size()})</h2>
+                    <ui:repeat value="#{repartidorBean.entregados}" var="p">
+                        <div class="card mb-2"><div class="card-body">
+                            <p class="mb-1"><strong>Pedido ##{p.id}</strong>
+                                <span class="badge bg-success">Entregado</span></p>
+                            <p class="mb-0 small text-muted">Total: S/ <h:outputText value="#{p.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></p>
+                        </div></div>
+                    </ui:repeat>
+                </div>
+            </div>
+        </h:form>
+    </ui:define>
+</ui:composition>

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Pedido {
+public class Pedido implements java.io.Serializable {
 
     private Integer id;
     private Integer clienteId;

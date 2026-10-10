@@ -1,0 +1,115 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Reportes</ui:define>
+
+    <ui:define name="content">
+        <h1 class="h3 mb-3">Reportes <small class="text-muted fs-6">(versión JSF)</small></h1>
+
+        <div class="card mb-4">
+            <div class="card-header fw-semibold">Ventas por rango de fechas</div>
+            <div class="card-body">
+                <h:form id="formRango" styleClass="row g-2 align-items-end mb-3">
+                    <div class="col-6 col-md-3">
+                        <h:outputLabel for="desde" value="Desde" styleClass="form-label"/>
+                        <h:inputText id="desde" value="#{reporteBean.desde}" a:type="date"
+                                     required="true" requiredMessage="Indica la fecha inicial."
+                                     converterMessage="Fecha no válida."
+                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                            <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
+                        </h:inputText>
+                        <h:message for="desde" styleClass="invalid-feedback d-block"/>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <h:outputLabel for="hasta" value="Hasta" styleClass="form-label"/>
+                        <h:inputText id="hasta" value="#{reporteBean.hasta}" a:type="date"
+                                     required="true" requiredMessage="Indica la fecha final."
+                                     converterMessage="Fecha no válida."
+                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
+                            <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
+                        </h:inputText>
+                        <h:message for="hasta" styleClass="invalid-feedback d-block"/>
+                    </div>
+                    <div class="col-auto">
+                        <h:commandButton value="Filtrar" action="#{reporteBean.consultar}" styleClass="btn btn-amber"/>
+                    </div>
+                </h:form>
+
+                <p class="mb-3">
+                    Total vendido en el rango:
+                    <strong class="fs-5">S/ <h:outputText value="#{reporteBean.totalVentas}"><f:convertNumber pattern="#,##0.00"/></h:outputText></strong>
+                    <span class="text-muted">(#{reporteBean.pedidos.size()} pedidos)</span>
+                </p>
+
+                <div class="table-responsive">
+                    <h:dataTable value="#{reporteBean.pedidos}" var="p" styleClass="table table-sm table-hover align-middle mb-0">
+                        <h:column>
+                            <f:facet name="header">#</f:facet>
+                            #{p.id}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Cliente</f:facet>
+                            #{empty p.clienteNombre ? 'Cliente general' : p.clienteNombre}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Origen</f:facet>
+                            #{p.tipoOrigen}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Total</f:facet>
+                            S/ <h:outputText value="#{p.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <h:outputText value="#{p.estado}" styleClass="badge bg-secondary"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Fecha</f:facet>
+                            <h:outputText value="#{p.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText>
+                        </h:column>
+                    </h:dataTable>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header fw-semibold">Productos con stock bajo</div>
+                    <h:dataTable value="#{reporteBean.productosStockBajo}" var="p"
+                                 styleClass="table table-sm mb-0" rendered="#{not empty reporteBean.productosStockBajo}">
+                        <h:column><f:facet name="header">Producto</f:facet>#{p.nombre}</h:column>
+                        <h:column><f:facet name="header">Stock</f:facet><h:outputText value="#{p.stock}" styleClass="badge bg-danger"/></h:column>
+                        <h:column><f:facet name="header">Mínimo</f:facet>#{p.stockMinimo}</h:column>
+                    </h:dataTable>
+                    <h:panelGroup rendered="#{empty reporteBean.productosStockBajo}" layout="block" styleClass="p-3 text-muted">
+                        Sin alertas.
+                    </h:panelGroup>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header fw-semibold">Ingredientes con stock bajo</div>
+                    <h:dataTable value="#{reporteBean.ingredientesStockBajo}" var="i"
+                                 styleClass="table table-sm mb-0" rendered="#{not empty reporteBean.ingredientesStockBajo}">
+                        <h:column><f:facet name="header">Ingrediente</f:facet>#{i.nombre}</h:column>
+                        <h:column><f:facet name="header">Stock</f:facet>
+                            <h:outputText value="#{i.stock}" styleClass="badge bg-danger"><f:convertNumber pattern="#,##0.##"/></h:outputText>
+                            #{i.unidadMedida}
+                        </h:column>
+                        <h:column><f:facet name="header">Mínimo</f:facet>
+                            <h:outputText value="#{i.stockMinimo}"><f:convertNumber pattern="#,##0.##"/></h:outputText>
+                        </h:column>
+                    </h:dataTable>
+                    <h:panelGroup rendered="#{empty reporteBean.ingredientesStockBajo}" layout="block" styleClass="p-3 text-muted">
+                        Sin alertas.
+                    </h:panelGroup>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

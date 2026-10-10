@@ -1,0 +1,126 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Recetas</ui:define>
+
+    <ui:define name="content">
+        <h1 class="h3 mb-1">Recetas <small class="text-muted fs-6">(versión JSF)</small></h1>
+        <p class="text-muted">Define cuánto de cada ingrediente consume <strong>una unidad</strong> de cada producto.</p>
+
+        <h:form id="formFiltro" styleClass="row g-2 mb-3">
+            <div class="col-12 col-md-6 col-lg-4">
+                <h:inputText id="filtro" value="#{recetaBean.filtro}" styleClass="form-control"
+                             a:placeholder="Buscar producto..."/>
+            </div>
+            <div class="col-auto">
+                <h:commandButton value="Buscar" action="#{recetaBean.buscar}" styleClass="btn btn-outline-dark"/>
+                <h:commandButton value="Limpiar" action="#{recetaBean.limpiar}" styleClass="btn btn-link"/>
+            </div>
+        </h:form>
+
+        <div class="card">
+            <h:form id="formTabla">
+                <div class="table-responsive">
+                    <h:dataTable value="#{recetaBean.items}" var="p"
+                                 first="#{recetaBean.primero}" rows="#{recetaBean.filas}"
+                                 styleClass="table table-hover align-middle mb-0"
+                                 rendered="#{recetaBean.total gt 0}">
+                        <h:column>
+                            <f:facet name="header">Imagen</f:facet>
+                            <h:panelGroup rendered="#{not empty p.imagenUrl}">
+                                <img src="#{request.contextPath}#{p.imagenUrl}" alt="" width="40" height="40"
+                                     style="object-fit: cover; border-radius: 6px;"/>
+                            </h:panelGroup>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Producto</f:facet>
+                            <strong>#{p.nombre}</strong>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <h:outputText value="#{p.activo ? 'Activo' : 'Inactivo'}"
+                                          styleClass="badge #{p.activo ? 'bg-success' : 'bg-secondary'}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Acciones</f:facet>
+                            <h:commandButton value="Configurar receta" action="#{recetaBean.editar(p)}"
+                                             styleClass="btn btn-sm btn-outline-primary"/>
+                        </h:column>
+                    </h:dataTable>
+                </div>
+
+                <h:panelGroup rendered="#{recetaBean.total eq 0}" layout="block" styleClass="p-4 text-center text-muted">
+                    No se encontraron productos.
+                </h:panelGroup>
+
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{recetaBean.desde}–#{recetaBean.hasta} de #{recetaBean.total}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{recetaBean.anterior}"
+                                         disabled="#{not recetaBean.hayAnterior}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{recetaBean.siguiente}"
+                                         disabled="#{not recetaBean.haySiguiente}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- Modal: editor de la receta (filas dinamicas de ingrediente + cantidad) -->
+        <h:panelGroup rendered="#{recetaBean.editando}" layout="block">
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" tabindex="-1" role="dialog" aria-modal="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <h:form id="formReceta">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Receta de: #{recetaBean.producto.nombre}</h5>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted small">
+                                    Cantidad de cada ingrediente necesaria para producir <strong>1 unidad</strong>.
+                                    Las filas sin ingrediente o sin cantidad se ignoran.
+                                </p>
+                                <h:dataTable value="#{recetaBean.lineas}" var="l" styleClass="table table-sm align-middle">
+                                    <h:column>
+                                        <f:facet name="header">Ingrediente</f:facet>
+                                        <h:selectOneMenu value="#{l.ingredienteId}" styleClass="form-select form-select-sm">
+                                            <f:selectItem itemLabel="— Selecciona —" itemValue="" noSelectionOption="true"/>
+                                            <f:selectItems value="#{recetaBean.ingredientes}" var="i" itemValue="#{i.id}"
+                                                           itemLabel="#{i.nombre} (#{i.unidadMedida})"/>
+                                        </h:selectOneMenu>
+                                    </h:column>
+                                    <h:column>
+                                        <f:facet name="header">Cantidad por unidad</f:facet>
+                                        <h:inputText id="cantidad" value="#{l.cantidad}"
+                                                     converterMessage="Debe ser un número (ej. 0.25)."
+                                                     validatorMessage="Debe ser mayor a 0."
+                                                     styleClass="form-control form-control-sm #{component.valid ? '' : 'is-invalid'}">
+                                            <f:validateDoubleRange minimum="0.0001"/>
+                                        </h:inputText>
+                                        <h:message for="cantidad" styleClass="invalid-feedback d-block"/>
+                                    </h:column>
+                                    <h:column>
+                                        <h:commandButton value="Quitar" action="#{recetaBean.quitarLinea(l)}"
+                                                         styleClass="btn btn-sm btn-outline-danger"/>
+                                    </h:column>
+                                </h:dataTable>
+                                <h:commandButton value="+ Agregar ingrediente" action="#{recetaBean.agregarLinea}"
+                                                 styleClass="btn btn-sm btn-outline-secondary"/>
+                            </div>
+                            <div class="modal-footer">
+                                <h:commandButton value="Cancelar" action="#{recetaBean.cancelar}" immediate="true"
+                                                 styleClass="btn btn-outline-secondary"/>
+                                <h:commandButton value="Guardar receta" action="#{recetaBean.guardar}"
+                                                 styleClass="btn btn-amber"/>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </div>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>
