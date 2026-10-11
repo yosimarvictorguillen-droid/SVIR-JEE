@@ -38,7 +38,10 @@
         %>
         <tr>
             <td>#<%= p.getId() %></td>
-            <td><%= cliente %></td>
+            <td><%= cliente %>
+                <% if (!"General".equals(p.getTipoComprador())) { %>
+                <span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : "bg-warning text-dark" %>"><%= p.getTipoComprador() %></span>
+                <% } %></td>
             <td><%= p.getTipoOrigen() %></td>
             <td>S/ <%= p.getTotal() %></td>
             <td><span class="badge bg-secondary badge-estado"><%= p.getEstado() %></span></td>

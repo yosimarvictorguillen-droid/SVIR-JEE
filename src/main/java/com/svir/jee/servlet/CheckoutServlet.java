@@ -55,6 +55,18 @@ public class CheckoutServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Texto libre que escribe quien compra (nombre, direccion...): se quitan los caracteres con los que
+     * se podria inyectar HTML en las pantallas del personal, se recorta y se limita el largo.
+     */
+    private static String limpiar(String texto, int maximo) {
+        if (texto == null) {
+            return "";
+        }
+        String limpio = texto.replaceAll("[<>&\"'`|]", "").trim();
+        return limpio.length() > maximo ? limpio.substring(0, maximo).trim() : limpio;
+    }
+
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -68,38 +80,40 @@ public class CheckoutServlet extends HttpServlet {
         try {
             Pedido pedido = new Pedido();
             Cliente cliente = (Cliente) session.getAttribute("cliente");
+            // Comprador sin cuenta ("invitado"): se guarda el nombre que escribio (ya limpio de caracteres peligrosos).
+            String nombreInvitado = cliente == null ? limpiar(req.getParameter("nombre"), 150) : "";
             if (cliente != null) {
                 pedido.setClienteId(cliente.getId());
+            } else if (!nombreInvitado.isEmpty()) {
+                pedido.setNombreInvitado(nombreInvitado);
             }
 
             String modoEntrega = req.getParameter("modoEntrega");
             if ("delivery".equals(modoEntrega)) {
                 pedido.setTipoOrigen(TipoOrigenPedido.DELIVERY);
-                String direccion = req.getParameter("direccion");
-                String telefono = req.getParameter("telefono");
-                String referencia = req.getParameter("referencia");
-                String gps = req.getParameter("gps");
+                String direccion = limpiar(req.getParameter("direccion"), 255);
+                String telefono = limpiar(req.getParameter("telefono"), 30);
+                String referencia = limpiar(req.getParameter("referencia"), 255);
+                String gps = limpiar(req.getParameter("gps"), 60);
                 StringBuilder obs = new StringBuilder();
-                obs.append("Dir: ").append(direccion == null ? "" : direccion.trim());
-                obs.append(" | Tel: ").append(telefono == null ? "" : telefono.trim());
-                if (referencia != null && !referencia.isBlank()) {
-                    obs.append(" | Ref: ").append(referencia.trim());
+                obs.append("Dir: ").append(direccion);
+                obs.append(" | Tel: ").append(telefono);
+                if (!referencia.isEmpty()) {
+                    obs.append(" | Ref: ").append(referencia);
                 }
-                if (gps != null && !gps.isBlank()) {
-                    obs.append(" | GPS: ").append(gps.trim());
+                if (!gps.isEmpty()) {
+                    obs.append(" | GPS: ").append(gps);
                 }
                 if (cliente != null) {
-                    obs.append(" | ").append(cliente.getNombre());
+                    obs.append(" | ").append(limpiar(cliente.getNombre(), 150));
                 } else {
-                    String nombreInvitado = req.getParameter("nombre");
-                    obs.append(" | ").append(nombreInvitado == null ? "Invitado" : nombreInvitado.trim());
+                    obs.append(" | ").append(nombreInvitado.isEmpty() ? "Invitado" : nombreInvitado);
                 }
                 pedido.setObservacion(obs.toString());
             } else {
                 pedido.setTipoOrigen(TipoOrigenPedido.TIENDA);
-                String nombreInvitado = req.getParameter("nombre");
-                if (cliente == null && nombreInvitado != null && !nombreInvitado.isBlank()) {
-                    pedido.setObservacion("Recojo en tienda | " + nombreInvitado.trim());
+                if (cliente == null && !nombreInvitado.isEmpty()) {
+                    pedido.setObservacion("Recojo en tienda | " + nombreInvitado);
                 } else {
                     pedido.setObservacion("Recojo en tienda");
                 }

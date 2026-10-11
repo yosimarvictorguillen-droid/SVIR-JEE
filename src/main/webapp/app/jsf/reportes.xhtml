@@ -53,7 +53,7 @@
                         </h:column>
                         <h:column>
                             <f:facet name="header">Cliente</f:facet>
-                            #{empty p.clienteNombre ? 'Cliente general' : p.clienteNombre}
+                            #{empty p.clienteNombre ? 'Cliente general' : p.clienteNombre} <h:outputText value="#{p.tipoComprador}" rendered="#{p.tipoComprador ne 'General'}" styleClass="badge #{p.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : 'bg-warning text-dark'}"/>
                         </h:column>
                         <h:column>
                             <f:facet name="header">Origen</f:facet>

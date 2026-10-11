@@ -10,6 +10,7 @@ public class Pedido implements java.io.Serializable {
     private Integer id;
     private Integer clienteId;
     private String clienteNombre; // solo para mostrar en pantalla (join)
+    private String nombreInvitado; // nombre que escribio quien compra sin cuenta
     private Integer usuarioId;
     private String usuarioNombre; // solo para mostrar en pantalla (join)
     private BigDecimal total;
@@ -39,12 +40,29 @@ public class Pedido implements java.io.Serializable {
         this.clienteId = clienteId;
     }
 
+    /** Nombre de quien compro: el del cliente con cuenta o, si no tiene cuenta, el que escribio como invitado. */
     public String getClienteNombre() {
-        return clienteNombre;
+        return clienteNombre != null ? clienteNombre : nombreInvitado;
     }
 
     public void setClienteNombre(String clienteNombre) {
         this.clienteNombre = clienteNombre;
+    }
+
+    public String getNombreInvitado() {
+        return nombreInvitado;
+    }
+
+    public void setNombreInvitado(String nombreInvitado) {
+        this.nombreInvitado = nombreInvitado;
+    }
+
+    /** "Cliente" (tiene cuenta), "Invitado" (compro sin cuenta dejando su nombre) o "General" (venta de mostrador). */
+    public String getTipoComprador() {
+        if (clienteId != null) {
+            return "Cliente";
+        }
+        return nombreInvitado != null && !nombreInvitado.isBlank() ? "Invitado" : "General";
     }
 
     public Integer getUsuarioId() {

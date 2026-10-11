@@ -91,6 +91,7 @@ CREATE TABLE recetas (
 CREATE TABLE pedidos (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id          INT NULL,
+    nombre_invitado     VARCHAR(150) NULL,
     usuario_id          INT NULL,
     total               DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     estado              ENUM('PENDIENTE','PARCIAL','PREPARACION','LISTO','EN_CAMINO','ENTREGADO','CANCELADO')

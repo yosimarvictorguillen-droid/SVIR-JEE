@@ -45,8 +45,8 @@ public class PedidoDAO {
             con = ConexionBD.getInstancia().obtenerConexion();
             con.setAutoCommit(false);
 
-            String sqlPedido = "INSERT INTO pedidos (cliente_id, usuario_id, total, estado, tipo_origen, observacion) "
-                    + "VALUES (?, ?, 0, 'PENDIENTE', ?, ?)";
+            String sqlPedido = "INSERT INTO pedidos (cliente_id, usuario_id, total, estado, tipo_origen, observacion, nombre_invitado) "
+                    + "VALUES (?, ?, 0, 'PENDIENTE', ?, ?, ?)";
             try (PreparedStatement ps = con.prepareStatement(sqlPedido, PreparedStatement.RETURN_GENERATED_KEYS)) {
                 if (pedido.getClienteId() != null) {
                     ps.setInt(1, pedido.getClienteId());
@@ -60,6 +60,7 @@ public class PedidoDAO {
                 }
                 ps.setString(3, pedido.getTipoOrigen().name());
                 ps.setString(4, pedido.getObservacion());
+                ps.setString(5, pedido.getNombreInvitado());
                 ps.executeUpdate();
                 try (ResultSet keys = ps.getGeneratedKeys()) {
                     keys.next();
@@ -345,6 +346,43 @@ public class PedidoDAO {
         return lista;
     }
 
+    /**
+     * Busqueda publica de la tienda: por nombre (del cliente con cuenta o del invitado) y, si el texto
+     * son 7 o mas digitos, tambien por telefono. Maximo 20 resultados, mas recientes primero.
+     * Las cabeceras devueltas no se usan para mostrar direcciones ni telefonos.
+     */
+    public List<Pedido> buscarPorTexto(String texto) throws SQLException {
+        String limpio = texto.trim().toLowerCase();
+        boolean esTelefono = limpio.matches("\\d{7,}");
+        // se escapan los comodines de LIKE para que "%%%" o "___" no listen todos los pedidos
+        String seguro = limpio.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+        String sql = "SELECT p.*, c.nombre AS cliente_nombre, u.nombre AS usuario_nombre "
+                + "FROM pedidos p "
+                + "LEFT JOIN clientes c ON c.id = p.cliente_id "
+                + "LEFT JOIN usuarios u ON u.id = p.usuario_id "
+                + "WHERE " + (esTelefono
+                        ? "p.observacion LIKE ? "
+                        : "(LOWER(p.nombre_invitado) LIKE ? OR LOWER(c.nombre) LIKE ?) ")
+                + "ORDER BY p.created_at DESC LIMIT 20";
+        List<Pedido> lista = new ArrayList<>();
+        try (Connection con = ConexionBD.getInstancia().obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            if (esTelefono) {
+                ps.setString(1, "%Tel: " + seguro + "%");
+            } else {
+                String patron = "%" + seguro + "%";
+                ps.setString(1, patron);
+                ps.setString(2, patron);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapearCabecera(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
     public Optional<Pedido> buscarPorId(int id) throws SQLException {
         String sql = "SELECT p.*, c.nombre AS cliente_nombre, u.nombre AS usuario_nombre "
                 + "FROM pedidos p "
@@ -467,6 +505,7 @@ public class PedidoDAO {
         int clienteId = rs.getInt("cliente_id");
         p.setClienteId(rs.wasNull() ? null : clienteId);
         p.setClienteNombre(rs.getString("cliente_nombre"));
+        p.setNombreInvitado(rs.getString("nombre_invitado"));
         int usuarioId = rs.getInt("usuario_id");
         p.setUsuarioId(rs.wasNull() ? null : usuarioId);
         p.setUsuarioNombre(rs.getString("usuario_nombre"));
