@@ -36,7 +36,7 @@
                 boolean verVentas = esAdmin || esVentas;
                 boolean verCocina = esAdmin || esCocina;
                 // El grupo de la pagina actual se muestra abierto al cargar.
-                boolean abreVentas = java.util.Arrays.asList("pedidos", "pos", "clientes", "productos").contains(paginaActiva);
+                boolean abreVentas = java.util.Arrays.asList("pedidos", "pos", "clientes", "invitados", "productos").contains(paginaActiva);
                 boolean abreCocina = java.util.Arrays.asList("ingredientes", "recetas", "producciones").contains(paginaActiva);
                 boolean abreAdmin = java.util.Arrays.asList("movimientos", "usuarios", "reportes").contains(paginaActiva);
             %>
@@ -50,6 +50,7 @@
                 <a class="nav-link <%= paginaActiva.equals("pedidos") ? "active" : "" %>" href="<%= ctx %>/app/pedidos">Pedidos</a>
                 <a class="nav-link <%= paginaActiva.equals("pos") ? "active" : "" %>" href="<%= ctx %>/app/pos">Punto de Venta</a>
                 <a class="nav-link <%= paginaActiva.equals("clientes") ? "active" : "" %>" href="<%= ctx %>/app/clientes">Clientes</a>
+                <a class="nav-link <%= paginaActiva.equals("invitados") ? "active" : "" %>" href="<%= ctx %>/app/invitados">Invitados</a>
                 <a class="nav-link <%= paginaActiva.equals("productos") ? "active" : "" %>" href="<%= ctx %>/app/productos">Productos</a>
             </div>
             <% } %>

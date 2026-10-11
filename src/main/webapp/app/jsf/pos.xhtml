@@ -109,6 +109,20 @@
                                     <f:selectItems value="#{posBean.clientes}" var="c" itemValue="#{c.id}" itemLabel="#{c.nombre}"/>
                                 </h:selectOneMenu>
                             </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col-5">
+                                    <h:selectOneMenu id="compradorTipoDoc" value="#{posBean.compradorTipoDoc}" styleClass="form-select form-select-sm">
+                                        <f:selectItem itemValue="DNI" itemLabel="DNI"/>
+                                        <f:selectItem itemValue="CE" itemLabel="Carné ext."/>
+                                        <f:selectItem itemValue="PASAPORTE" itemLabel="Pasaporte"/>
+                                    </h:selectOneMenu>
+                                </div>
+                                <div class="col-7">
+                                    <h:inputText id="compradorDoc" value="#{posBean.compradorDoc}" maxlength="12"
+                                                 styleClass="form-control form-control-sm" a:placeholder="Documento (si no es cliente)"/>
+                                </div>
+                                <div class="col-12"><h:message for="compradorDoc" styleClass="text-danger small d-block"/></div>
+                            </div>
                             <div class="mb-3">
                                 <h:inputText id="nombreComprador" value="#{posBean.nombreComprador}" maxlength="150"
                                              styleClass="form-control form-control-sm #{component.valid ? '' : 'is-invalid'}" a:placeholder="Nombre del invitado (obligatorio si no es cliente)"/>
@@ -138,6 +152,7 @@
                                     <strong>Dulce Momento</strong><br/>
                                     <small class="text-muted">#{posBean.ticket.comprobanteNombre} <strong>#{posBean.ticket.comprobanteNumero}</strong> (pedido ##{posBean.ticket.id})</small><br/>
                                     <small><strong>#{empty posBean.ticket.clienteNombre ? 'Sin nombre' : posBean.ticket.clienteNombre}</strong> <h:outputText value="#{posBean.ticket.tipoComprador}" styleClass="badge #{posBean.ticket.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : 'bg-warning text-dark'}"/></small><br/>
+                                    <h:panelGroup rendered="#{not empty posBean.ticket.documentoComprador}"><small class="text-muted">Doc.: #{posBean.ticket.documentoComprador}</small><br/></h:panelGroup>
                                     <small class="text-muted"><h:outputText value="#{posBean.ticket.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText></small>
                                 </div>
                                 <h:dataTable value="#{posBean.ticket.detalles}" var="d" styleClass="table table-sm mb-2">

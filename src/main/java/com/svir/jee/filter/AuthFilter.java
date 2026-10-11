@@ -36,6 +36,7 @@ public class AuthFilter implements Filter {
         PERMISOS.put("/app/recetas", EnumSet.of(RolUsuario.ADMIN, RolUsuario.COCINA));
         PERMISOS.put("/app/producciones", EnumSet.of(RolUsuario.ADMIN, RolUsuario.COCINA));
         PERMISOS.put("/app/clientes", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
+        PERMISOS.put("/app/invitados", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
         PERMISOS.put("/app/pedidos", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
         PERMISOS.put("/app/pos", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
         PERMISOS.put("/app/repartidor", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS, RolUsuario.REPARTIDOR));
@@ -46,6 +47,7 @@ public class AuthFilter implements Filter {
         PERMISOS.put("/app/jsf/dashboard.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS, RolUsuario.COCINA, RolUsuario.REPARTIDOR));
         PERMISOS.put("/app/jsf/productos.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
         PERMISOS.put("/app/jsf/clientes.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
+        PERMISOS.put("/app/jsf/invitados.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
         PERMISOS.put("/app/jsf/pedidos.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
         PERMISOS.put("/app/jsf/pos.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.VENTAS));
         PERMISOS.put("/app/jsf/ingredientes.xhtml", EnumSet.of(RolUsuario.ADMIN, RolUsuario.COCINA));

@@ -1,0 +1,98 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
+                template="/WEB-INF/templates/layout.xhtml">
+
+    <ui:define name="titulo">Invitados</ui:define>
+
+    <ui:define name="content">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <h1 class="h3 mb-0">Invitados <small class="text-muted fs-6">(versión JSF)</small></h1>
+            <span class="text-muted small">Compradores sin cuenta, identificados por su documento. Al registrarse pasan a Clientes.</span>
+        </div>
+
+        <h:form id="formFiltro" styleClass="card card-body mb-3">
+            <div class="row g-2">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small mb-1" for="formFiltro:filtro">Buscar</label>
+                    <h:inputText id="filtro" value="#{invitadoBean.filtro}" styleClass="form-control form-control-sm"
+                                 a:placeholder="Nombre, documento o teléfono"/>
+                </div>
+                <div class="col-6 col-md-3">
+                    <label class="form-label small mb-1" for="formFiltro:estado">Estado</label>
+                    <h:selectOneMenu id="estado" value="#{invitadoBean.sel['estado']}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="ACTIVO" itemLabel="Invitado (sin cuenta)"/>
+                        <f:selectItem itemValue="CONVERTIDO" itemLabel="Convertido a cliente"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                    <h:commandButton value="Buscar" action="#{invitadoBean.buscar}" styleClass="btn btn-sm btn-dark"/>
+                    <h:commandButton value="Limpiar" action="#{invitadoBean.limpiar}" styleClass="btn btn-sm btn-outline-secondary"/>
+                </div>
+            </div>
+        </h:form>
+
+        <div class="card">
+            <h:form id="formTabla">
+                <div class="table-responsive">
+                    <h:dataTable value="#{invitadoBean.items}" var="i"
+                                 first="#{invitadoBean.primero}" rows="#{invitadoBean.filas}"
+                                 styleClass="table table-hover align-middle mb-0"
+                                 rendered="#{invitadoBean.total gt 0}">
+                        <h:column>
+                            <f:facet name="header">Documento</f:facet>
+                            <span class="small text-muted">#{i.tipoDocumento}</span> #{i.documento}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Nombre</f:facet>
+                            <strong>#{i.nombre}</strong>
+                            <div class="small text-muted">#{i.telefono}</div>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Pedidos</f:facet>
+                            #{i.totalPedidos}
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Total comprado</f:facet>
+                            S/ <h:outputText value="#{i.totalComprado}"><f:convertNumber pattern="#,##0.00"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Último pedido</f:facet>
+                            <h:outputText value="#{i.ultimoPedido}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Estado</f:facet>
+                            <h:outputText value="#{i.convertido ? 'Convertido' : 'Invitado'}"
+                                          styleClass="badge #{i.convertido ? 'bg-secondary' : 'bg-warning text-dark'}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">Se hizo cliente</f:facet>
+                            <h:panelGroup rendered="#{i.convertido}">
+                                <h:outputText value="#{i.fechaConversion}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText>
+                                <div class="small text-muted">Cliente: #{i.clienteNombre}
+                                    <h:outputText value=" (#{i.pedidosVinculados} pedido(s) vinculados)" rendered="#{not empty i.pedidosVinculados}"/></div>
+                            </h:panelGroup>
+                        </h:column>
+                    </h:dataTable>
+                </div>
+
+                <h:panelGroup rendered="#{invitadoBean.total eq 0}" layout="block" styleClass="p-4 text-center text-muted">
+                    No se encontraron invitados.
+                </h:panelGroup>
+
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                    <small class="text-muted">Mostrando #{invitadoBean.desde}–#{invitadoBean.hasta} de #{invitadoBean.total}</small>
+                    <div class="btn-group btn-group-sm">
+                        <h:commandButton value="« Anterior" action="#{invitadoBean.anterior}"
+                                         disabled="#{not invitadoBean.hayAnterior}" styleClass="btn btn-outline-dark"/>
+                        <h:commandButton value="Siguiente »" action="#{invitadoBean.siguiente}"
+                                         disabled="#{not invitadoBean.haySiguiente}" styleClass="btn btn-outline-dark"/>
+                    </div>
+                </div>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

@@ -35,6 +35,11 @@
             <redirect/>
         </navigation-case>
         <navigation-case>
+            <from-outcome>invitados</from-outcome>
+            <to-view-id>/app/jsf/invitados.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+        <navigation-case>
             <from-outcome>ingredientes</from-outcome>
             <to-view-id>/app/jsf/ingredientes.xhtml</to-view-id>
             <redirect/>

@@ -168,6 +168,10 @@
                                 <div class="row mb-3">
                                     <div class="col-md-6">
                                         <p class="mb-1"><strong>Cliente:</strong> #{empty pedidoBean.detalle.clienteNombre ? 'Sin nombre' : pedidoBean.detalle.clienteNombre} <h:outputText value="#{pedidoBean.detalle.tipoComprador}" rendered="#{pedidoBean.detalle.tipoComprador ne 'General'}" styleClass="badge #{pedidoBean.detalle.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : 'bg-warning text-dark'}"/></p>
+                                        <h:panelGroup rendered="#{not empty pedidoBean.detalle.documentoComprador}" layout="block">
+                                            <p class="mb-1"><strong>Documento:</strong> #{pedidoBean.detalle.documentoComprador}
+                                                <h:outputText value="Compró como invitado, hoy es cliente" rendered="#{pedidoBean.detalle.antesInvitado}" styleClass="badge bg-secondary"/></p>
+                                        </h:panelGroup>
                                         <p class="mb-1"><strong>Origen:</strong> #{pedidoBean.detalle.tipoOrigen}</p>
                                         <p class="mb-0"><strong>Atendió:</strong> #{pedidoBean.detalle.usuarioNombre}</p>
                                     </div>
@@ -247,18 +251,34 @@
                             </div>
                             <div class="modal-body">
                                 <div class="row g-3 mb-3">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <h:outputLabel for="cliente" value="Cliente" styleClass="form-label"/>
                                         <h:selectOneMenu id="cliente" value="#{pedidoBean.clienteId}" styleClass="form-select">
                                             <f:selectItem itemLabel="Invitado (no registrado)" itemValue="" noSelectionOption="true"/>
                                             <f:selectItems value="#{pedidoBean.clientes}" var="c" itemValue="#{c.id}" itemLabel="#{c.nombre}"/>
                                         </h:selectOneMenu>
                                     </div>
-                                    <div class="col-md-3">
-                                        <h:outputLabel for="nombreInvitado" value="Nombre del invitado *" styleClass="form-label"/>
-                                        <h:inputText id="nombreInvitado" value="#{pedidoBean.nombreInvitado}" maxlength="150"
-                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}" a:placeholder="Obligatorio si no es cliente"/>
-                                        <h:message for="nombreInvitado" styleClass="invalid-feedback d-block"/>
+                                    <div class="col-md-5">
+                                        <h:outputLabel for="compradorDoc" value="Documento y nombre del invitado *" styleClass="form-label"/>
+                                        <div class="row g-2">
+                                            <div class="col-4">
+                                                <h:selectOneMenu id="compradorTipoDoc" value="#{pedidoBean.compradorTipoDoc}" styleClass="form-select">
+                                                    <f:selectItem itemValue="DNI" itemLabel="DNI"/>
+                                                    <f:selectItem itemValue="CE" itemLabel="Carné ext."/>
+                                                    <f:selectItem itemValue="PASAPORTE" itemLabel="Pasaporte"/>
+                                                </h:selectOneMenu>
+                                            </div>
+                                            <div class="col-8">
+                                                <h:inputText id="compradorDoc" value="#{pedidoBean.compradorDoc}" maxlength="12"
+                                                             styleClass="form-control" a:placeholder="Documento (si no es cliente)"/>
+                                                <h:message for="compradorDoc" styleClass="text-danger small d-block"/>
+                                            </div>
+                                            <div class="col-12">
+                                                <h:inputText id="nombreInvitado" value="#{pedidoBean.nombreInvitado}" maxlength="150"
+                                                             styleClass="form-control" a:placeholder="Nombre del invitado"/>
+                                                <h:message for="nombreInvitado" styleClass="text-danger small d-block"/>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-2">
                                         <h:outputLabel for="origen" value="Origen" styleClass="form-label"/>
@@ -266,7 +286,7 @@
                                             <f:selectItems value="#{pedidoBean.origenes}" var="o" itemValue="#{o}" itemLabel="#{o}"/>
                                         </h:selectOneMenu>
                                     </div>
-                                    <div class="col-md-3">
+                                    <div class="col-md-2">
                                         <h:outputLabel for="observacion" value="Observación" styleClass="form-label"/>
                                         <h:inputText id="observacion" value="#{pedidoBean.observacion}" maxlength="255" styleClass="form-control"/>
                                     </div>

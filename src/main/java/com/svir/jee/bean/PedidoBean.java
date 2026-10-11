@@ -11,6 +11,7 @@ import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
+import com.svir.jee.util.Compradores;
 import com.svir.jee.util.Textos;
 
 import jakarta.faces.application.FacesMessage;
@@ -71,6 +72,8 @@ public class PedidoBean extends ListadoBase<Pedido> {
     private boolean creando;
     private Integer clienteId;
     private String nombreInvitado;
+    private String compradorTipoDoc = "DNI";
+    private String compradorDoc;
     private TipoOrigenPedido tipoOrigen = TipoOrigenPedido.PRESENCIAL;
     private String observacion;
     private List<Linea> lineas = new ArrayList<>();
@@ -110,7 +113,7 @@ public class PedidoBean extends ListadoBase<Pedido> {
     @Override
     protected String textoBusqueda(Pedido p) {
         return p.getId() + " " + texto(p.getClienteNombre()) + " " + p.getEstado() + " " + p.getTipoOrigen()
-                + " " + texto(p.getComprobanteNumero()) + " " + texto(p.getObservacion());
+                + " " + texto(p.getDocumentoComprador()) + " " + texto(p.getComprobanteNumero()) + " " + texto(p.getObservacion());
     }
 
     // ---- filtros rapidos (tarjetas del dashboard) y apertura directa del detalle ----
@@ -242,6 +245,8 @@ public class PedidoBean extends ListadoBase<Pedido> {
         Formularios.resetear("formPedido");
         clienteId = null;
         nombreInvitado = null;
+        compradorTipoDoc = "DNI";
+        compradorDoc = null;
         tipoOrigen = TipoOrigenPedido.PRESENCIAL;
         observacion = null;
         lineas = new ArrayList<>();
@@ -273,15 +278,6 @@ public class PedidoBean extends ListadoBase<Pedido> {
 
         Pedido pedido = new Pedido();
         pedido.setClienteId(clienteId);
-        if (clienteId == null) {
-            String nombre = Textos.limpiar(nombreInvitado, 150);
-            if (nombre.isEmpty()) {
-                FacesContext.getCurrentInstance().addMessage("formPedido:nombreInvitado",
-                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "El nombre es obligatorio.", null));
-                return;
-            }
-            pedido.setNombreInvitado(nombre);
-        }
         pedido.setTipoOrigen(tipoOrigen);
         pedido.setObservacion(observacion);
         for (Linea l : lineas) {
@@ -299,6 +295,26 @@ public class PedidoBean extends ListadoBase<Pedido> {
         if (pedido.getDetalles().isEmpty()) {
             Mensajes.error("Debes agregar al menos un producto válido al pedido.");
             return;
+        }
+
+        // Sin cliente elegido: el comprador es un invitado identificado por su documento (unico).
+        if (clienteId == null) {
+            try {
+                Compradores.Comprador comprador = Compradores.resolver(compradorTipoDoc, compradorDoc, nombreInvitado, null, true);
+                pedido.setClienteId(comprador.clienteId);
+                pedido.setInvitadoId(comprador.invitadoId);
+                if (comprador.clienteId == null) {
+                    pedido.setNombreInvitado(comprador.nombre);
+                }
+            } catch (Compradores.ValidacionException e) {
+                String campo = e.getMessage().contains("nombre") ? "nombreInvitado" : "compradorDoc";
+                FacesContext.getCurrentInstance().addMessage("formPedido:" + campo,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null));
+                return;
+            } catch (SQLException e) {
+                Mensajes.error("No se pudo registrar al comprador: " + e.getMessage());
+                return;
+            }
         }
 
         try {
@@ -397,6 +413,10 @@ public class PedidoBean extends ListadoBase<Pedido> {
     public Integer getClienteId() { return clienteId; }
     public void setClienteId(Integer clienteId) { this.clienteId = clienteId; }
     public String getNombreInvitado() { return nombreInvitado; }
+    public String getCompradorTipoDoc() { return compradorTipoDoc; }
+    public void setCompradorTipoDoc(String v) { this.compradorTipoDoc = v; }
+    public String getCompradorDoc() { return compradorDoc; }
+    public void setCompradorDoc(String v) { this.compradorDoc = v; }
     public void setNombreInvitado(String nombreInvitado) { this.nombreInvitado = nombreInvitado; }
     public TipoOrigenPedido getTipoOrigen() { return tipoOrigen; }
     public void setTipoOrigen(TipoOrigenPedido tipoOrigen) { this.tipoOrigen = tipoOrigen; }

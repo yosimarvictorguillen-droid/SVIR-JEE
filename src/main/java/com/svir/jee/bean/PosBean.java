@@ -9,6 +9,7 @@ import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
+import com.svir.jee.util.Compradores;
 import com.svir.jee.util.Textos;
 
 import jakarta.faces.application.FacesMessage;
@@ -64,6 +65,8 @@ public class PosBean implements Serializable {
     private String documento;
     private Integer clienteId;
     private String nombreComprador;
+    private String compradorTipoDoc = "DNI";
+    private String compradorDoc;
 
     private boolean mostrandoTicket;
     private Pedido ticket;
@@ -132,16 +135,8 @@ public class PosBean implements Serializable {
         Pedido pedido = new Pedido();
         pedido.setTipoOrigen(TipoOrigenPedido.PRESENCIAL);
 
-        // El nombre del comprador es obligatorio: cliente registrado o nombre del invitado.
-        String nombre = Textos.limpiar(nombreComprador, 150);
         if (clienteId != null) {
             pedido.setClienteId(clienteId);
-        } else if (nombre.isEmpty()) {
-            FacesContext.getCurrentInstance().addMessage("formPos:nombreComprador",
-                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "El nombre del comprador es obligatorio.", null));
-            return;
-        } else {
-            pedido.setNombreInvitado(nombre);
         }
 
         String errorComprobante = PedidoDAO.validarComprobante(tipoComprobante, Textos.limpiar(documento, 20));
@@ -167,6 +162,26 @@ public class PosBean implements Serializable {
             return;
         }
 
+        // Sin cliente elegido: el comprador es un invitado identificado por su documento (unico).
+        if (clienteId == null) {
+            try {
+                Compradores.Comprador comprador = Compradores.resolver(compradorTipoDoc, compradorDoc, nombreComprador, null, true);
+                pedido.setClienteId(comprador.clienteId);
+                pedido.setInvitadoId(comprador.invitadoId);
+                if (comprador.clienteId == null) {
+                    pedido.setNombreInvitado(comprador.nombre);
+                }
+            } catch (Compradores.ValidacionException e) {
+                String campo = e.getMessage().contains("nombre") ? "nombreComprador" : "compradorDoc";
+                FacesContext.getCurrentInstance().addMessage("formPos:" + campo,
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, e.getMessage(), null));
+                return;
+            } catch (SQLException e) {
+                Mensajes.error("No se pudo registrar al comprador: " + e.getMessage());
+                return;
+            }
+        }
+
         try {
             Usuario usuario = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuario");
             Pedido creado = DAO_PEDIDO.crear(pedido, usuario.getId());
@@ -177,6 +192,8 @@ public class PosBean implements Serializable {
             documento = null;
             clienteId = null;
             nombreComprador = null;
+            compradorDoc = null;
+            compradorTipoDoc = "DNI";
             tipoComprobante = "BOLETA_SIMPLE";
             productos = null;
         } catch (SQLException e) {
@@ -197,6 +214,10 @@ public class PosBean implements Serializable {
     public String getDocumento() { return documento; }
     public void setDocumento(String documento) { this.documento = documento; }
     public Integer getClienteId() { return clienteId; }
+    public String getCompradorTipoDoc() { return compradorTipoDoc; }
+    public void setCompradorTipoDoc(String v) { this.compradorTipoDoc = v; }
+    public String getCompradorDoc() { return compradorDoc; }
+    public void setCompradorDoc(String v) { this.compradorDoc = v; }
     public void setClienteId(Integer clienteId) { this.clienteId = clienteId; }
     public String getNombreComprador() { return nombreComprador; }
     public void setNombreComprador(String nombreComprador) { this.nombreComprador = nombreComprador; }

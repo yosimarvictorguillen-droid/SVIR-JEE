@@ -22,7 +22,7 @@
                 <div class="col-12 col-md-4">
                     <label class="form-label small mb-1" for="formFiltro:filtro">Buscar</label>
                     <h:inputText id="filtro" value="#{clienteBean.filtro}" styleClass="form-control form-control-sm"
-                                 a:placeholder="Nombre, DNI, RUC o teléfono"/>
+                                 a:placeholder="Nombre, documento, RUC o teléfono"/>
                 </div>
                 <div class="col-6 col-md-2">
                     <label class="form-label small mb-1" for="formFiltro:estado">Estado</label>
@@ -49,11 +49,12 @@
                         <h:column>
                             <f:facet name="header">Cliente</f:facet>
                             <strong>#{c.nombre}</strong>
+                            <h:panelGroup rendered="#{c.antesInvitado}"><span class="badge bg-secondary">Antes invitado <h:outputText value="#{c.fechaConversionInvitado}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy"/></h:outputText></span></h:panelGroup>
                             <div class="small text-muted">#{c.email}</div>
                         </h:column>
                         <h:column>
-                            <f:facet name="header">DNI</f:facet>
-                            #{c.dni}
+                            <f:facet name="header">Documento</f:facet>
+                            <span class="small text-muted">#{c.tipoDocumento}</span> #{c.dni}
                         </h:column>
                         <h:column>
                             <f:facet name="header">RUC</f:facet>
@@ -116,16 +117,22 @@
                                     <h:message for="nombre" styleClass="invalid-feedback d-block"/>
                                 </div>
                                 <div class="row g-3 mb-3">
-                                    <div class="col-6">
-                                        <h:outputLabel for="dni" value="DNI" styleClass="form-label"/>
-                                        <h:inputText id="dni" value="#{clienteBean.cliente.dni}" maxlength="8"
-                                                     validatorMessage="El DNI debe tener 8 dígitos."
-                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}">
-                                            <f:validateRegex pattern="\d{8}"/>
-                                        </h:inputText>
+                                    <div class="col-4">
+                                        <h:outputLabel for="tipoDocumento" value="Tipo de documento" styleClass="form-label"/>
+                                        <h:selectOneMenu id="tipoDocumento" value="#{clienteBean.cliente.tipoDocumento}" styleClass="form-select">
+                                            <f:selectItem itemValue="DNI" itemLabel="DNI"/>
+                                            <f:selectItem itemValue="CE" itemLabel="Carné de extranjería"/>
+                                            <f:selectItem itemValue="PASAPORTE" itemLabel="Pasaporte"/>
+                                        </h:selectOneMenu>
+                                    </div>
+                                    <div class="col-4">
+                                        <h:outputLabel for="dni" value="Documento (único)" styleClass="form-label"/>
+                                        <h:inputText id="dni" value="#{clienteBean.cliente.dni}" maxlength="12"
+                                                     required="true" requiredMessage="El documento es obligatorio."
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}"/>
                                         <h:message for="dni" styleClass="invalid-feedback d-block"/>
                                     </div>
-                                    <div class="col-6">
+                                    <div class="col-4">
                                         <h:outputLabel for="ruc" value="RUC" styleClass="form-label"/>
                                         <h:inputText id="ruc" value="#{clienteBean.cliente.ruc}" maxlength="11"
                                                      validatorMessage="El RUC debe tener 11 dígitos."
