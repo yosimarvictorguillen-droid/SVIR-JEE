@@ -37,7 +37,7 @@
 <div class="table-responsive mb-5">
     <table class="table table-hover bg-white">
         <thead>
-        <tr><th>#</th><th>Cliente</th><th>Canal</th><th>Total</th><th>Estado</th><th>Fecha</th></tr>
+        <tr><th>#</th><th>Cliente</th><th>Tipo de cliente</th><th>Canal</th><th>Total</th><th>Estado</th><th>Fecha</th></tr>
         </thead>
         <tbody>
         <%
@@ -47,6 +47,7 @@
         <tr>
             <td>#<%= p.getId() %></td>
             <td><%= p.getClienteNombre() != null ? p.getClienteNombre() : "Cliente general" %></td>
+            <td><span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : ("Invitado".equals(p.getTipoComprador()) ? "bg-warning text-dark" : "bg-secondary") %>"><%= p.getTipoComprador() %></span></td>
             <td><%= p.getTipoOrigen() %></td>
             <td>S/ <%= p.getTotal() %></td>
             <td><span class="badge bg-secondary"><%= p.getEstado() %></span></td>
@@ -56,7 +57,7 @@
                 }
                 if (pedidosRango.isEmpty()) {
         %>
-        <tr><td colspan="6" class="text-center text-muted">No hay ventas en ese rango.</td></tr>
+        <tr><td colspan="7" class="text-center text-muted">No hay ventas en ese rango.</td></tr>
         <% }
             }
         %>

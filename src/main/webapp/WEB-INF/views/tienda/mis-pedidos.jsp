@@ -36,7 +36,7 @@
 <% if (resultados != null && !resultados.isEmpty()) { %>
 <h5 class="mb-3">Resultados de la busqueda</h5>
 <table class="table bg-white mb-4">
-    <thead><tr><th>#</th><th>Nombre</th><th>Tipo</th><th>Canal</th><th>Estado</th><th>Total</th><th>Fecha</th><th></th></tr></thead>
+    <thead><tr><th>#</th><th>Nombre</th><th>Tipo de cliente</th><th>Canal</th><th>Estado</th><th>Total</th><th>Fecha</th><th></th></tr></thead>
     <tbody>
     <% for (Pedido r : resultados) { %>
     <tr>

@@ -63,6 +63,7 @@
         <tr>
             <th>#</th>
             <th>Cliente</th>
+            <th>Tipo de cliente</th>
             <th>Canal</th>
             <th>Total</th>
             <th>Estado</th>
@@ -76,10 +77,8 @@
         %>
         <tr>
             <td>#<%= p.getId() %></td>
-            <td><%= cliente %>
-                <% if (!"General".equals(p.getTipoComprador())) { %>
-                <span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : "bg-warning text-dark" %>"><%= p.getTipoComprador() %></span>
-                <% } %></td>
+            <td><%= cliente %></td>
+            <td><span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : ("Invitado".equals(p.getTipoComprador()) ? "bg-warning text-dark" : "bg-secondary") %>"><%= p.getTipoComprador() %></span></td>
             <td><%= p.getTipoOrigen() %></td>
             <td>S/ <%= p.getTotal() %></td>
             <td><span class="badge bg-secondary badge-estado"><%= p.getEstado() %></span></td>
@@ -87,7 +86,7 @@
         </tr>
         <% } %>
         <% if (resumen.getPedidosRecientes().isEmpty()) { %>
-        <tr><td colspan="6" class="text-center text-muted">Aun no hay pedidos registrados.</td></tr>
+        <tr><td colspan="7" class="text-center text-muted">Aun no hay pedidos registrados.</td></tr>
         <% } %>
         </tbody>
     </table>
