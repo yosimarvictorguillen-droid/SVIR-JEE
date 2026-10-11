@@ -96,7 +96,7 @@
         <tr>
             <th>#</th>
             <th>Cliente</th>
-            <th>Tipo de cliente</th>
+            <th>Tipo de cliente</th><th>Documento / Telefono</th>
             <th>Canal</th>
             <th>Total</th>
             <th>Estado</th>
@@ -116,6 +116,7 @@
             <td>#<%= p.getId() %></td>
             <td><%= cliente %></td>
             <td><span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : ("Invitado".equals(p.getTipoComprador()) ? "bg-warning text-dark" : "bg-secondary") %>"><%= p.getTipoComprador() %></span><% if (p.isAntesInvitado()) { %><div class="small text-muted">antes invitado</div><% } %></td>
+            <td><%= p.getDocumentoComprador() != null ? p.getDocumentoComprador() : "-" %><br><span class="small text-muted"><%= p.getTelefonoComprador() != null ? p.getTelefonoComprador() : "-" %></span></td>
             <td><%= p.getTipoOrigen() %></td>
             <td>S/ <%= p.getTotal() %></td>
             <td><span class="badge bg-secondary badge-estado"><%= p.getEstado() %></span></td>
@@ -154,7 +155,7 @@
             }
         %>
         <% if (pedidos == null || pedidos.isEmpty()) { %>
-        <tr><td colspan="9" class="text-center text-muted py-4">No se encontraron pedidos con esos filtros.</td></tr>
+        <tr><td colspan="10" class="text-center text-muted py-4">No se encontraron pedidos con esos filtros.</td></tr>
         <% } %>
         </tbody>
     </table>

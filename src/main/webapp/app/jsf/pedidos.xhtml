@@ -101,6 +101,11 @@
                         <h:outputText value="#{p.tipoComprador}" styleClass="badge #{p.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : (p.tipoComprador eq 'Invitado' ? 'bg-warning text-dark' : 'bg-secondary')}"/>
                         <h:panelGroup rendered="#{p.antesInvitado}" layout="block" styleClass="small text-muted">antes invitado</h:panelGroup>
                     </h:column>
+                    <h:column>
+                        <f:facet name="header">Documento / Teléfono</f:facet>
+                        #{empty p.documentoComprador ? '-' : p.documentoComprador}
+                        <div class="small text-muted">#{empty p.telefonoComprador ? '-' : p.telefonoComprador}</div>
+                    </h:column>
                         <h:column>
                             <f:facet name="header">Origen</f:facet>
                             #{p.tipoOrigen}
@@ -172,6 +177,9 @@
                                         <h:panelGroup rendered="#{not empty pedidoBean.detalle.documentoComprador}" layout="block">
                                             <p class="mb-1"><strong>Documento:</strong> #{pedidoBean.detalle.documentoComprador}
                                                 <h:outputText value="Compró como invitado, hoy es cliente" rendered="#{pedidoBean.detalle.antesInvitado}" styleClass="badge bg-secondary"/></p>
+                                        </h:panelGroup>
+                                        <h:panelGroup rendered="#{not empty pedidoBean.detalle.telefonoComprador}" layout="block">
+                                            <p class="mb-1"><strong>Teléfono:</strong> #{pedidoBean.detalle.telefonoComprador}</p>
                                         </h:panelGroup>
                                         <p class="mb-1"><strong>Origen:</strong> #{pedidoBean.detalle.tipoOrigen}</p>
                                         <p class="mb-0"><strong>Atendió:</strong> #{pedidoBean.detalle.usuarioNombre}</p>

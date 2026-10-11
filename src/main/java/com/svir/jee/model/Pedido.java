@@ -14,6 +14,8 @@ public class Pedido implements java.io.Serializable {
     private Integer invitadoId; // registro del invitado (si compro sin cuenta); se conserva tras convertirse en cliente
     private String clienteDocumento; // solo para mostrar (join)
     private String invitadoDocumento; // solo para mostrar (join)
+    private String clienteTelefono; // solo para mostrar (join)
+    private String invitadoTelefono; // solo para mostrar (join)
     private Integer usuarioId;
     private String usuarioNombre; // solo para mostrar en pantalla (join)
     private BigDecimal total;
@@ -78,6 +80,28 @@ public class Pedido implements java.io.Serializable {
 
     public void setInvitadoDocumento(String invitadoDocumento) {
         this.invitadoDocumento = invitadoDocumento;
+    }
+
+    public void setClienteTelefono(String clienteTelefono) {
+        this.clienteTelefono = clienteTelefono;
+    }
+
+    public void setInvitadoTelefono(String invitadoTelefono) {
+        this.invitadoTelefono = invitadoTelefono;
+    }
+
+    /**
+     * Telefono de contacto del pedido: el que se escribio en un delivery ("Tel: ..." en la observacion) y, si no hay,
+     * el del cliente o el del invitado. null si no hay ninguno.
+     */
+    public String getTelefonoComprador() {
+        if (observacion != null) {
+            java.util.regex.Matcher m = java.util.regex.Pattern.compile("Tel:\\s*([0-9+()\\- ]{5,25})").matcher(observacion);
+            if (m.find() && !m.group(1).isBlank()) {
+                return m.group(1).trim();
+            }
+        }
+        return clienteTelefono != null ? clienteTelefono : invitadoTelefono;
     }
 
     /** Documento de quien compro (del cliente o del invitado); null en pedidos antiguos sin documento. */

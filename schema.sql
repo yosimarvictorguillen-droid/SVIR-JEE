@@ -253,7 +253,6 @@ INSERT INTO ingredientes (nombre, unidad_medida, stock, stock_minimo, activo) VA
   ('Huevos', 'unidad', 120.00, 30.00, 1);
 
 INSERT INTO clientes (nombre, dni, telefono, direccion, email, activo) VALUES
-  ('Cliente Mostrador', NULL, NULL, NULL, NULL, 1),
   ('Maria Fernandez', '45678912', '987654321', 'Av. Los Alamos 123, Lima', 'maria.fernandez@mail.com', 1);
 
 -- Recetas: cuanto de cada ingrediente lleva una unidad de cada producto

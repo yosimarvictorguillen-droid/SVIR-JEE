@@ -59,6 +59,11 @@
                         <f:facet name="header">Tipo de cliente</f:facet>
                         <h:outputText value="#{p.tipoComprador}" styleClass="badge #{p.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : (p.tipoComprador eq 'Invitado' ? 'bg-warning text-dark' : 'bg-secondary')}"/>
                     </h:column>
+                    <h:column>
+                        <f:facet name="header">Documento / Teléfono</f:facet>
+                        #{empty p.documentoComprador ? '-' : p.documentoComprador}
+                        <div class="small text-muted">#{empty p.telefonoComprador ? '-' : p.telefonoComprador}</div>
+                    </h:column>
                         <h:column>
                             <f:facet name="header">Origen</f:facet>
                             #{p.tipoOrigen}

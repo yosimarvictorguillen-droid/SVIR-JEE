@@ -424,7 +424,7 @@ public class PedidoDAO {
     /** Pedidos que cumplen el filtro, mas recientes primero. limite <= 0 devuelve todos. */
     public List<Pedido> buscar(FiltroPedido filtro, int limite, int offset) throws SQLException {
         Condiciones w = condiciones(filtro);
-        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, u.nombre AS usuario_nombre "
+        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, c.telefono AS cliente_telefono, (SELECT iv.telefono FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_telefono, u.nombre AS usuario_nombre "
                 + DESDE_PEDIDOS + w.sql + "ORDER BY p.id DESC" + (limite > 0 ? " LIMIT ? OFFSET ?" : "");
         List<Pedido> lista = new ArrayList<>();
         try (Connection con = ConexionBD.getInstancia().obtenerConexion();
@@ -463,7 +463,7 @@ public class PedidoDAO {
     }
 
     public List<Pedido> listarTodos() throws SQLException {
-        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, u.nombre AS usuario_nombre "
+        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, c.telefono AS cliente_telefono, (SELECT iv.telefono FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_telefono, u.nombre AS usuario_nombre "
                 + "FROM pedidos p "
                 + "LEFT JOIN clientes c ON c.id = p.cliente_id "
                 + "LEFT JOIN usuarios u ON u.id = p.usuario_id "
@@ -480,7 +480,7 @@ public class PedidoDAO {
     }
 
     public List<Pedido> listarPorRangoFechas(LocalDate desde, LocalDate hasta) throws SQLException {
-        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, u.nombre AS usuario_nombre "
+        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, c.telefono AS cliente_telefono, (SELECT iv.telefono FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_telefono, u.nombre AS usuario_nombre "
                 + "FROM pedidos p "
                 + "LEFT JOIN clientes c ON c.id = p.cliente_id "
                 + "LEFT JOIN usuarios u ON u.id = p.usuario_id "
@@ -502,7 +502,7 @@ public class PedidoDAO {
 
     /** Pedidos activos (no cancelados/entregados) que tienen al menos una linea sin atender del todo. */
     public List<Pedido> listarConFaltante() throws SQLException {
-        String sql = "SELECT DISTINCT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, u.nombre AS usuario_nombre "
+        String sql = "SELECT DISTINCT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, c.telefono AS cliente_telefono, (SELECT iv.telefono FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_telefono, u.nombre AS usuario_nombre "
                 + "FROM pedidos p "
                 + "JOIN detalle_pedido d ON d.pedido_id = p.id AND d.cantidad_atendida < d.cantidad "
                 + "LEFT JOIN clientes c ON c.id = p.cliente_id "
@@ -522,7 +522,7 @@ public class PedidoDAO {
 
     /** Pedidos con tipo_origen DELIVERY activos o entregados hoy (para el panel de repartidor). */
     public List<Pedido> listarDelivery() throws SQLException {
-        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, u.nombre AS usuario_nombre "
+        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, c.telefono AS cliente_telefono, (SELECT iv.telefono FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_telefono, u.nombre AS usuario_nombre "
                 + "FROM pedidos p "
                 + "LEFT JOIN clientes c ON c.id = p.cliente_id "
                 + "LEFT JOIN usuarios u ON u.id = p.usuario_id "
@@ -543,7 +543,7 @@ public class PedidoDAO {
 
     /** Historial de pedidos de un cliente registrado, mas reciente primero. */
     public List<Pedido> listarPorCliente(int clienteId) throws SQLException {
-        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, u.nombre AS usuario_nombre "
+        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, c.telefono AS cliente_telefono, (SELECT iv.telefono FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_telefono, u.nombre AS usuario_nombre "
                 + "FROM pedidos p "
                 + "LEFT JOIN clientes c ON c.id = p.cliente_id "
                 + "LEFT JOIN usuarios u ON u.id = p.usuario_id "
@@ -571,7 +571,7 @@ public class PedidoDAO {
         boolean esTelefono = limpio.matches("\\d{7,}");
         // se escapan los comodines de LIKE para que "%%%" o "___" no listen todos los pedidos
         String seguro = limpio.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
-        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, u.nombre AS usuario_nombre "
+        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, c.telefono AS cliente_telefono, (SELECT iv.telefono FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_telefono, u.nombre AS usuario_nombre "
                 + "FROM pedidos p "
                 + "LEFT JOIN clientes c ON c.id = p.cliente_id "
                 + "LEFT JOIN usuarios u ON u.id = p.usuario_id "
@@ -599,7 +599,7 @@ public class PedidoDAO {
     }
 
     public Optional<Pedido> buscarPorId(int id) throws SQLException {
-        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, u.nombre AS usuario_nombre "
+        String sql = "SELECT p.*, c.nombre AS cliente_nombre, c.dni AS cliente_documento, (SELECT iv.documento FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_documento, c.telefono AS cliente_telefono, (SELECT iv.telefono FROM invitados iv WHERE iv.id = p.invitado_id) AS invitado_telefono, u.nombre AS usuario_nombre "
                 + "FROM pedidos p "
                 + "LEFT JOIN clientes c ON c.id = p.cliente_id "
                 + "LEFT JOIN usuarios u ON u.id = p.usuario_id "
@@ -725,6 +725,8 @@ public class PedidoDAO {
         p.setInvitadoId(rs.wasNull() ? null : invitadoId);
         p.setClienteDocumento(rs.getString("cliente_documento"));
         p.setInvitadoDocumento(rs.getString("invitado_documento"));
+        p.setClienteTelefono(rs.getString("cliente_telefono"));
+        p.setInvitadoTelefono(rs.getString("invitado_telefono"));
         int usuarioId = rs.getInt("usuario_id");
         p.setUsuarioId(rs.wasNull() ? null : usuarioId);
         p.setUsuarioNombre(rs.getString("usuario_nombre"));

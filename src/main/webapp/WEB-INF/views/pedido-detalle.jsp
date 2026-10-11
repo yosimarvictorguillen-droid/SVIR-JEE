@@ -25,6 +25,9 @@
         <p class="mb-1"><strong>Documento:</strong> <%= pedido.getDocumentoComprador() %>
             <% if (pedido.isAntesInvitado()) { %><span class="badge bg-secondary">Compro como invitado, hoy es cliente</span><% } %></p>
         <% } %>
+        <% if (pedido.getTelefonoComprador() != null) { %>
+        <p class="mb-1"><strong>Telefono:</strong> <%= pedido.getTelefonoComprador() %></p>
+        <% } %>
         <p class="mb-1"><strong>Canal:</strong> <%= pedido.getTipoOrigen() %></p>
         <p class="mb-1"><strong>Estado:</strong> <span class="badge bg-secondary"><%= pedido.getEstado() %></span></p>
         <p class="mb-1"><strong>Atendido por:</strong> <%= pedido.getUsuarioNombre() != null ? pedido.getUsuarioNombre() : "-" %></p>

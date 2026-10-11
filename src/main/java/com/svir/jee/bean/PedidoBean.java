@@ -113,7 +113,7 @@ public class PedidoBean extends ListadoBase<Pedido> {
     @Override
     protected String textoBusqueda(Pedido p) {
         return p.getId() + " " + texto(p.getClienteNombre()) + " " + p.getEstado() + " " + p.getTipoOrigen()
-                + " " + texto(p.getDocumentoComprador()) + " " + texto(p.getComprobanteNumero()) + " " + texto(p.getObservacion());
+                + " " + texto(p.getDocumentoComprador()) + " " + texto(p.getTelefonoComprador()) + " " + texto(p.getComprobanteNumero()) + " " + texto(p.getObservacion());
     }
 
     // ---- filtros rapidos (tarjetas del dashboard) y apertura directa del detalle ----

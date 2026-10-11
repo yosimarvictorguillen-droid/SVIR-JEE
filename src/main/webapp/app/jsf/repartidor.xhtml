@@ -17,6 +17,7 @@
                     <ui:repeat value="#{repartidorBean.paraRecoger}" var="p">
                         <div class="card mb-2"><div class="card-body">
                             <p class="mb-1"><strong>Pedido ##{p.id}</strong> - #{empty p.clienteNombre ? 'Sin nombre' : p.clienteNombre} <h:outputText value="#{p.tipoComprador}" styleClass="badge #{p.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : 'bg-warning text-dark'}"/></p>
+                            <h:panelGroup rendered="#{not empty p.telefonoComprador}" layout="block" styleClass="mb-1 small"><i class="bi bi-telephone"></i> #{p.telefonoComprador}</h:panelGroup>
                             <ui:repeat value="#{repartidorBean.partes(p)}" var="parte">
                                 <div class="small text-muted">#{parte}</div>
                             </ui:repeat>
@@ -33,6 +34,7 @@
                     <ui:repeat value="#{repartidorBean.enCamino}" var="p">
                         <div class="card mb-2"><div class="card-body">
                             <p class="mb-1"><strong>Pedido ##{p.id}</strong> - #{empty p.clienteNombre ? 'Sin nombre' : p.clienteNombre} <h:outputText value="#{p.tipoComprador}" styleClass="badge #{p.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : 'bg-warning text-dark'}"/></p>
+                            <h:panelGroup rendered="#{not empty p.telefonoComprador}" layout="block" styleClass="mb-1 small"><i class="bi bi-telephone"></i> #{p.telefonoComprador}</h:panelGroup>
                             <ui:repeat value="#{repartidorBean.partes(p)}" var="parte">
                                 <div class="small text-muted">#{parte}</div>
                             </ui:repeat>
@@ -50,6 +52,7 @@
                         <div class="card mb-2"><div class="card-body">
                             <p class="mb-1"><strong>Pedido ##{p.id}</strong> - #{empty p.clienteNombre ? 'Sin nombre' : p.clienteNombre} <h:outputText value="#{p.tipoComprador}" styleClass="badge #{p.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : 'bg-warning text-dark'}"/>
                                 <span class="badge bg-success">Entregado</span></p>
+                            <h:panelGroup rendered="#{not empty p.telefonoComprador}" layout="block" styleClass="mb-1 small"><i class="bi bi-telephone"></i> #{p.telefonoComprador}</h:panelGroup>
                             <p class="mb-0 small text-muted">Total: S/ <h:outputText value="#{p.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></p>
                         </div></div>
                     </ui:repeat>
