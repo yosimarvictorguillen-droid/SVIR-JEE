@@ -17,6 +17,10 @@ public class Pedido implements java.io.Serializable {
     private EstadoPedido estado;
     private TipoOrigenPedido tipoOrigen;
     private String observacion;
+    private String comprobanteTipo; // BOLETA_SIMPLE, BOLETA_DNI o FACTURA (null = sin comprobante)
+    private String comprobanteNumero; // ej. B001-00000012
+    private String comprobanteDocumento; // DNI o RUC del comprobante
+    private LocalDateTime comprobanteFecha;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<DetallePedido> detalles = new ArrayList<>();
@@ -124,6 +128,50 @@ public class Pedido implements java.io.Serializable {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getComprobanteTipo() {
+        return comprobanteTipo;
+    }
+
+    public void setComprobanteTipo(String comprobanteTipo) {
+        this.comprobanteTipo = comprobanteTipo;
+    }
+
+    public String getComprobanteNumero() {
+        return comprobanteNumero;
+    }
+
+    public void setComprobanteNumero(String comprobanteNumero) {
+        this.comprobanteNumero = comprobanteNumero;
+    }
+
+    public String getComprobanteDocumento() {
+        return comprobanteDocumento;
+    }
+
+    public void setComprobanteDocumento(String comprobanteDocumento) {
+        this.comprobanteDocumento = comprobanteDocumento;
+    }
+
+    public LocalDateTime getComprobanteFecha() {
+        return comprobanteFecha;
+    }
+
+    public void setComprobanteFecha(LocalDateTime comprobanteFecha) {
+        this.comprobanteFecha = comprobanteFecha;
+    }
+
+    public boolean isTieneComprobante() {
+        return comprobanteNumero != null;
+    }
+
+    /** "Factura" o "Boleta" segun el comprobante emitido; vacio si no tiene. */
+    public String getComprobanteNombre() {
+        if (comprobanteTipo == null) {
+            return "";
+        }
+        return "FACTURA".equals(comprobanteTipo) ? "Factura" : "Boleta";
     }
 
     public List<DetallePedido> getDetalles() {

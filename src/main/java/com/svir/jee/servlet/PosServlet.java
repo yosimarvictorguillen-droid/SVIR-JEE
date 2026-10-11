@@ -69,6 +69,15 @@ public class PosServlet extends HttpServlet {
                 return;
             }
 
+            // Boleta con DNI exige 8 digitos y factura 11 (RUC); se valida antes de registrar la venta.
+            String tipoComprobante = req.getParameter("tipoComprobante");
+            String documento = Textos.limpiar(req.getParameter("documento"), 20);
+            String errorComprobante = PedidoDAO.validarComprobante(tipoComprobante, documento);
+            if (errorComprobante != null) {
+                mostrarFormulario(req, resp, errorComprobante);
+                return;
+            }
+
             Map<Integer, Producto> productosPorId = new HashMap<>();
             for (Producto p : productoDAO.listarActivos()) {
                 productosPorId.put(p.getId(), p);
@@ -81,14 +90,6 @@ public class PosServlet extends HttpServlet {
             } else {
                 pedido.setNombreInvitado(nombreInvitado);
             }
-
-            String tipoComprobante = req.getParameter("tipoComprobante");
-            String documento = Textos.limpiar(req.getParameter("documento"), 20);
-            StringBuilder obs = new StringBuilder("Comprobante: ").append(tipoComprobante);
-            if (!documento.isEmpty()) {
-                obs.append(" | Doc: ").append(documento);
-            }
-            pedido.setObservacion(obs.toString());
 
             for (int i = 0; i < productoIds.length; i++) {
                 int cantidad = Integer.parseInt(cantidades[i]);
@@ -113,6 +114,7 @@ public class PosServlet extends HttpServlet {
 
             Usuario usuario = (Usuario) req.getSession().getAttribute("usuario");
             Pedido creado = pedidoDAO.crear(pedido, usuario.getId());
+            pedidoDAO.emitirComprobante(creado.getId(), tipoComprobante, documento);
             resp.sendRedirect(req.getContextPath() + "/app/pos?action=ticket&id=" + creado.getId());
         } catch (SQLException e) {
             throw new ServletException("Error procesando la venta", e);

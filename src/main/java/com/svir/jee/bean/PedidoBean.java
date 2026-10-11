@@ -54,6 +54,8 @@ public class PedidoBean extends ListadoBase<Pedido> {
     // detalle
     private boolean viendo;
     private Pedido detalle;
+    private String compTipo = "BOLETA_SIMPLE";
+    private String compDocumento;
 
     // pedido nuevo
     private boolean creando;
@@ -90,6 +92,9 @@ public class PedidoBean extends ListadoBase<Pedido> {
 
     public void ver(Pedido p) {
         try {
+            Formularios.resetear("formDetalle");
+            compTipo = "BOLETA_SIMPLE";
+            compDocumento = null;
             detalle = DAO.buscarPorId(p.getId()).orElse(p);
             viendo = true;
         } catch (SQLException e) {
@@ -100,6 +105,30 @@ public class PedidoBean extends ListadoBase<Pedido> {
     public void cerrarDetalle() {
         viendo = false;
         detalle = null;
+    }
+
+    // ---- comprobante (boleta / factura) ----
+
+    public boolean isPuedeEmitirComprobante() {
+        return detalle != null && !detalle.isTieneComprobante() && detalle.getEstado() != EstadoPedido.CANCELADO;
+    }
+
+    public void emitirComprobante() {
+        String documento = Textos.limpiar(compDocumento, 20);
+        String error = PedidoDAO.validarComprobante(compTipo, documento);
+        if (error != null) {
+            FacesContext.getCurrentInstance().addMessage("formDetalle:compDocumento",
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, error, null));
+            return;
+        }
+        try {
+            String numero = DAO.emitirComprobante(detalle.getId(), compTipo, documento);
+            detalle = DAO.buscarPorId(detalle.getId()).orElse(detalle);
+            Mensajes.info("Comprobante " + numero + " emitido.");
+            recargar();
+        } catch (SQLException e) {
+            Mensajes.error("No se pudo emitir el comprobante: " + e.getMessage());
+        }
     }
 
     // ---- cambios de estado ----
@@ -274,6 +303,10 @@ public class PedidoBean extends ListadoBase<Pedido> {
     public TipoOrigenPedido[] getOrigenes() { return TipoOrigenPedido.values(); }
 
     public boolean isViendo() { return viendo; }
+    public String getCompTipo() { return compTipo; }
+    public void setCompTipo(String compTipo) { this.compTipo = compTipo; }
+    public String getCompDocumento() { return compDocumento; }
+    public void setCompDocumento(String compDocumento) { this.compDocumento = compDocumento; }
     public Pedido getDetalle() { return detalle; }
     public boolean isCreando() { return creando; }
     public Integer getClienteId() { return clienteId; }

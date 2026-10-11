@@ -156,6 +156,95 @@ public class PedidoDAO {
         }
     }
 
+    /**
+     * Valida los datos de un comprobante antes de emitirlo. Devuelve el mensaje de error o null si es valido.
+     * Boleta simple no lleva documento; boleta con DNI exige 8 digitos; factura exige RUC de 11 digitos.
+     */
+    public static String validarComprobante(String tipo, String documento) {
+        String doc = documento == null ? "" : documento.trim();
+        if ("BOLETA_SIMPLE".equals(tipo)) {
+            return null;
+        }
+        if ("BOLETA_DNI".equals(tipo)) {
+            return doc.matches("\\d{8}") ? null : "Para boleta con DNI escribe un DNI de 8 digitos.";
+        }
+        if ("FACTURA".equals(tipo)) {
+            return doc.matches("\\d{11}") ? null : "Para factura escribe un RUC de 11 digitos.";
+        }
+        return "Elige el tipo de comprobante.";
+    }
+
+    /**
+     * Emite el comprobante (boleta o factura) de un pedido ya existente y le asigna el siguiente
+     * numero de su serie (B001 para boletas, F001 para facturas). Un pedido solo puede tener un
+     * comprobante y no se emite para pedidos cancelados. Devuelve el numero asignado.
+     */
+    public String emitirComprobante(int pedidoId, String tipo, String documento) throws SQLException {
+        String error = validarComprobante(tipo, documento);
+        if (error != null) {
+            throw new SQLException(error);
+        }
+        String doc = "BOLETA_SIMPLE".equals(tipo) || documento == null || documento.isBlank() ? null : documento.trim();
+        String serie = "FACTURA".equals(tipo) ? "F001" : "B001";
+
+        Connection con = null;
+        try {
+            con = ConexionBD.getInstancia().obtenerConexion();
+            con.setAutoCommit(false);
+
+            try (PreparedStatement ps = con.prepareStatement(
+                    "SELECT estado, comprobante_numero FROM pedidos WHERE id = ? FOR UPDATE")) {
+                ps.setInt(1, pedidoId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new SQLException("Pedido no encontrado id=" + pedidoId);
+                    }
+                    if ("CANCELADO".equals(rs.getString("estado"))) {
+                        throw new SQLException("No se puede emitir comprobante de un pedido cancelado.");
+                    }
+                    if (rs.getString("comprobante_numero") != null) {
+                        throw new SQLException("Este pedido ya tiene el comprobante " + rs.getString("comprobante_numero") + ".");
+                    }
+                }
+            }
+
+            int siguiente;
+            try (PreparedStatement ps = con.prepareStatement(
+                    "SELECT COALESCE(MAX(CAST(SUBSTRING(comprobante_numero, 6) AS UNSIGNED)), 0) + 1 "
+                            + "FROM pedidos WHERE comprobante_numero LIKE ?")) {
+                ps.setString(1, serie + "-%");
+                try (ResultSet rs = ps.executeQuery()) {
+                    rs.next();
+                    siguiente = rs.getInt(1);
+                }
+            }
+            String numero = String.format("%s-%08d", serie, siguiente);
+
+            try (PreparedStatement ps = con.prepareStatement(
+                    "UPDATE pedidos SET comprobante_tipo = ?, comprobante_numero = ?, comprobante_documento = ?, "
+                            + "comprobante_fecha = NOW() WHERE id = ?")) {
+                ps.setString(1, tipo);
+                ps.setString(2, numero);
+                ps.setString(3, doc);
+                ps.setInt(4, pedidoId);
+                ps.executeUpdate();
+            }
+
+            con.commit();
+            return numero;
+        } catch (SQLException e) {
+            if (con != null) {
+                con.rollback();
+            }
+            throw e;
+        } finally {
+            if (con != null) {
+                con.setAutoCommit(true);
+                con.close();
+            }
+        }
+    }
+
     /** Cambia el estado del pedido sin validar la maquina de estados (igual que el sistema original). */
     public void cambiarEstado(int pedidoId, EstadoPedido nuevoEstado) throws SQLException {
         String sql = "UPDATE pedidos SET estado = ? WHERE id = ?";
@@ -513,6 +602,13 @@ public class PedidoDAO {
         p.setEstado(EstadoPedido.valueOf(rs.getString("estado")));
         p.setTipoOrigen(TipoOrigenPedido.valueOf(rs.getString("tipo_origen")));
         p.setObservacion(rs.getString("observacion"));
+        p.setComprobanteTipo(rs.getString("comprobante_tipo"));
+        p.setComprobanteNumero(rs.getString("comprobante_numero"));
+        p.setComprobanteDocumento(rs.getString("comprobante_documento"));
+        Timestamp compFecha = rs.getTimestamp("comprobante_fecha");
+        if (compFecha != null) {
+            p.setComprobanteFecha(compFecha.toLocalDateTime());
+        }
         Timestamp created = rs.getTimestamp("created_at");
         if (created != null) {
             p.setCreatedAt(created.toLocalDateTime());

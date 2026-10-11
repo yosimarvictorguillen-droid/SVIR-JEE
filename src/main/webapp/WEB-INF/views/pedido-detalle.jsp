@@ -31,6 +31,51 @@
     </div>
 </div>
 
+<div class="card mb-3">
+    <div class="card-body">
+        <h6 class="mb-2">Comprobante</h6>
+        <% if (pedido.isTieneComprobante()) { %>
+        <p class="mb-1"><strong><%= pedido.getComprobanteNombre() %> <%= pedido.getComprobanteNumero() %></strong>
+            <span class="text-muted small">emitida el <%= pedido.getComprobanteFecha() %></span></p>
+        <% if (pedido.getComprobanteDocumento() != null) { %>
+        <p class="mb-2"><%= "FACTURA".equals(pedido.getComprobanteTipo()) ? "RUC" : "DNI" %>: <%= pedido.getComprobanteDocumento() %></p>
+        <% } %>
+        <a href="<%= ctx %>/app/pos?action=ticket&id=<%= pedido.getId() %>" class="btn btn-sm btn-outline-dark">
+            <i class="bi bi-printer"></i> Ver / imprimir
+        </a>
+        <% } else if (pedido.getEstado().name().equals("CANCELADO")) { %>
+        <p class="mb-0 text-muted">Un pedido cancelado no tiene comprobante.</p>
+        <% } else { %>
+        <form method="post" action="<%= ctx %>/app/pedidos" class="row g-2 align-items-end">
+            <input type="hidden" name="action" value="emitirComprobante">
+            <input type="hidden" name="id" value="<%= pedido.getId() %>">
+            <div class="col-md-4">
+                <label class="form-label small mb-1">Tipo</label>
+                <select class="form-select" name="tipoComprobante" id="tipoComprobante" onchange="mostrarDocumento()">
+                    <option value="BOLETA_SIMPLE">Boleta simple</option>
+                    <option value="BOLETA_DNI">Boleta con DNI</option>
+                    <option value="FACTURA">Factura con RUC</option>
+                </select>
+            </div>
+            <div class="col-md-4" id="campoDocumento" style="display:none;">
+                <label class="form-label small mb-1" id="etiquetaDocumento">DNI</label>
+                <input type="text" class="form-control" name="documento" maxlength="11" inputmode="numeric">
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn text-white" style="background-color:#d97706;">Emitir comprobante</button>
+            </div>
+        </form>
+        <script>
+            function mostrarDocumento() {
+                var tipo = document.getElementById("tipoComprobante").value;
+                document.getElementById("campoDocumento").style.display = tipo === "BOLETA_SIMPLE" ? "none" : "block";
+                document.getElementById("etiquetaDocumento").textContent = tipo === "FACTURA" ? "RUC (11 digitos)" : "DNI (8 digitos)";
+            }
+        </script>
+        <% } %>
+    </div>
+</div>
+
 <table class="table bg-white">
     <thead>
     <tr>

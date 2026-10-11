@@ -18,6 +18,7 @@
         <button onclick="window.print()" class="btn btn-sm text-white" style="background-color:#d97706;">
             <i class="bi bi-printer"></i> Imprimir
         </button>
+        <a href="<%= ctx %>/app/pedidos?action=ver&id=<%= pedido.getId() %>" class="btn btn-sm btn-outline-secondary">Ver pedido</a>
         <a href="<%= ctx %>/app/pos" class="btn btn-sm btn-outline-secondary">Nueva venta</a>
     </div>
 </div>
@@ -26,12 +27,19 @@
     <div class="card-body" style="font-family: 'Courier New', monospace;">
         <div class="text-center mb-2">
             <strong>DULCE MOMENTO</strong><br>
-            <span class="small"><%= (pedido.getObservacion() != null && pedido.getObservacion().startsWith("Comprobante: FACTURA")) ? "FACTURA" : "BOLETA DE VENTA" %></span><br>
+            <span class="small"><%= pedido.isTieneComprobante() ? ("FACTURA".equals(pedido.getComprobanteTipo()) ? "FACTURA" : "BOLETA DE VENTA") : "TICKET DE VENTA" %></span><br>
+            <% if (pedido.isTieneComprobante()) { %>
+            <strong><%= pedido.getComprobanteNumero() %></strong><br>
+            <% } %>
             <span class="small">Pedido #<%= pedido.getId() %> - <%= pedido.getCreatedAt() %></span>
         </div>
         <hr>
         <div class="small mb-1"><strong><%= pedido.getTipoComprador().toUpperCase() %>:</strong> <%= pedido.getClienteNombre() != null ? pedido.getClienteNombre() : "Sin nombre" %></div>
+        <% if (pedido.getComprobanteDocumento() != null) { %>
+        <div class="small mb-2"><strong><%= "FACTURA".equals(pedido.getComprobanteTipo()) ? "RUC" : "DNI" %>:</strong> <%= pedido.getComprobanteDocumento() %></div>
+        <% } else if (!pedido.isTieneComprobante() && pedido.getObservacion() != null && !pedido.getObservacion().isBlank()) { %>
         <div class="small mb-2"><%= pedido.getObservacion() %></div>
+        <% } %>
         <hr>
         <table class="table table-sm mb-2">
             <thead><tr><th>Cant.</th><th>Producto</th><th class="text-end">Subtotal</th></tr></thead>

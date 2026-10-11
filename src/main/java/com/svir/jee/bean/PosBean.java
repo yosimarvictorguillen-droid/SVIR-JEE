@@ -134,11 +134,6 @@ public class PosBean implements Serializable {
 
         // El nombre del comprador es obligatorio: cliente registrado o nombre del invitado.
         String nombre = Textos.limpiar(nombreComprador, 150);
-        StringBuilder obs = new StringBuilder("Comprobante: ").append(tipoComprobante);
-        if (documento != null && !documento.isBlank()) {
-            obs.append(" | Doc: ").append(Textos.limpiar(documento, 20));
-        }
-        pedido.setObservacion(obs.toString());
         if (clienteId != null) {
             pedido.setClienteId(clienteId);
         } else if (nombre.isEmpty()) {
@@ -147,6 +142,13 @@ public class PosBean implements Serializable {
             return;
         } else {
             pedido.setNombreInvitado(nombre);
+        }
+
+        String errorComprobante = PedidoDAO.validarComprobante(tipoComprobante, Textos.limpiar(documento, 20));
+        if (errorComprobante != null) {
+            FacesContext.getCurrentInstance().addMessage("formPos:documento",
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, errorComprobante, null));
+            return;
         }
 
         for (Item item : carrito) {
@@ -168,6 +170,7 @@ public class PosBean implements Serializable {
         try {
             Usuario usuario = (Usuario) FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("usuario");
             Pedido creado = DAO_PEDIDO.crear(pedido, usuario.getId());
+            DAO_PEDIDO.emitirComprobante(creado.getId(), tipoComprobante, Textos.limpiar(documento, 20));
             ticket = DAO_PEDIDO.buscarPorId(creado.getId()).orElse(creado);
             mostrandoTicket = true;
             carrito.clear();

@@ -98,10 +98,15 @@ CREATE TABLE pedidos (
                             NOT NULL DEFAULT 'PENDIENTE',
     tipo_origen         ENUM('PRESENCIAL','TIENDA','WHATSAPP','WEB','DELIVERY') NOT NULL DEFAULT 'PRESENCIAL',
     observacion         TEXT NULL,
+    comprobante_tipo    VARCHAR(20) NULL,
+    comprobante_numero  VARCHAR(20) NULL,
+    comprobante_documento VARCHAR(20) NULL,
+    comprobante_fecha   DATETIME NULL,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_pedido_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id),
-    CONSTRAINT fk_pedido_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    CONSTRAINT fk_pedido_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    UNIQUE KEY uq_pedido_comprobante (comprobante_numero)
 ) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------

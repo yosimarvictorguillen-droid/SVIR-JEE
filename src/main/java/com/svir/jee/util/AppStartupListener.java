@@ -33,6 +33,7 @@ public class AppStartupListener implements ServletContextListener {
         sce.getServletContext().setAttribute("iniciadoEn", System.currentTimeMillis());
 
         asegurarColumnaNombreInvitado();
+        asegurarColumnasComprobante();
 
         UsuarioDAO usuarioDAO = new UsuarioDAO();
         try {
@@ -76,6 +77,34 @@ public class AppStartupListener implements ServletContextListener {
             }
         } catch (SQLException e) {
             LOG.log(Level.SEVERE, "No se pudo verificar/crear la columna pedidos.nombre_invitado.", e);
+        }
+    }
+
+    /**
+     * Migracion automatica: agrega a pedidos las columnas del comprobante (boleta/factura) y un indice
+     * unico sobre el numero, para que no se repita ni se emita dos veces.
+     */
+    private void asegurarColumnasComprobante() {
+        String existe = "SELECT COUNT(*) FROM information_schema.COLUMNS "
+                + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'pedidos' AND COLUMN_NAME = 'comprobante_numero'";
+        try (Connection con = ConexionBD.getInstancia().obtenerConexion();
+             Statement st = con.createStatement();
+             ResultSet rs = st.executeQuery(existe)) {
+            rs.next();
+            if (rs.getInt(1) > 0) {
+                return;
+            }
+            try (Statement ddl = con.createStatement()) {
+                ddl.executeUpdate("ALTER TABLE pedidos "
+                        + "ADD COLUMN comprobante_tipo VARCHAR(20) NULL AFTER observacion, "
+                        + "ADD COLUMN comprobante_numero VARCHAR(20) NULL AFTER comprobante_tipo, "
+                        + "ADD COLUMN comprobante_documento VARCHAR(20) NULL AFTER comprobante_numero, "
+                        + "ADD COLUMN comprobante_fecha DATETIME NULL AFTER comprobante_documento, "
+                        + "ADD UNIQUE KEY uq_pedido_comprobante (comprobante_numero)");
+                LOG.info("Migracion: columnas de comprobante creadas en pedidos.");
+            }
+        } catch (SQLException e) {
+            LOG.log(Level.SEVERE, "No se pudieron crear las columnas de comprobante en pedidos.", e);
         }
     }
 

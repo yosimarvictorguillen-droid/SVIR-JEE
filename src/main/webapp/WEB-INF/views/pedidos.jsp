@@ -26,6 +26,7 @@
             <th>Canal</th>
             <th>Total</th>
             <th>Estado</th>
+            <th>Comprobante</th>
             <th>Fecha</th>
             <th>Acciones</th>
         </tr>
@@ -44,6 +45,7 @@
             <td><%= p.getTipoOrigen() %></td>
             <td>S/ <%= p.getTotal() %></td>
             <td><span class="badge bg-secondary badge-estado"><%= p.getEstado() %></span></td>
+            <td><%= p.isTieneComprobante() ? p.getComprobanteNumero() : "-" %></td>
             <td><%= p.getCreatedAt() %></td>
             <td class="table-actions">
                 <a href="<%= ctx %>/app/pedidos?action=ver&id=<%= p.getId() %>" class="btn btn-sm btn-outline-secondary">

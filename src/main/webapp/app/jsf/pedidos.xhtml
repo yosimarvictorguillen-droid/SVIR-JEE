@@ -60,6 +60,10 @@
                             <h:outputText value="#{p.estado}" styleClass="badge bg-secondary"/>
                         </h:column>
                         <h:column>
+                            <f:facet name="header">Comprobante</f:facet>
+                            #{p.tieneComprobante ? p.comprobanteNumero : '-'}
+                        </h:column>
+                        <h:column>
                             <f:facet name="header">Fecha</f:facet>
                             <h:outputText value="#{p.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText>
                         </h:column>
@@ -132,6 +136,37 @@
                                     <h:column><f:facet name="header">Estado</f:facet>
                                         <h:outputText value="#{d.estado}" styleClass="badge bg-light text-dark"/></h:column>
                                 </h:dataTable>
+                                <div class="border rounded p-2 mt-3">
+                                    <h:panelGroup rendered="#{pedidoBean.detalle.tieneComprobante}" layout="block">
+                                        <strong>#{pedidoBean.detalle.comprobanteNombre} #{pedidoBean.detalle.comprobanteNumero}</strong>
+                                        <h:panelGroup rendered="#{not empty pedidoBean.detalle.comprobanteDocumento}">
+                                            - #{pedidoBean.detalle.comprobanteTipo eq 'FACTURA' ? 'RUC' : 'DNI'}: #{pedidoBean.detalle.comprobanteDocumento}
+                                        </h:panelGroup>
+                                        <a href="#{request.contextPath}/app/pos?action=ticket&amp;id=#{pedidoBean.detalle.id}" target="_blank"
+                                           class="btn btn-sm btn-outline-dark ms-2">Ver / imprimir</a>
+                                    </h:panelGroup>
+                                    <h:panelGroup rendered="#{pedidoBean.puedeEmitirComprobante}" layout="block" styleClass="row g-2 align-items-start">
+                                        <div class="col-md-4">
+                                            <h:selectOneMenu id="compTipo" value="#{pedidoBean.compTipo}" styleClass="form-select form-select-sm">
+                                                <f:selectItem itemValue="BOLETA_SIMPLE" itemLabel="Boleta simple"/>
+                                                <f:selectItem itemValue="BOLETA_DNI" itemLabel="Boleta con DNI"/>
+                                                <f:selectItem itemValue="FACTURA" itemLabel="Factura con RUC"/>
+                                            </h:selectOneMenu>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h:inputText id="compDocumento" value="#{pedidoBean.compDocumento}" maxlength="11"
+                                                         styleClass="form-control form-control-sm" a:placeholder="DNI (8) o RUC (11)"/>
+                                            <h:message for="compDocumento" styleClass="text-danger small d-block"/>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <h:commandButton value="Emitir comprobante" action="#{pedidoBean.emitirComprobante}"
+                                                             styleClass="btn btn-sm btn-amber"/>
+                                        </div>
+                                    </h:panelGroup>
+                                    <h:panelGroup rendered="#{not pedidoBean.detalle.tieneComprobante and not pedidoBean.puedeEmitirComprobante}">
+                                        <span class="text-muted small">Un pedido cancelado no tiene comprobante.</span>
+                                    </h:panelGroup>
+                                </div>
                             </div>
                             <div class="modal-footer">
                                 <h:commandButton value="Cancelar pedido" action="#{pedidoBean.cancelarPedido(pedidoBean.detalle)}"

@@ -99,7 +99,8 @@
                             </div>
                             <div class="mb-2">
                                 <h:inputText id="documento" value="#{posBean.documento}" maxlength="11"
-                                             styleClass="form-control form-control-sm" a:placeholder="DNI o RUC (opcional)"/>
+                                             styleClass="form-control form-control-sm" a:placeholder="DNI (boleta con DNI) o RUC (factura)"/>
+                                <h:message for="documento" styleClass="text-danger small d-block"/>
                             </div>
                             <div class="mb-2">
                                 <h:outputLabel for="clienteId" value="Comprador" styleClass="form-label small"/>
@@ -135,7 +136,7 @@
                             <div class="modal-body">
                                 <div class="text-center mb-2">
                                     <strong>Dulce Momento</strong><br/>
-                                    <small class="text-muted">Ticket ##{posBean.ticket.id}</small><br/>
+                                    <small class="text-muted">#{posBean.ticket.comprobanteNombre} <strong>#{posBean.ticket.comprobanteNumero}</strong> (pedido ##{posBean.ticket.id})</small><br/>
                                     <small><strong>#{empty posBean.ticket.clienteNombre ? 'Sin nombre' : posBean.ticket.clienteNombre}</strong> <h:outputText value="#{posBean.ticket.tipoComprador}" styleClass="badge #{posBean.ticket.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : 'bg-warning text-dark'}"/></small><br/>
                                     <small class="text-muted"><h:outputText value="#{posBean.ticket.createdAt}"><f:convertDateTime type="localDateTime" pattern="dd/MM/yyyy HH:mm"/></h:outputText></small>
                                 </div>
@@ -148,7 +149,9 @@
                                 <p class="text-end fs-5 mb-1">
                                     <strong>Total: S/ <h:outputText value="#{posBean.ticket.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></strong>
                                 </p>
-                                <p class="small text-muted mb-0">#{posBean.ticket.observacion}</p>
+                                <h:panelGroup rendered="#{not empty posBean.ticket.comprobanteDocumento}" layout="block" styleClass="small text-muted">
+                                    #{posBean.ticket.comprobanteTipo eq 'FACTURA' ? 'RUC' : 'DNI'}: #{posBean.ticket.comprobanteDocumento}
+                                </h:panelGroup>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-outline-dark" onclick="window.print();">Imprimir</button>

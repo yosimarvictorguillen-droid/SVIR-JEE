@@ -9,6 +9,7 @@ import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
+import com.svir.jee.util.Textos;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -77,6 +78,24 @@ public class PedidoServlet extends HttpServlet {
                     Usuario usuario = (Usuario) req.getSession().getAttribute("usuario");
                     pedidoDAO.cancelar(id, usuario.getId());
                     resp.sendRedirect(req.getContextPath() + "/app/pedidos");
+                }
+                case "emitirComprobante" -> {
+                    int id = Integer.parseInt(req.getParameter("id"));
+                    String tipo = req.getParameter("tipoComprobante");
+                    String documento = Textos.limpiar(req.getParameter("documento"), 20);
+                    String error = PedidoDAO.validarComprobante(tipo, documento);
+                    if (error == null) {
+                        try {
+                            pedidoDAO.emitirComprobante(id, tipo, documento);
+                            resp.sendRedirect(req.getContextPath() + "/app/pos?action=ticket&id=" + id);
+                            return;
+                        } catch (SQLException e) {
+                            error = e.getMessage();
+                        }
+                    }
+                    pedidoDAO.buscarPorId(id).ifPresent(p -> req.setAttribute("pedido", p));
+                    req.setAttribute("error", error);
+                    req.getRequestDispatcher("/WEB-INF/views/pedido-detalle.jsp").forward(req, resp);
                 }
                 default -> guardarNuevoPedido(req, resp);
             }
