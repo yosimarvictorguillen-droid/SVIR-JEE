@@ -42,6 +42,7 @@
                         <option value="WHATSAPP">WhatsApp</option>
                         <option value="TIENDA">Tienda</option>
                         <option value="WEB">Web</option>
+                        <option value="DELIVERY">Delivery</option>
                     </select>
                 </div>
             </div>
