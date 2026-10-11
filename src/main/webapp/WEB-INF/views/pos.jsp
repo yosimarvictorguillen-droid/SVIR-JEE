@@ -1,10 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.svir.jee.model.Producto" %>
+<%@ page import="com.svir.jee.model.Cliente" %>
 <%@ page import="java.util.List" %>
 <%
     request.setAttribute("tituloPagina", "Punto de Venta");
     request.setAttribute("paginaActiva", "pos");
     List<Producto> productos = (List<Producto>) request.getAttribute("productos");
+    List<Cliente> clientes = (List<Cliente>) request.getAttribute("clientes");
 %>
 <%@ include file="/WEB-INF/views/common/header.jspf" %>
 
@@ -25,6 +27,30 @@
             </button>
             <div class="text-end mb-4"><strong>Total: S/ <span id="totalPedido">0.00</span></strong></div>
 
+            <h6>Comprador</h6>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Cliente registrado</label>
+                    <select class="form-select" name="clienteId" id="clienteId" onchange="alternarNombre()">
+                        <option value="">Invitado (no registrado)</option>
+                        <%
+                            if (clientes != null) {
+                                for (Cliente c : clientes) {
+                        %>
+                        <option value="<%= c.getId() %>"><%= c.getNombre() %></option>
+                        <%
+                                }
+                            }
+                        %>
+                    </select>
+                </div>
+                <div class="col-md-6" id="campoNombre">
+                    <label class="form-label">Nombre del invitado</label>
+                    <input type="text" class="form-control" name="nombreComprador" id="nombreComprador"
+                           maxlength="150" required placeholder="Nombre de quien compra">
+                </div>
+            </div>
+
             <h6>Comprobante</h6>
             <div class="row mb-3">
                 <div class="col-md-4">
@@ -35,12 +61,10 @@
                     </select>
                 </div>
                 <div class="col-md-4" id="campoDocumento" style="display:none;">
-                    <input type="text" class="form-control" name="documento" placeholder="DNI o RUC">
-                </div>
-                <div class="col-md-4" id="campoRazonSocial" style="display:none;">
-                    <input type="text" class="form-control" name="razonSocial" placeholder="Nombre / Razon social">
+                    <input type="text" class="form-control" name="documento" maxlength="20" placeholder="DNI o RUC">
                 </div>
             </div>
+
 
             <button type="submit" class="btn text-white" style="background-color:#d97706;">Cobrar</button>
         </form>
@@ -66,8 +90,16 @@
     function mostrarCamposComprobante() {
         const tipo = document.getElementById("tipoComprobante").value;
         document.getElementById("campoDocumento").style.display = tipo === "BOLETA_SIMPLE" ? "none" : "block";
-        document.getElementById("campoRazonSocial").style.display = tipo === "BOLETA_SIMPLE" ? "none" : "block";
     }
+
+    function alternarNombre() {
+        const hayCliente = document.getElementById("clienteId").value !== "";
+        const input = document.getElementById("nombreComprador");
+        document.getElementById("campoNombre").style.display = hayCliente ? "none" : "block";
+        input.required = !hayCliente;
+        if (hayCliente) { input.value = ""; }
+    }
+
 </script>
 
 <%@ include file="/WEB-INF/views/common/footer.jspf" %>

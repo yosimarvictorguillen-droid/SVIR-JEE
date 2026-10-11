@@ -167,9 +167,10 @@
                                         </h:selectOneMenu>
                                     </div>
                                     <div class="col-md-3">
-                                        <h:outputLabel for="nombreInvitado" value="Nombre del invitado" styleClass="form-label"/>
+                                        <h:outputLabel for="nombreInvitado" value="Nombre del invitado *" styleClass="form-label"/>
                                         <h:inputText id="nombreInvitado" value="#{pedidoBean.nombreInvitado}" maxlength="150"
-                                                     styleClass="form-control" a:placeholder="Solo si no es cliente"/>
+                                                     styleClass="form-control #{component.valid ? '' : 'is-invalid'}" a:placeholder="Obligatorio si no es cliente"/>
+                                        <h:message for="nombreInvitado" styleClass="invalid-feedback d-block"/>
                                     </div>
                                     <div class="col-md-2">
                                         <h:outputLabel for="origen" value="Origen" styleClass="form-label"/>

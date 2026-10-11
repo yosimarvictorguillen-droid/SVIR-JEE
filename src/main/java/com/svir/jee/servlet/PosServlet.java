@@ -1,5 +1,6 @@
 package com.svir.jee.servlet;
 
+import com.svir.jee.dao.ClienteDAO;
 import com.svir.jee.dao.PedidoDAO;
 import com.svir.jee.dao.ProductoDAO;
 import com.svir.jee.model.DetallePedido;
@@ -7,6 +8,7 @@ import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
+import com.svir.jee.util.Textos;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -25,6 +27,7 @@ public class PosServlet extends HttpServlet {
 
     private final PedidoDAO pedidoDAO = new PedidoDAO();
     private final ProductoDAO productoDAO = new ProductoDAO();
+    private final ClienteDAO clienteDAO = new ClienteDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -39,8 +42,7 @@ public class PosServlet extends HttpServlet {
                 return;
             }
 
-            req.setAttribute("productos", productoDAO.listarActivos());
-            req.getRequestDispatcher("/WEB-INF/views/pos.jsp").forward(req, resp);
+            mostrarFormulario(req, resp, null);
         } catch (SQLException e) {
             throw new ServletException("Error accediendo al POS", e);
         }
@@ -52,18 +54,21 @@ public class PosServlet extends HttpServlet {
         String[] productoIds = req.getParameterValues("productoId");
         String[] cantidades = req.getParameterValues("cantidad");
 
-        if (productoIds == null || productoIds.length == 0) {
-            req.setAttribute("error", "El carrito esta vacio.");
-            try {
-                req.setAttribute("productos", productoDAO.listarActivos());
-            } catch (SQLException ignored) {
-                // si tampoco se puede listar, se muestra el error igual sin el grid
-            }
-            req.getRequestDispatcher("/WEB-INF/views/pos.jsp").forward(req, resp);
-            return;
-        }
-
         try {
+            if (productoIds == null || productoIds.length == 0) {
+                mostrarFormulario(req, resp, "El carrito esta vacio.");
+                return;
+            }
+
+            // El comprador es obligatorio: un cliente registrado o el nombre de un invitado.
+            String clienteIdParam = req.getParameter("clienteId");
+            boolean hayCliente = clienteIdParam != null && !clienteIdParam.isBlank();
+            String nombreInvitado = Textos.limpiar(req.getParameter("nombreComprador"), 150);
+            if (!hayCliente && nombreInvitado.isEmpty()) {
+                mostrarFormulario(req, resp, "El nombre del comprador es obligatorio (elige un cliente registrado o escribe el nombre del invitado).");
+                return;
+            }
+
             Map<Integer, Producto> productosPorId = new HashMap<>();
             for (Producto p : productoDAO.listarActivos()) {
                 productosPorId.put(p.getId(), p);
@@ -71,22 +76,19 @@ public class PosServlet extends HttpServlet {
 
             Pedido pedido = new Pedido();
             pedido.setTipoOrigen(TipoOrigenPedido.PRESENCIAL);
+            if (hayCliente) {
+                pedido.setClienteId(Integer.parseInt(clienteIdParam));
+            } else {
+                pedido.setNombreInvitado(nombreInvitado);
+            }
 
             String tipoComprobante = req.getParameter("tipoComprobante");
-            String documento = req.getParameter("documento");
-            String razonSocial = req.getParameter("razonSocial");
+            String documento = Textos.limpiar(req.getParameter("documento"), 20);
             StringBuilder obs = new StringBuilder("Comprobante: ").append(tipoComprobante);
-            if (documento != null && !documento.isBlank()) {
-                obs.append(" | Doc: ").append(documento.trim());
-            }
-            if (razonSocial != null && !razonSocial.isBlank()) {
-                obs.append(" | Cliente: ").append(razonSocial.trim());
+            if (!documento.isEmpty()) {
+                obs.append(" | Doc: ").append(documento);
             }
             pedido.setObservacion(obs.toString());
-            String nombreComprador = com.svir.jee.util.Textos.limpiar(razonSocial, 150);
-            if (!nombreComprador.isEmpty()) {
-                pedido.setNombreInvitado(nombreComprador);
-            }
 
             for (int i = 0; i < productoIds.length; i++) {
                 int cantidad = Integer.parseInt(cantidades[i]);
@@ -105,9 +107,7 @@ public class PosServlet extends HttpServlet {
             }
 
             if (pedido.getDetalles().isEmpty()) {
-                req.setAttribute("error", "El carrito esta vacio.");
-                req.setAttribute("productos", productoDAO.listarActivos());
-                req.getRequestDispatcher("/WEB-INF/views/pos.jsp").forward(req, resp);
+                mostrarFormulario(req, resp, "El carrito esta vacio.");
                 return;
             }
 
@@ -117,5 +117,15 @@ public class PosServlet extends HttpServlet {
         } catch (SQLException e) {
             throw new ServletException("Error procesando la venta", e);
         }
+    }
+
+    private void mostrarFormulario(HttpServletRequest req, HttpServletResponse resp, String error)
+            throws ServletException, IOException, SQLException {
+        if (error != null) {
+            req.setAttribute("error", error);
+        }
+        req.setAttribute("productos", productoDAO.listarActivos());
+        req.setAttribute("clientes", clienteDAO.listarActivos());
+        req.getRequestDispatcher("/WEB-INF/views/pos.jsp").forward(req, resp);
     }
 }

@@ -1,7 +1,9 @@
 package com.svir.jee.bean;
 
+import com.svir.jee.dao.ClienteDAO;
 import com.svir.jee.dao.PedidoDAO;
 import com.svir.jee.dao.ProductoDAO;
+import com.svir.jee.model.Cliente;
 import com.svir.jee.model.DetallePedido;
 import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
@@ -9,6 +11,7 @@ import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
 import com.svir.jee.util.Textos;
 
+import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
@@ -32,6 +35,7 @@ public class PosBean implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final PedidoDAO DAO_PEDIDO = new PedidoDAO();
     private static final ProductoDAO DAO_PRODUCTO = new ProductoDAO();
+    private static final ClienteDAO DAO_CLIENTE = new ClienteDAO();
 
     /** Linea del carrito. */
     public static class Item implements Serializable {
@@ -58,12 +62,14 @@ public class PosBean implements Serializable {
 
     private String tipoComprobante = "BOLETA_SIMPLE";
     private String documento;
-    private String razonSocial;
+    private Integer clienteId;
+    private String nombreComprador;
 
     private boolean mostrandoTicket;
     private Pedido ticket;
 
     private transient List<Producto> productos;
+    private transient List<Cliente> clientes;
 
     // ---- catalogo ----
 
@@ -126,17 +132,21 @@ public class PosBean implements Serializable {
         Pedido pedido = new Pedido();
         pedido.setTipoOrigen(TipoOrigenPedido.PRESENCIAL);
 
+        // El nombre del comprador es obligatorio: cliente registrado o nombre del invitado.
+        String nombre = Textos.limpiar(nombreComprador, 150);
         StringBuilder obs = new StringBuilder("Comprobante: ").append(tipoComprobante);
         if (documento != null && !documento.isBlank()) {
-            obs.append(" | Doc: ").append(documento.trim());
-        }
-        if (razonSocial != null && !razonSocial.isBlank()) {
-            obs.append(" | Cliente: ").append(razonSocial.trim());
+            obs.append(" | Doc: ").append(Textos.limpiar(documento, 20));
         }
         pedido.setObservacion(obs.toString());
-        String nombreComprador = Textos.limpiar(razonSocial, 150);
-        if (!nombreComprador.isEmpty()) {
-            pedido.setNombreInvitado(nombreComprador);
+        if (clienteId != null) {
+            pedido.setClienteId(clienteId);
+        } else if (nombre.isEmpty()) {
+            FacesContext.getCurrentInstance().addMessage("formPos:nombreComprador",
+                    new FacesMessage(FacesMessage.SEVERITY_ERROR, "El nombre del comprador es obligatorio.", null));
+            return;
+        } else {
+            pedido.setNombreInvitado(nombre);
         }
 
         for (Item item : carrito) {
@@ -162,7 +172,8 @@ public class PosBean implements Serializable {
             mostrandoTicket = true;
             carrito.clear();
             documento = null;
-            razonSocial = null;
+            clienteId = null;
+            nombreComprador = null;
             tipoComprobante = "BOLETA_SIMPLE";
             productos = null;
         } catch (SQLException e) {
@@ -182,8 +193,21 @@ public class PosBean implements Serializable {
     public void setTipoComprobante(String tipoComprobante) { this.tipoComprobante = tipoComprobante; }
     public String getDocumento() { return documento; }
     public void setDocumento(String documento) { this.documento = documento; }
-    public String getRazonSocial() { return razonSocial; }
-    public void setRazonSocial(String razonSocial) { this.razonSocial = razonSocial; }
+    public Integer getClienteId() { return clienteId; }
+    public void setClienteId(Integer clienteId) { this.clienteId = clienteId; }
+    public String getNombreComprador() { return nombreComprador; }
+    public void setNombreComprador(String nombreComprador) { this.nombreComprador = nombreComprador; }
+    public List<Cliente> getClientes() {
+        if (clientes == null) {
+            try {
+                clientes = DAO_CLIENTE.listarActivos();
+            } catch (SQLException e) {
+                Mensajes.error("No se pudo leer la lista de clientes.");
+                clientes = List.of();
+            }
+        }
+        return clientes;
+    }
     public boolean isMostrandoTicket() { return mostrandoTicket; }
     public Pedido getTicket() { return ticket; }
 }

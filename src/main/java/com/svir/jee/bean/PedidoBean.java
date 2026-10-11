@@ -12,6 +12,7 @@ import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
 import com.svir.jee.util.Textos;
 
+import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
 import jakarta.inject.Named;
@@ -172,9 +173,12 @@ public class PedidoBean extends ListadoBase<Pedido> {
         pedido.setClienteId(clienteId);
         if (clienteId == null) {
             String nombre = Textos.limpiar(nombreInvitado, 150);
-            if (!nombre.isEmpty()) {
-                pedido.setNombreInvitado(nombre);
+            if (nombre.isEmpty()) {
+                FacesContext.getCurrentInstance().addMessage("formPedido:nombreInvitado",
+                        new FacesMessage(FacesMessage.SEVERITY_ERROR, "El nombre es obligatorio.", null));
+                return;
             }
+            pedido.setNombreInvitado(nombre);
         }
         pedido.setTipoOrigen(tipoOrigen);
         pedido.setObservacion(observacion);

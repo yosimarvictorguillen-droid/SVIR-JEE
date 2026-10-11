@@ -30,6 +30,7 @@
             <span class="small">Pedido #<%= pedido.getId() %> - <%= pedido.getCreatedAt() %></span>
         </div>
         <hr>
+        <div class="small mb-1"><strong><%= pedido.getTipoComprador().toUpperCase() %>:</strong> <%= pedido.getClienteNombre() != null ? pedido.getClienteNombre() : "Sin nombre" %></div>
         <div class="small mb-2"><%= pedido.getObservacion() %></div>
         <hr>
         <table class="table table-sm mb-2">

@@ -18,7 +18,7 @@
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Cliente (opcional)</label>
-                    <select class="form-select" name="clienteId">
+                    <select class="form-select" name="clienteId" id="clienteId" onchange="alternarNombre()">
                         <option value="">Invitado (no registrado)</option>
                         <%
                             if (clientes != null) {
@@ -31,9 +31,9 @@
                         %>
                     </select>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Nombre del invitado (solo si no es cliente)</label>
-                    <input type="text" class="form-control" name="nombreInvitado" maxlength="150" placeholder="Opcional">
+                <div class="col-md-6 mb-3" id="campoNombre">
+                    <label class="form-label">Nombre del invitado</label>
+                    <input type="text" class="form-control" name="nombreInvitado" id="nombreInvitado" maxlength="150" required placeholder="Nombre de quien compra">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Canal</label>
@@ -93,5 +93,15 @@
     ];
 </script>
 <script src="<%= ctx %>/assets/js/carrito-lineas.js"></script>
+
+<script>
+    function alternarNombre() {
+        const hayCliente = document.getElementById("clienteId").value !== "";
+        const input = document.getElementById("nombreInvitado");
+        document.getElementById("campoNombre").style.display = hayCliente ? "none" : "block";
+        input.required = !hayCliente;
+        if (hayCliente) { input.value = ""; }
+    }
+</script>
 
 <%@ include file="/WEB-INF/views/common/footer.jspf" %>

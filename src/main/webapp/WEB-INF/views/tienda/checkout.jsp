@@ -13,6 +13,10 @@
 
 <h3 class="mb-4">Confirmar pedido</h3>
 
+<% if (request.getParameter("errorNombre") != null) { %>
+<div class="alert alert-danger">Escribe tu nombre para poder registrar el pedido.</div>
+<% } %>
+
 <div class="row">
     <div class="col-md-7">
         <div class="card mb-3">

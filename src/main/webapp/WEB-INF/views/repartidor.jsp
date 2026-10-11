@@ -35,7 +35,8 @@
         %>
         <div class="card mb-2">
             <div class="card-body">
-                <p class="mb-1"><strong>Pedido #<%= p.getId() %></strong></p>
+                <p class="mb-1"><strong>Pedido #<%= p.getId() %></strong> - <%= p.getClienteNombre() != null ? p.getClienteNombre() : "Sin nombre" %>
+                    <span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : "bg-warning text-dark" %>"><%= p.getTipoComprador() %></span></p>
                 <% for (String parte : (p.getObservacion() != null ? p.getObservacion() : "").split("\\|")) { %>
                     <div class="small text-muted"><%= parte.trim() %></div>
                 <% } %>
@@ -60,7 +61,8 @@
         %>
         <div class="card mb-2">
             <div class="card-body">
-                <p class="mb-1"><strong>Pedido #<%= p.getId() %></strong></p>
+                <p class="mb-1"><strong>Pedido #<%= p.getId() %></strong> - <%= p.getClienteNombre() != null ? p.getClienteNombre() : "Sin nombre" %>
+                    <span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : "bg-warning text-dark" %>"><%= p.getTipoComprador() %></span></p>
                 <% for (String parte : (p.getObservacion() != null ? p.getObservacion() : "").split("\\|")) { %>
                     <div class="small text-muted"><%= parte.trim() %></div>
                 <% } %>
@@ -83,7 +85,8 @@
         %>
         <div class="card mb-2">
             <div class="card-body">
-                <p class="mb-1"><strong>Pedido #<%= p.getId() %></strong></p>
+                <p class="mb-1"><strong>Pedido #<%= p.getId() %></strong> - <%= p.getClienteNombre() != null ? p.getClienteNombre() : "Sin nombre" %>
+                    <span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : "bg-warning text-dark" %>"><%= p.getTipoComprador() %></span></p>
                 <p class="mb-0"><strong>Total: S/ <%= p.getTotal() %></strong></p>
             </div>
         </div>

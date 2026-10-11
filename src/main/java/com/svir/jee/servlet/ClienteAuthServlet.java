@@ -3,6 +3,7 @@ package com.svir.jee.servlet;
 import com.svir.jee.dao.ClienteDAO;
 import com.svir.jee.model.Cliente;
 import com.svir.jee.util.PasswordUtil;
+import com.svir.jee.util.Textos;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -59,9 +60,19 @@ public class ClienteAuthServlet extends HttpServlet {
 
     private void registrar(HttpServletRequest req, HttpServletResponse resp, String volverA)
             throws IOException, SQLException {
-        String dni = req.getParameter("dni");
+        // Texto libre de la persona: se limpia para que no pueda inyectar HTML en las pantallas del personal.
+        String nombre = Textos.limpiar(req.getParameter("nombre"), 150);
+        String dni = Textos.limpiar(req.getParameter("dni"), 20);
         String password = req.getParameter("password");
 
+        if (nombre.isEmpty()) {
+            redirigirConError(req, resp, volverA, "El nombre es obligatorio.");
+            return;
+        }
+        if (dni.isEmpty()) {
+            redirigirConError(req, resp, volverA, "El DNI es obligatorio.");
+            return;
+        }
         if (clienteDAO.existeDni(dni)) {
             redirigirConError(req, resp, volverA, "Ya existe una cuenta con ese DNI. Intenta iniciar sesion.");
             return;
@@ -72,11 +83,11 @@ public class ClienteAuthServlet extends HttpServlet {
         }
 
         Cliente c = new Cliente();
-        c.setNombre(req.getParameter("nombre"));
+        c.setNombre(nombre);
         c.setDni(dni);
-        c.setTelefono(req.getParameter("telefono"));
-        c.setDireccion(req.getParameter("direccion"));
-        c.setEmail(req.getParameter("email"));
+        c.setTelefono(Textos.limpiar(req.getParameter("telefono"), 30));
+        c.setDireccion(Textos.limpiar(req.getParameter("direccion"), 255));
+        c.setEmail(Textos.limpiar(req.getParameter("email"), 150));
         c.setPasswordHash(PasswordUtil.hash(password));
         clienteDAO.registrar(c);
 

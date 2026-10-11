@@ -74,7 +74,11 @@ public class CheckoutServlet extends HttpServlet {
             String nombreInvitado = cliente == null ? limpiar(req.getParameter("nombre"), 150) : "";
             if (cliente != null) {
                 pedido.setClienteId(cliente.getId());
-            } else if (!nombreInvitado.isEmpty()) {
+            } else if (nombreInvitado.isEmpty()) {
+                // El nombre es obligatorio para quien compra sin cuenta.
+                resp.sendRedirect(req.getContextPath() + "/checkout?errorNombre=1");
+                return;
+            } else {
                 pedido.setNombreInvitado(nombreInvitado);
             }
 

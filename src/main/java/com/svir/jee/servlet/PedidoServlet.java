@@ -114,10 +114,16 @@ public class PedidoServlet extends HttpServlet {
         if (clienteIdParam != null && !clienteIdParam.isBlank()) {
             pedido.setClienteId(Integer.parseInt(clienteIdParam));
         } else {
+            // Sin cliente registrado el nombre del invitado es obligatorio.
             String nombre = com.svir.jee.util.Textos.limpiar(req.getParameter("nombreInvitado"), 150);
-            if (!nombre.isEmpty()) {
-                pedido.setNombreInvitado(nombre);
+            if (nombre.isEmpty()) {
+                req.setAttribute("error", "El nombre del comprador es obligatorio (elige un cliente registrado o escribe el nombre del invitado).");
+                req.setAttribute("productos", productoDAO.listarActivos());
+                req.setAttribute("clientes", clienteDAO.listarActivos());
+                req.getRequestDispatcher("/WEB-INF/views/pedido-form.jsp").forward(req, resp);
+                return;
             }
+            pedido.setNombreInvitado(nombre);
         }
         pedido.setTipoOrigen(TipoOrigenPedido.valueOf(req.getParameter("tipoOrigen")));
         pedido.setObservacion(req.getParameter("observacion"));
