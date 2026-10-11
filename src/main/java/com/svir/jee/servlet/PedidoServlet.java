@@ -5,6 +5,7 @@ import com.svir.jee.dao.PedidoDAO;
 import com.svir.jee.dao.ProductoDAO;
 import com.svir.jee.model.DetallePedido;
 import com.svir.jee.model.EstadoPedido;
+import com.svir.jee.model.FiltroPedido;
 import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
@@ -56,30 +57,75 @@ public class PedidoServlet extends HttpServlet {
                 return;
             }
 
-            // Filtros que llegan desde las tarjetas del dashboard (?filtro=hoy|mes|pendientes|listos).
-            List<Pedido> lista = pedidoDAO.listarTodos();
-            String filtro = req.getParameter("filtro");
+            // Filtros del formulario (GET). Los atajos ?filtro=hoy|mes|pendientes|listos vienen de las tarjetas
+            // del dashboard: solo rellenan el formulario, que despues se puede seguir ajustando.
+            FiltroPedido f = new FiltroPedido();
             LocalDate hoy = LocalDate.now();
-            String titulo = null;
-            if ("hoy".equals(filtro)) {
-                titulo = "Pedidos de hoy";
-                lista = lista.stream().filter(p -> p.getEstado() != EstadoPedido.CANCELADO
-                        && p.getCreatedAt().toLocalDate().equals(hoy)).toList();
-            } else if ("mes".equals(filtro)) {
-                titulo = "Pedidos del mes";
-                lista = lista.stream().filter(p -> p.getEstado() != EstadoPedido.CANCELADO
-                        && p.getCreatedAt().getYear() == hoy.getYear()
-                        && p.getCreatedAt().getMonth() == hoy.getMonth()).toList();
-            } else if ("pendientes".equals(filtro)) {
-                titulo = "Pedidos pendientes / en preparacion";
-                lista = lista.stream().filter(p -> p.getEstado() == EstadoPedido.PENDIENTE
-                        || p.getEstado() == EstadoPedido.PREPARACION).toList();
-            } else if ("listos".equals(filtro)) {
-                titulo = "Pedidos listos";
-                lista = lista.stream().filter(p -> p.getEstado() == EstadoPedido.LISTO).toList();
+            String rapido = req.getParameter("filtro");
+            if ("hoy".equals(rapido)) {
+                f.setDesde(hoy);
+                f.setHasta(hoy);
+                f.setEstado("ACTIVOS");
+            } else if ("mes".equals(rapido)) {
+                f.setDesde(hoy.withDayOfMonth(1));
+                f.setHasta(hoy.withDayOfMonth(hoy.lengthOfMonth()));
+                f.setEstado("ACTIVOS");
+            } else if ("pendientes".equals(rapido)) {
+                f.setEstado("ABIERTOS");
+            } else if ("listos".equals(rapido)) {
+                f.setEstado("LISTO");
             }
-            req.setAttribute("filtroTitulo", titulo);
-            req.setAttribute("pedidos", lista);
+            if (noVacio(req.getParameter("q"))) {
+                f.setTexto(Textos.limpiar(req.getParameter("q"), 100));
+            }
+            if (noVacio(req.getParameter("estado"))) {
+                f.setEstado(req.getParameter("estado"));
+            }
+            if (noVacio(req.getParameter("origen"))) {
+                f.setOrigen(req.getParameter("origen"));
+            }
+            if (noVacio(req.getParameter("tipoCliente"))) {
+                f.setTipoCliente(req.getParameter("tipoCliente"));
+            }
+            if (noVacio(req.getParameter("comprobante"))) {
+                f.setComprobante(req.getParameter("comprobante"));
+            }
+            LocalDate desde = parsearFecha(req.getParameter("desde"));
+            if (desde != null) {
+                f.setDesde(desde);
+            }
+            LocalDate hasta = parsearFecha(req.getParameter("hasta"));
+            if (hasta != null) {
+                f.setHasta(hasta);
+            }
+
+            int porPagina = 10;
+            int total = pedidoDAO.contar(f);
+            int totalPaginas = Math.max(1, (total + porPagina - 1) / porPagina);
+            int pagina = 1;
+            try {
+                pagina = Integer.parseInt(req.getParameter("pagina"));
+            } catch (NumberFormatException ignored) {
+                // sin parametro o invalido: primera pagina
+            }
+            pagina = Math.min(Math.max(1, pagina), totalPaginas);
+
+            StringBuilder qs = new StringBuilder();
+            agregarParam(qs, "q", f.getTexto());
+            agregarParam(qs, "estado", f.getEstado());
+            agregarParam(qs, "origen", f.getOrigen());
+            agregarParam(qs, "tipoCliente", f.getTipoCliente());
+            agregarParam(qs, "comprobante", f.getComprobante());
+            agregarParam(qs, "desde", f.getDesde() == null ? "" : f.getDesde().toString());
+            agregarParam(qs, "hasta", f.getHasta() == null ? "" : f.getHasta().toString());
+
+            req.setAttribute("filtroPedido", f);
+            req.setAttribute("totalPedidos", total);
+            req.setAttribute("pagina", pagina);
+            req.setAttribute("totalPaginas", totalPaginas);
+            req.setAttribute("porPagina", porPagina);
+            req.setAttribute("queryFiltros", qs.toString());
+            req.setAttribute("pedidos", pedidoDAO.buscar(f, porPagina, (pagina - 1) * porPagina));
             req.getRequestDispatcher("/WEB-INF/views/pedidos.jsp").forward(req, resp);
         } catch (SQLException e) {
             throw new ServletException("Error accediendo a pedidos", e);
@@ -132,6 +178,28 @@ public class PedidoServlet extends HttpServlet {
                 // si tampoco se puede listar, se muestra el error igual sin la tabla
             }
             req.getRequestDispatcher("/WEB-INF/views/pedidos.jsp").forward(req, resp);
+        }
+    }
+
+    private static boolean noVacio(String valor) {
+        return valor != null && !valor.isBlank();
+    }
+
+    private static LocalDate parsearFecha(String valor) {
+        if (!noVacio(valor)) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(valor.trim());
+        } catch (java.time.format.DateTimeParseException e) {
+            return null;
+        }
+    }
+
+    private static void agregarParam(StringBuilder qs, String nombre, String valor) {
+        if (valor != null && !valor.isEmpty()) {
+            qs.append(qs.length() == 0 ? "" : "&").append(nombre).append('=')
+                    .append(java.net.URLEncoder.encode(valor, java.nio.charset.StandardCharsets.UTF_8));
         }
     }
 

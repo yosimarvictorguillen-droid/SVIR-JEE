@@ -4,6 +4,7 @@ import com.svir.jee.db.ConexionBD;
 import com.svir.jee.model.DetallePedido;
 import com.svir.jee.model.EstadoDetallePedido;
 import com.svir.jee.model.EstadoPedido;
+import com.svir.jee.model.FiltroPedido;
 import com.svir.jee.model.MotivoMovimientoProducto;
 import com.svir.jee.model.MovimientoProducto;
 import com.svir.jee.model.Pedido;
@@ -332,6 +333,123 @@ public class PedidoDAO {
             if (con != null) {
                 con.setAutoCommit(true);
                 con.close();
+            }
+        }
+    }
+
+    // ---- busqueda con filtros (pantalla Pedidos) ----
+
+    private static final String DESDE_PEDIDOS = "FROM pedidos p "
+            + "LEFT JOIN clientes c ON c.id = p.cliente_id "
+            + "LEFT JOIN usuarios u ON u.id = p.usuario_id ";
+
+    /** Condiciones WHERE y sus parametros, siempre con PreparedStatement (nunca se concatena texto del usuario). */
+    private static final class Condiciones {
+        final StringBuilder sql = new StringBuilder("WHERE 1 = 1 ");
+        final List<Object> params = new ArrayList<>();
+    }
+
+    private Condiciones condiciones(FiltroPedido f) {
+        Condiciones w = new Condiciones();
+
+        String texto = f.getTexto() == null ? "" : f.getTexto().trim().toLowerCase();
+        if (!texto.isEmpty()) {
+            String seguro = texto.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
+            String patron = "%" + seguro + "%";
+            int id = texto.matches("\\d{1,9}") ? Integer.parseInt(texto) : -1;
+            w.sql.append("AND (p.id = ? OR LOWER(p.nombre_invitado) LIKE ? OR LOWER(c.nombre) LIKE ? "
+                    + "OR LOWER(p.comprobante_numero) LIKE ? OR p.observacion LIKE ?) ");
+            w.params.add(id);
+            w.params.add(patron);
+            w.params.add(patron);
+            w.params.add(patron);
+            w.params.add("%Tel: " + seguro + "%");
+        }
+
+        String estado = f.getEstado();
+        if ("ACTIVOS".equals(estado)) {
+            w.sql.append("AND p.estado <> 'CANCELADO' ");
+        } else if ("ABIERTOS".equals(estado)) {
+            w.sql.append("AND p.estado IN ('PENDIENTE','PREPARACION') ");
+        } else if (estado != null && !estado.isEmpty()) {
+            try {
+                w.sql.append("AND p.estado = ? ");
+                w.params.add(EstadoPedido.valueOf(estado).name());
+            } catch (IllegalArgumentException e) {
+                w.sql.setLength(w.sql.length() - "AND p.estado = ? ".length());
+            }
+        }
+
+        String origen = f.getOrigen();
+        if (origen != null && !origen.isEmpty()) {
+            try {
+                w.sql.append("AND p.tipo_origen = ? ");
+                w.params.add(TipoOrigenPedido.valueOf(origen).name());
+            } catch (IllegalArgumentException e) {
+                w.sql.setLength(w.sql.length() - "AND p.tipo_origen = ? ".length());
+            }
+        }
+
+        if ("Cliente".equals(f.getTipoCliente())) {
+            w.sql.append("AND p.cliente_id IS NOT NULL ");
+        } else if ("Invitado".equals(f.getTipoCliente())) {
+            w.sql.append("AND p.cliente_id IS NULL ");
+        }
+
+        if ("CON".equals(f.getComprobante())) {
+            w.sql.append("AND p.comprobante_numero IS NOT NULL ");
+        } else if ("SIN".equals(f.getComprobante())) {
+            w.sql.append("AND p.comprobante_numero IS NULL ");
+        }
+
+        if (f.getDesde() != null) {
+            w.sql.append("AND DATE(p.created_at) >= ? ");
+            w.params.add(f.getDesde());
+        }
+        if (f.getHasta() != null) {
+            w.sql.append("AND DATE(p.created_at) <= ? ");
+            w.params.add(f.getHasta());
+        }
+        return w;
+    }
+
+    /** Pedidos que cumplen el filtro, mas recientes primero. limite <= 0 devuelve todos. */
+    public List<Pedido> buscar(FiltroPedido filtro, int limite, int offset) throws SQLException {
+        Condiciones w = condiciones(filtro);
+        String sql = "SELECT p.*, c.nombre AS cliente_nombre, u.nombre AS usuario_nombre "
+                + DESDE_PEDIDOS + w.sql + "ORDER BY p.id DESC" + (limite > 0 ? " LIMIT ? OFFSET ?" : "");
+        List<Pedido> lista = new ArrayList<>();
+        try (Connection con = ConexionBD.getInstancia().obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            int i = 1;
+            for (Object param : w.params) {
+                ps.setObject(i++, param);
+            }
+            if (limite > 0) {
+                ps.setInt(i++, limite);
+                ps.setInt(i, offset);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapearCabecera(rs));
+                }
+            }
+        }
+        return lista;
+    }
+
+    public int contar(FiltroPedido filtro) throws SQLException {
+        Condiciones w = condiciones(filtro);
+        String sql = "SELECT COUNT(*) " + DESDE_PEDIDOS + w.sql;
+        try (Connection con = ConexionBD.getInstancia().obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            int i = 1;
+            for (Object param : w.params) {
+                ps.setObject(i++, param);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1);
             }
         }
     }

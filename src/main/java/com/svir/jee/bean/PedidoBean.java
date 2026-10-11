@@ -6,6 +6,7 @@ import com.svir.jee.dao.ProductoDAO;
 import com.svir.jee.model.Cliente;
 import com.svir.jee.model.DetallePedido;
 import com.svir.jee.model.EstadoPedido;
+import com.svir.jee.model.FiltroPedido;
 import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
@@ -51,6 +52,15 @@ public class PedidoBean extends ListadoBase<Pedido> {
         public void setCantidad(Integer cantidad) { this.cantidad = cantidad; }
     }
 
+    // filtros avanzados (los "Sel" son lo que se ve en el formulario; el filtro se aplica al pulsar Buscar)
+    private String estadoSel = "";
+    private String origenSel = "";
+    private String tipoClienteSel = "";
+    private String comprobanteSel = "";
+    private java.time.LocalDate desdeSel;
+    private java.time.LocalDate hastaSel;
+    private FiltroPedido aplicado = new FiltroPedido();
+
     // detalle
     private boolean viendo;
     private Pedido detalle;
@@ -70,12 +80,37 @@ public class PedidoBean extends ListadoBase<Pedido> {
 
     @Override
     protected List<Pedido> cargar() throws SQLException {
-        return DAO.listarTodos();
+        return DAO.buscar(aplicado, 0, 0);
+    }
+
+    @Override
+    public void buscar() {
+        FiltroPedido f = new FiltroPedido();
+        f.setEstado(estadoSel);
+        f.setOrigen(origenSel);
+        f.setTipoCliente(tipoClienteSel);
+        f.setComprobante(comprobanteSel);
+        f.setDesde(desdeSel);
+        f.setHasta(hastaSel);
+        aplicado = f;
+        super.buscar();
+    }
+
+    @Override
+    public void limpiar() {
+        estadoSel = "";
+        origenSel = "";
+        tipoClienteSel = "";
+        comprobanteSel = "";
+        desdeSel = null;
+        hastaSel = null;
+        super.limpiar();
     }
 
     @Override
     protected String textoBusqueda(Pedido p) {
-        return p.getId() + " " + texto(p.getClienteNombre()) + " " + p.getEstado() + " " + p.getTipoOrigen();
+        return p.getId() + " " + texto(p.getClienteNombre()) + " " + p.getEstado() + " " + p.getTipoOrigen()
+                + " " + texto(p.getComprobanteNumero()) + " " + texto(p.getObservacion());
     }
 
     // ---- filtros rapidos (tarjetas del dashboard) y apertura directa del detalle ----
@@ -346,6 +381,18 @@ public class PedidoBean extends ListadoBase<Pedido> {
     public TipoOrigenPedido[] getOrigenes() { return TipoOrigenPedido.values(); }
 
     public boolean isViendo() { return viendo; }
+    public String getEstadoSel() { return estadoSel; }
+    public void setEstadoSel(String v) { this.estadoSel = v; }
+    public String getOrigenSel() { return origenSel; }
+    public void setOrigenSel(String v) { this.origenSel = v; }
+    public String getTipoClienteSel() { return tipoClienteSel; }
+    public void setTipoClienteSel(String v) { this.tipoClienteSel = v; }
+    public String getComprobanteSel() { return comprobanteSel; }
+    public void setComprobanteSel(String v) { this.comprobanteSel = v; }
+    public java.time.LocalDate getDesdeSel() { return desdeSel; }
+    public void setDesdeSel(java.time.LocalDate v) { this.desdeSel = v; }
+    public java.time.LocalDate getHastaSel() { return hastaSel; }
+    public void setHastaSel(java.time.LocalDate v) { this.hastaSel = v; }
     public String getCompTipo() { return compTipo; }
     public void setCompTipo(String compTipo) { this.compTipo = compTipo; }
     public String getCompDocumento() { return compDocumento; }

@@ -17,14 +17,67 @@
             </h:form>
         </div>
 
-        <h:form id="formFiltro" styleClass="row g-2 mb-3">
-            <div class="col-12 col-md-6 col-lg-4">
-                <h:inputText id="filtro" value="#{pedidoBean.filtro}" styleClass="form-control"
-                             a:placeholder="Buscar por N°, cliente, estado u origen..."/>
-            </div>
-            <div class="col-auto">
-                <h:commandButton value="Buscar" action="#{pedidoBean.buscar}" styleClass="btn btn-outline-dark"/>
-                <h:commandButton value="Limpiar" action="#{pedidoBean.limpiar}" styleClass="btn btn-link"/>
+        <h:form id="formFiltro" styleClass="card card-body mb-3">
+            <div class="row g-2">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small mb-1" for="formFiltro:filtro">Buscar</label>
+                    <h:inputText id="filtro" value="#{pedidoBean.filtro}" styleClass="form-control form-control-sm"
+                                 a:placeholder="NÂ° de pedido, nombre, telÃ©fono o comprobante"/>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:estado">Estado</label>
+                    <h:selectOneMenu id="estado" value="#{pedidoBean.estadoSel}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="ACTIVOS" itemLabel="Activos (sin cancelados)"/>
+                        <f:selectItem itemValue="ABIERTOS" itemLabel="Pendientes / en preparaciÃ³n"/>
+                        <f:selectItem itemValue="PENDIENTE" itemLabel="Pendiente"/>
+                        <f:selectItem itemValue="PARCIAL" itemLabel="Parcial"/>
+                        <f:selectItem itemValue="PREPARACION" itemLabel="En preparaciÃ³n"/>
+                        <f:selectItem itemValue="LISTO" itemLabel="Listo"/>
+                        <f:selectItem itemValue="EN_CAMINO" itemLabel="En camino"/>
+                        <f:selectItem itemValue="ENTREGADO" itemLabel="Entregado"/>
+                        <f:selectItem itemValue="CANCELADO" itemLabel="Cancelado"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:origen">Origen</label>
+                    <h:selectOneMenu id="origen" value="#{pedidoBean.origenSel}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItems value="#{pedidoBean.origenes}" var="o" itemValue="#{o}" itemLabel="#{o}"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:tipoCliente">Tipo de cliente</label>
+                    <h:selectOneMenu id="tipoCliente" value="#{pedidoBean.tipoClienteSel}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="Cliente" itemLabel="Cliente"/>
+                        <f:selectItem itemValue="Invitado" itemLabel="Invitado"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:comprobante">Comprobante</label>
+                    <h:selectOneMenu id="comprobante" value="#{pedidoBean.comprobanteSel}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="CON" itemLabel="Con comprobante"/>
+                        <f:selectItem itemValue="SIN" itemLabel="Sin comprobante"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:desde">Desde</label>
+                    <h:inputText id="desde" value="#{pedidoBean.desdeSel}" styleClass="form-control form-control-sm" a:type="date">
+                        <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
+                    </h:inputText>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:hasta">Hasta</label>
+                    <h:inputText id="hasta" value="#{pedidoBean.hastaSel}" styleClass="form-control form-control-sm" a:type="date">
+                        <f:convertDateTime type="localDate" pattern="yyyy-MM-dd"/>
+                    </h:inputText>
+                </div>
+                <div class="col-12 col-md-8 d-flex align-items-end gap-2">
+                    <h:commandButton value="Buscar" action="#{pedidoBean.buscar}" styleClass="btn btn-sm btn-dark"/>
+                    <h:commandButton value="Limpiar" action="#{pedidoBean.limpiar}" styleClass="btn btn-sm btn-outline-secondary"/>
+                </div>
             </div>
         </h:form>
 
