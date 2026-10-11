@@ -38,6 +38,19 @@ public final class Compradores {
         }
     }
 
+    /** El documento ya esta registrado a nombre de otra persona. */
+    public static class NombreDistintoException extends ValidacionException {
+        private static final long serialVersionUID = 1L;
+
+        /** @param nombreRegistrado nombre guardado (solo se muestra al personal); null en la tienda. */
+        public NombreDistintoException(String nombreRegistrado) {
+            super(nombreRegistrado == null
+                    ? "Ese documento ya esta registrado a nombre de otra persona. Revisa el documento o escribe el mismo nombre."
+                    : "Ese documento ya esta registrado a nombre de " + nombreRegistrado
+                    + ". Escribe el mismo nombre o revisa el documento.");
+        }
+    }
+
     /** Resultado: o es un cliente registrado (clienteId) o un invitado (invitadoId). */
     public static final class Comprador {
         public final Integer clienteId;
@@ -80,8 +93,13 @@ public final class Compradores {
 
         Optional<Invitado> existente = INVITADOS.buscarPorDocumento(doc);
         if (existente.isPresent()) {
-            INVITADOS.actualizarContacto(existente.get().getId(), nom, tel.isEmpty() ? null : tel);
-            return new Comprador(null, existente.get().getId(), nom);
+            Invitado registrado = existente.get();
+            // Un documento pertenece a una sola persona: otro nombre no se acepta ni sobrescribe al registrado.
+            if (!Textos.mismoNombre(registrado.getNombre(), nom)) {
+                throw new NombreDistintoException(permitirCliente ? registrado.getNombre() : null);
+            }
+            INVITADOS.actualizarContacto(registrado.getId(), registrado.getNombre(), tel.isEmpty() ? null : tel);
+            return new Comprador(null, registrado.getId(), registrado.getNombre());
         }
 
         Invitado nuevo = new Invitado();

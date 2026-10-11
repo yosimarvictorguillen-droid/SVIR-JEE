@@ -19,6 +19,8 @@
 <% if ("cuenta".equals(request.getParameter("errorDoc"))) { %>
 <div class="alert alert-warning">Ese documento ya tiene una cuenta. Inicia sesion para continuar con tu compra.
     <button type="button" class="btn btn-sm btn-dark ms-2" data-bs-toggle="modal" data-bs-target="#authModal" onclick="mostrarTabAuth('tabLogin')">Ingresar</button></div>
+<% } else if ("nombre".equals(request.getParameter("errorDoc"))) { %>
+<div class="alert alert-danger">Ese documento ya esta registrado a nombre de otra persona. Revisa el numero o escribe el mismo nombre con el que compraste antes.</div>
 <% } else if ("formato".equals(request.getParameter("errorDoc"))) { %>
 <div class="alert alert-danger">El documento no es valido para el tipo elegido (DNI: 8 digitos; carne de extranjeria: 9 a 12; pasaporte: 6 a 12 letras o numeros).</div>
 <% } %>

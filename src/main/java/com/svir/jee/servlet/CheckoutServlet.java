@@ -91,6 +91,9 @@ public class CheckoutServlet extends HttpServlet {
                 } catch (Compradores.ClienteExistenteException e) {
                     resp.sendRedirect(req.getContextPath() + "/checkout?errorDoc=cuenta");
                     return;
+                } catch (Compradores.NombreDistintoException e) {
+                    resp.sendRedirect(req.getContextPath() + "/checkout?errorDoc=nombre");
+                    return;
                 } catch (Compradores.ValidacionException e) {
                     resp.sendRedirect(req.getContextPath() + "/checkout?errorDoc=formato");
                     return;
