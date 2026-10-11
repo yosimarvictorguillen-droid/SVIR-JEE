@@ -4,6 +4,9 @@ import com.svir.jee.dao.ProductoDAO;
 import com.svir.jee.model.Producto;
 import com.svir.jee.util.AlmacenImagenes;
 
+import com.svir.jee.util.Filtros;
+import com.svir.jee.util.Pagina;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -46,12 +49,27 @@ public class ProductoServlet extends HttpServlet {
                 return;
             }
 
-            var productos = productoDAO.listarTodos();
-            if ("stockbajo".equals(req.getParameter("filtro"))) {
-                productos = productos.stream().filter(p -> p.isActivo() && p.isStockBajo()).toList();
-                req.setAttribute("filtroTitulo", "Productos con stock bajo");
+            String q = Filtros.texto(req, "q");
+            String estado = Filtros.opcion(req, "estado", "ACTIVO", "INACTIVO");
+            String stock = Filtros.opcion(req, "stock", "BAJO");
+            if ("stockbajo".equals(req.getParameter("filtro"))) { // atajo desde el dashboard
+                estado = "ACTIVO";
+                stock = "BAJO";
             }
-            req.setAttribute("productos", productos);
+            final String fq = q.toLowerCase();
+            final String festado = estado;
+            final String fstock = stock;
+            var filtrados = productoDAO.listarTodos().stream()
+                    .filter(p -> fq.isEmpty() || p.getNombre().toLowerCase().contains(fq))
+                    .filter(p -> festado.isEmpty() || p.isActivo() == "ACTIVO".equals(festado))
+                    .filter(p -> fstock.isEmpty() || p.isStockBajo())
+                    .toList();
+            Pagina<com.svir.jee.model.Producto> pg = Pagina.de(filtrados, req.getParameter("pagina"));
+            pg.publicar(req, req.getContextPath() + "/app/productos?" + Filtros.query("q", q, "estado", estado, "stock", stock));
+            req.setAttribute("fq", q);
+            req.setAttribute("festado", estado);
+            req.setAttribute("fstock", stock);
+            req.setAttribute("productos", pg.getItems());
             req.getRequestDispatcher("/WEB-INF/views/productos.jsp").forward(req, resp);
         } catch (SQLException e) {
             throw new ServletException("Error accediendo a productos", e);

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.svir.jee.model.Ingrediente" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.svir.jee.util.Filtros" %>
 <%
     request.setAttribute("tituloPagina", "Ingredientes");
     request.setAttribute("paginaActiva", "ingredientes");
@@ -15,15 +16,33 @@
     </a>
 </div>
 
-<%
-    String filtroTitulo = (String) request.getAttribute("filtroTitulo");
-%>
-<% if (filtroTitulo != null) { %>
-<div class="alert alert-info d-flex justify-content-between align-items-center py-2">
-    <span><i class="bi bi-funnel"></i> Mostrando: <strong><%= filtroTitulo %></strong> (<%= ingredientes.size() %>)</span>
-    <a href="<%= ctx %>/app/ingredientes" class="btn btn-sm btn-outline-secondary">Ver todos</a>
-</div>
-<% } %>
+<form method="get" action="<%= ctx %>/app/ingredientes" class="card card-body mb-3">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <label class="form-label small mb-1">Buscar</label>
+            <input type="text" class="form-control form-control-sm" name="q" maxlength="100" value="<%= Filtros.attr(request, "fq") %>" placeholder="Nombre o unidad">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Estado</label>
+            <select class="form-select form-select-sm" name="estado">
+                <option value="" <%= Filtros.sel(Filtros.attr(request, "festado"), "") %>>Todos</option>
+                <option value="ACTIVO" <%= Filtros.sel(Filtros.attr(request, "festado"), "ACTIVO") %>>Activo</option>
+                <option value="INACTIVO" <%= Filtros.sel(Filtros.attr(request, "festado"), "INACTIVO") %>>Inactivo</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Stock</label>
+            <select class="form-select form-select-sm" name="stock">
+                <option value="" <%= Filtros.sel(Filtros.attr(request, "fstock"), "") %>>Todos</option>
+                <option value="BAJO" <%= Filtros.sel(Filtros.attr(request, "fstock"), "BAJO") %>>Solo stock bajo</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-sm btn-dark"><i class="bi bi-search"></i> Buscar</button>
+            <a href="<%= ctx %>/app/ingredientes" class="btn btn-sm btn-outline-secondary">Limpiar</a>
+        </div>
+    </div>
+</form>
 
 <div class="table-responsive">
     <table class="table table-hover align-middle bg-white">
@@ -83,5 +102,8 @@
         </tbody>
     </table>
 </div>
+
+<% request.removeAttribute("pgSufijoActual"); %>
+<jsp:include page="/WEB-INF/views/common/paginacion.jsp"/>
 
 <%@ include file="/WEB-INF/views/common/footer.jspf" %>

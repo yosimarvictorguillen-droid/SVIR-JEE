@@ -5,6 +5,9 @@ import com.svir.jee.model.RolUsuario;
 import com.svir.jee.model.Usuario;
 import com.svir.jee.util.PasswordUtil;
 
+import com.svir.jee.util.Filtros;
+import com.svir.jee.util.Pagina;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -38,7 +41,26 @@ public class UsuarioServlet extends HttpServlet {
                 return;
             }
 
-            req.setAttribute("usuarios", usuarioDAO.listarTodos());
+            String q = Filtros.texto(req, "q");
+            String rol = Filtros.opcion(req, "rol", "ADMIN", "VENTAS", "COCINA", "REPARTIDOR");
+            String estado = Filtros.opcion(req, "estado", "ACTIVO", "INACTIVO");
+            final String fq = q.toLowerCase();
+            final String frol = rol;
+            final String festado = estado;
+            var filtrados = usuarioDAO.listarTodos().stream()
+                    .filter(u -> fq.isEmpty()
+                            || (u.getNombre() != null && u.getNombre().toLowerCase().contains(fq))
+                            || (u.getEmail() != null && u.getEmail().toLowerCase().contains(fq))
+                            || (u.getTelefono() != null && u.getTelefono().toLowerCase().contains(fq)))
+                    .filter(u -> frol.isEmpty() || u.getRol().name().equals(frol))
+                    .filter(u -> festado.isEmpty() || u.isActivo() == "ACTIVO".equals(festado))
+                    .toList();
+            Pagina<com.svir.jee.model.Usuario> pg = Pagina.de(filtrados, req.getParameter("pagina"));
+            pg.publicar(req, req.getContextPath() + "/app/usuarios?" + Filtros.query("q", q, "rol", rol, "estado", estado));
+            req.setAttribute("fq", q);
+            req.setAttribute("frol", rol);
+            req.setAttribute("festado", estado);
+            req.setAttribute("usuarios", pg.getItems());
             req.getRequestDispatcher("/WEB-INF/views/usuarios.jsp").forward(req, resp);
         } catch (SQLException e) {
             throw new ServletException("Error accediendo a usuarios", e);

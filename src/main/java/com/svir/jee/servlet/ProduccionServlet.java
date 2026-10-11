@@ -6,6 +6,9 @@ import com.svir.jee.dao.ProductoDAO;
 import com.svir.jee.model.ProduccionDetalle;
 import com.svir.jee.model.Usuario;
 
+import com.svir.jee.util.Filtros;
+import com.svir.jee.util.Pagina;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -49,7 +52,33 @@ public class ProduccionServlet extends HttpServlet {
                     req.getRequestDispatcher("/WEB-INF/views/produccion-detalle.jsp").forward(req, resp);
                 }
                 default -> {
-                    req.setAttribute("producciones", produccionDAO.listarTodos());
+                    String q = Filtros.texto(req, "q");
+                    String tipo = Filtros.opcion(req, "tipo", "PEDIDO", "STOCK");
+                    String estado = Filtros.opcion(req, "estado", "PENDIENTE", "EN_PROCESO", "TERMINADO", "CANCELADO");
+                    java.time.LocalDate desde = Filtros.fecha(req, "desde");
+                    java.time.LocalDate hasta = Filtros.fecha(req, "hasta");
+                    final String fq = q.toLowerCase().replace("#", "");
+                    final String ftipo = tipo;
+                    final String festado = estado;
+                    var filtrados = produccionDAO.listarTodos().stream()
+                            .filter(p -> fq.isEmpty() || String.valueOf(p.getId()).equals(fq)
+                                    || (p.getPedidoId() != null && String.valueOf(p.getPedidoId()).equals(fq))
+                                    || (p.getUsuarioNombre() != null && p.getUsuarioNombre().toLowerCase().contains(fq)))
+                            .filter(p -> ftipo.isEmpty() || p.getTipo().name().equals(ftipo))
+                            .filter(p -> festado.isEmpty() || p.getEstado().name().equals(festado))
+                            .filter(p -> desde == null || (p.getCreatedAt() != null && !p.getCreatedAt().toLocalDate().isBefore(desde)))
+                            .filter(p -> hasta == null || (p.getCreatedAt() != null && !p.getCreatedAt().toLocalDate().isAfter(hasta)))
+                            .toList();
+                    Pagina<com.svir.jee.model.Produccion> pg = Pagina.de(filtrados, req.getParameter("pagina"));
+                    pg.publicar(req, req.getContextPath() + "/app/producciones?" + Filtros.query("q", q, "tipo", tipo,
+                            "estado", estado, "desde", desde == null ? "" : desde.toString(),
+                            "hasta", hasta == null ? "" : hasta.toString()));
+                    req.setAttribute("fq", q);
+                    req.setAttribute("ftipo", tipo);
+                    req.setAttribute("festado", estado);
+                    req.setAttribute("fdesde", desde == null ? "" : desde.toString());
+                    req.setAttribute("fhasta", hasta == null ? "" : hasta.toString());
+                    req.setAttribute("producciones", pg.getItems());
                     req.getRequestDispatcher("/WEB-INF/views/producciones.jsp").forward(req, resp);
                 }
             }

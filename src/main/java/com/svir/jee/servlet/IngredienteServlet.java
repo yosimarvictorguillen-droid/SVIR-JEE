@@ -6,6 +6,9 @@ import com.svir.jee.model.MotivoMovimientoIngrediente;
 import com.svir.jee.model.TipoMovimiento;
 import com.svir.jee.model.Usuario;
 
+import com.svir.jee.util.Filtros;
+import com.svir.jee.util.Pagina;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -47,12 +50,28 @@ public class IngredienteServlet extends HttpServlet {
                 return;
             }
 
-            var ingredientes = ingredienteDAO.listarTodos();
-            if ("stockbajo".equals(req.getParameter("filtro"))) {
-                ingredientes = ingredientes.stream().filter(i -> i.isActivo() && i.isStockBajo()).toList();
-                req.setAttribute("filtroTitulo", "Ingredientes con stock bajo");
+            String q = Filtros.texto(req, "q");
+            String estado = Filtros.opcion(req, "estado", "ACTIVO", "INACTIVO");
+            String stock = Filtros.opcion(req, "stock", "BAJO");
+            if ("stockbajo".equals(req.getParameter("filtro"))) { // atajo desde el dashboard
+                estado = "ACTIVO";
+                stock = "BAJO";
             }
-            req.setAttribute("ingredientes", ingredientes);
+            final String fq = q.toLowerCase();
+            final String festado = estado;
+            final String fstock = stock;
+            var filtrados = ingredienteDAO.listarTodos().stream()
+                    .filter(i -> fq.isEmpty() || i.getNombre().toLowerCase().contains(fq)
+                            || (i.getUnidadMedida() != null && i.getUnidadMedida().toString().toLowerCase().contains(fq)))
+                    .filter(i -> festado.isEmpty() || i.isActivo() == "ACTIVO".equals(festado))
+                    .filter(i -> fstock.isEmpty() || i.isStockBajo())
+                    .toList();
+            Pagina<com.svir.jee.model.Ingrediente> pg = Pagina.de(filtrados, req.getParameter("pagina"));
+            pg.publicar(req, req.getContextPath() + "/app/ingredientes?" + Filtros.query("q", q, "estado", estado, "stock", stock));
+            req.setAttribute("fq", q);
+            req.setAttribute("festado", estado);
+            req.setAttribute("fstock", stock);
+            req.setAttribute("ingredientes", pg.getItems());
             req.getRequestDispatcher("/WEB-INF/views/ingredientes.jsp").forward(req, resp);
         } catch (SQLException e) {
             throw new ServletException("Error accediendo a ingredientes", e);

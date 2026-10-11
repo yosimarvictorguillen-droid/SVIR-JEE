@@ -3,6 +3,9 @@ package com.svir.jee.servlet;
 import com.svir.jee.dao.ClienteDAO;
 import com.svir.jee.model.Cliente;
 
+import com.svir.jee.util.Filtros;
+import com.svir.jee.util.Pagina;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -35,7 +38,23 @@ public class ClienteServlet extends HttpServlet {
                 return;
             }
 
-            req.setAttribute("clientes", clienteDAO.listarTodos());
+            String q = Filtros.texto(req, "q");
+            String estado = Filtros.opcion(req, "estado", "ACTIVO", "INACTIVO");
+            final String fq = q.toLowerCase();
+            final String festado = estado;
+            var filtrados = clienteDAO.listarTodos().stream()
+                    .filter(c -> fq.isEmpty()
+                            || (c.getNombre() != null && c.getNombre().toLowerCase().contains(fq))
+                            || (c.getDni() != null && c.getDni().toLowerCase().contains(fq))
+                            || (c.getTelefono() != null && c.getTelefono().toLowerCase().contains(fq))
+                            || (c.getEmail() != null && c.getEmail().toLowerCase().contains(fq)))
+                    .filter(c -> festado.isEmpty() || c.isActivo() == "ACTIVO".equals(festado))
+                    .toList();
+            Pagina<com.svir.jee.model.Cliente> pg = Pagina.de(filtrados, req.getParameter("pagina"));
+            pg.publicar(req, req.getContextPath() + "/app/clientes?" + Filtros.query("q", q, "estado", estado));
+            req.setAttribute("fq", q);
+            req.setAttribute("festado", estado);
+            req.setAttribute("clientes", pg.getItems());
             req.getRequestDispatcher("/WEB-INF/views/clientes.jsp").forward(req, resp);
         } catch (SQLException e) {
             throw new ServletException("Error accediendo a clientes", e);

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.svir.jee.model.Usuario" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.svir.jee.util.Filtros" %>
 <%
     request.setAttribute("tituloPagina", "Usuarios");
     request.setAttribute("paginaActiva", "usuarios");
@@ -14,6 +15,37 @@
         <i class="bi bi-plus-lg"></i> Nuevo usuario
     </a>
 </div>
+
+<form method="get" action="<%= ctx %>/app/usuarios" class="card card-body mb-3">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <label class="form-label small mb-1">Buscar</label>
+            <input type="text" class="form-control form-control-sm" name="q" maxlength="100" value="<%= Filtros.attr(request, "fq") %>" placeholder="Nombre, email o telefono">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Rol</label>
+            <select class="form-select form-select-sm" name="rol">
+                <option value="" <%= Filtros.sel(Filtros.attr(request, "frol"), "") %>>Todos</option>
+                <option value="ADMIN" <%= Filtros.sel(Filtros.attr(request, "frol"), "ADMIN") %>>Admin</option>
+                <option value="VENTAS" <%= Filtros.sel(Filtros.attr(request, "frol"), "VENTAS") %>>Ventas</option>
+                <option value="COCINA" <%= Filtros.sel(Filtros.attr(request, "frol"), "COCINA") %>>Cocina</option>
+                <option value="REPARTIDOR" <%= Filtros.sel(Filtros.attr(request, "frol"), "REPARTIDOR") %>>Repartidor</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">Estado</label>
+            <select class="form-select form-select-sm" name="estado">
+                <option value="" <%= Filtros.sel(Filtros.attr(request, "festado"), "") %>>Todos</option>
+                <option value="ACTIVO" <%= Filtros.sel(Filtros.attr(request, "festado"), "ACTIVO") %>>Activo</option>
+                <option value="INACTIVO" <%= Filtros.sel(Filtros.attr(request, "festado"), "INACTIVO") %>>Inactivo</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-sm btn-dark"><i class="bi bi-search"></i> Buscar</button>
+            <a href="<%= ctx %>/app/usuarios" class="btn btn-sm btn-outline-secondary">Limpiar</a>
+        </div>
+    </div>
+</form>
 
 <div class="table-responsive">
     <table class="table table-hover align-middle bg-white">
@@ -52,5 +84,8 @@
         </tbody>
     </table>
 </div>
+
+<% request.removeAttribute("pgSufijoActual"); %>
+<jsp:include page="/WEB-INF/views/common/paginacion.jsp"/>
 
 <%@ include file="/WEB-INF/views/common/footer.jspf" %>
