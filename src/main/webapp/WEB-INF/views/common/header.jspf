@@ -32,58 +32,77 @@
     <aside class="svir-sidebar">
         <span class="brand"><img src="<%= ctx %>/assets/img/logo-mark.svg" alt="Dulce Momento"> SVIR-JEE</span>
         <nav class="nav flex-column">
+            <%
+                boolean verVentas = esAdmin || esVentas;
+                boolean verCocina = esAdmin || esCocina;
+                // El grupo de la pagina actual se muestra abierto al cargar.
+                boolean abreVentas = java.util.Arrays.asList("pedidos", "pos", "clientes", "productos").contains(paginaActiva);
+                boolean abreCocina = java.util.Arrays.asList("ingredientes", "recetas", "producciones").contains(paginaActiva);
+                boolean abreAdmin = java.util.Arrays.asList("movimientos", "usuarios", "reportes").contains(paginaActiva);
+            %>
             <a class="nav-link <%= paginaActiva.equals("dashboard") ? "active" : "" %>" href="<%= ctx %>/app/dashboard">
                 <i class="bi bi-speedometer2"></i> Dashboard
             </a>
-            <% if (esAdmin || esVentas) { %>
-            <a class="nav-link <%= paginaActiva.equals("productos") ? "active" : "" %>" href="<%= ctx %>/app/productos">
-                <i class="bi bi-box-seam"></i> Productos
-            </a>
+
+            <% if (verVentas) { %>
+            <button type="button" class="nav-group <%= abreVentas ? "open" : "" %>"><i class="bi bi-bag"></i> Ventas <i class="bi bi-chevron-down chev"></i></button>
+            <div class="nav-sub <%= abreVentas ? "open" : "" %>">
+                <a class="nav-link <%= paginaActiva.equals("pedidos") ? "active" : "" %>" href="<%= ctx %>/app/pedidos">Pedidos</a>
+                <a class="nav-link <%= paginaActiva.equals("pos") ? "active" : "" %>" href="<%= ctx %>/app/pos">Punto de Venta</a>
+                <a class="nav-link <%= paginaActiva.equals("clientes") ? "active" : "" %>" href="<%= ctx %>/app/clientes">Clientes</a>
+                <a class="nav-link <%= paginaActiva.equals("productos") ? "active" : "" %>" href="<%= ctx %>/app/productos">Productos</a>
+            </div>
             <% } %>
-            <% if (esAdmin || esCocina) { %>
-            <a class="nav-link <%= paginaActiva.equals("ingredientes") ? "active" : "" %>" href="<%= ctx %>/app/ingredientes">
-                <i class="bi bi-basket"></i> Ingredientes
-            </a>
-            <a class="nav-link <%= paginaActiva.equals("recetas") ? "active" : "" %>" href="<%= ctx %>/app/recetas">
-                <i class="bi bi-journal-text"></i> Recetas
-            </a>
-            <a class="nav-link <%= paginaActiva.equals("producciones") ? "active" : "" %>" href="<%= ctx %>/app/producciones">
-                <i class="bi bi-fire"></i> Produccion
-            </a>
+
+            <% if (verCocina) { %>
+            <button type="button" class="nav-group <%= abreCocina ? "open" : "" %>"><i class="bi bi-fire"></i> Cocina <i class="bi bi-chevron-down chev"></i></button>
+            <div class="nav-sub <%= abreCocina ? "open" : "" %>">
+                <a class="nav-link <%= paginaActiva.equals("ingredientes") ? "active" : "" %>" href="<%= ctx %>/app/ingredientes">Ingredientes</a>
+                <a class="nav-link <%= paginaActiva.equals("recetas") ? "active" : "" %>" href="<%= ctx %>/app/recetas">Recetas</a>
+                <a class="nav-link <%= paginaActiva.equals("producciones") ? "active" : "" %>" href="<%= ctx %>/app/producciones">Produccion</a>
+            </div>
             <% } %>
-            <% if (esAdmin || esVentas) { %>
-            <a class="nav-link <%= paginaActiva.equals("pos") ? "active" : "" %>" href="<%= ctx %>/app/pos">
-                <i class="bi bi-cash-coin"></i> Punto de Venta
-            </a>
-            <a class="nav-link <%= paginaActiva.equals("clientes") ? "active" : "" %>" href="<%= ctx %>/app/clientes">
-                <i class="bi bi-people"></i> Clientes
-            </a>
-            <a class="nav-link <%= paginaActiva.equals("pedidos") ? "active" : "" %>" href="<%= ctx %>/app/pedidos">
-                <i class="bi bi-receipt"></i> Pedidos
-            </a>
-            <% } %>
+
             <% if (esAdmin || esVentas || esRepartidor) { %>
             <a class="nav-link <%= paginaActiva.equals("repartidor") ? "active" : "" %>" href="<%= ctx %>/app/repartidor">
                 <i class="bi bi-bicycle"></i> Repartidor
             </a>
             <% } %>
+
             <% if (esAdmin) { %>
-            <a class="nav-link <%= paginaActiva.equals("movimientos") ? "active" : "" %>" href="<%= ctx %>/app/movimientos">
-                <i class="bi bi-clock-history"></i> Movimientos
-            </a>
-            <a class="nav-link <%= paginaActiva.equals("usuarios") ? "active" : "" %>" href="<%= ctx %>/app/usuarios">
-                <i class="bi bi-person-badge"></i> Usuarios
-            </a>
-            <a class="nav-link <%= paginaActiva.equals("reportes") ? "active" : "" %>" href="<%= ctx %>/app/reportes">
-                <i class="bi bi-bar-chart-line"></i> Reportes
-            </a>
+            <button type="button" class="nav-group <%= abreAdmin ? "open" : "" %>"><i class="bi bi-gear"></i> Administracion <i class="bi bi-chevron-down chev"></i></button>
+            <div class="nav-sub <%= abreAdmin ? "open" : "" %>">
+                <a class="nav-link <%= paginaActiva.equals("movimientos") ? "active" : "" %>" href="<%= ctx %>/app/movimientos">Movimientos</a>
+                <a class="nav-link <%= paginaActiva.equals("usuarios") ? "active" : "" %>" href="<%= ctx %>/app/usuarios">Usuarios</a>
+                <a class="nav-link <%= paginaActiva.equals("reportes") ? "active" : "" %>" href="<%= ctx %>/app/reportes">Reportes</a>
+            </div>
             <% } %>
 
+            
             <div class="nav-section-title">Nuevo panel</div>
             <a class="nav-link" href="<%= ctx %>/app/jsf/dashboard.xhtml">
                 <i class="bi bi-lightning-charge"></i> Ir al nuevo panel
             </a>
         </nav>
+        <script>
+            // Acordeon: al abrir un grupo se cierran los demas.
+            (function () {
+                var grupos = document.querySelectorAll('.svir-sidebar .nav-group');
+                grupos.forEach(function (g) {
+                    g.addEventListener('click', function () {
+                        var abrir = !g.classList.contains('open');
+                        grupos.forEach(function (x) {
+                            x.classList.remove('open');
+                            x.nextElementSibling.classList.remove('open');
+                        });
+                        if (abrir) {
+                            g.classList.add('open');
+                            g.nextElementSibling.classList.add('open');
+                        }
+                    });
+                });
+            })();
+        </script>
     </aside>
 
     <div class="svir-main">

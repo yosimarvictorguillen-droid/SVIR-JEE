@@ -283,3 +283,38 @@ body {
     letter-spacing: .06em;
     color: #a89684;
 }
+
+/* Menu lateral en grupos desplegables (acordeon) */
+.svir-sidebar .nav-group {
+    width: 100%;
+    background: none;
+    border: 0;
+    color: #e7dbca;
+    padding: .55rem .8rem;
+    border-radius: .5rem;
+    margin-bottom: .15rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    text-align: left;
+    cursor: pointer;
+}
+.svir-sidebar .nav-group:hover { background: rgba(255, 255, 255, .08); }
+.svir-sidebar .nav-group.open { color: #fff; }
+.svir-sidebar .nav-group .chev {
+    margin-left: auto;
+    font-size: .75rem;
+    transition: transform .15s;
+}
+.svir-sidebar .nav-group.open .chev { transform: rotate(180deg); }
+.svir-sidebar .nav-sub {
+    display: none;
+    margin: 0 0 .25rem 1.1rem;
+    padding-left: .6rem;
+    border-left: 1px solid rgba(255, 255, 255, .15);
+}
+.svir-sidebar .nav-sub.open { display: block; }
+.svir-sidebar .nav-sub a.nav-link {
+    padding: .4rem .7rem;
+    font-size: .9rem;
+}
