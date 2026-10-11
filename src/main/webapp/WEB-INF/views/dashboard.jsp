@@ -8,51 +8,73 @@
 %>
 <%@ include file="/WEB-INF/views/common/header.jspf" %>
 
+<%
+    // Las tarjetas son enlaces solo si el rol puede entrar a la pantalla de destino.
+    boolean verPedidos = esAdmin || esVentas;
+    boolean verProductos = esAdmin || esVentas;
+    boolean verIngredientes = esAdmin || esCocina;
+    String pedidosUrl = ctx + "/app/pedidos?filtro=";
+%>
+
 <div class="row g-3 mb-4">
     <div class="col-md-3">
+        <% if (verPedidos) { %><a class="stat-link" href="<%= pedidosUrl + "hoy" %>"><% } %>
         <div class="stat-card">
             <div class="text-muted small">Ventas de hoy</div>
             <div class="stat-value">S/ <%= resumen.getVentasHoy() %></div>
         </div>
+        <% if (verPedidos) { %></a><% } %>
     </div>
     <div class="col-md-3">
+        <% if (verPedidos) { %><a class="stat-link" href="<%= pedidosUrl + "mes" %>"><% } %>
         <div class="stat-card">
             <div class="text-muted small">Ventas del mes</div>
             <div class="stat-value">S/ <%= resumen.getVentasMes() %></div>
         </div>
+        <% if (verPedidos) { %></a><% } %>
     </div>
     <div class="col-md-3">
+        <% if (verPedidos) { %><a class="stat-link" href="<%= pedidosUrl + "hoy" %>"><% } %>
         <div class="stat-card">
             <div class="text-muted small">Pedidos de hoy</div>
             <div class="stat-value"><%= resumen.getPedidosHoy() %></div>
         </div>
+        <% if (verPedidos) { %></a><% } %>
     </div>
     <div class="col-md-3">
+        <% if (verPedidos) { %><a class="stat-link" href="<%= pedidosUrl + "pendientes" %>"><% } %>
         <div class="stat-card">
             <div class="text-muted small">Pedidos pendientes / en preparacion</div>
             <div class="stat-value"><%= resumen.getPedidosPendientes() + resumen.getPedidosPreparacion() %></div>
         </div>
+        <% if (verPedidos) { %></a><% } %>
     </div>
 </div>
 
 <div class="row g-3 mb-4">
     <div class="col-md-3">
+        <% if (verProductos) { %><a class="stat-link" href="<%= ctx + "/app/productos?filtro=stockbajo" %>"><% } %>
         <div class="stat-card <%= resumen.getProductosStockBajo() > 0 ? "stock-bajo" : "" %>">
             <div class="text-muted small">Productos con stock bajo</div>
             <div class="stat-value"><%= resumen.getProductosStockBajo() %> / <%= resumen.getTotalProductos() %></div>
         </div>
+        <% if (verProductos) { %></a><% } %>
     </div>
     <div class="col-md-3">
+        <% if (verIngredientes) { %><a class="stat-link" href="<%= ctx + "/app/ingredientes?filtro=stockbajo" %>"><% } %>
         <div class="stat-card <%= resumen.getIngredientesStockBajo() > 0 ? "stock-bajo" : "" %>">
             <div class="text-muted small">Ingredientes con stock bajo</div>
             <div class="stat-value"><%= resumen.getIngredientesStockBajo() %> / <%= resumen.getTotalIngredientes() %></div>
         </div>
+        <% if (verIngredientes) { %></a><% } %>
     </div>
     <div class="col-md-3">
+        <% if (verPedidos) { %><a class="stat-link" href="<%= pedidosUrl + "listos" %>"><% } %>
         <div class="stat-card">
             <div class="text-muted small">Pedidos listos</div>
             <div class="stat-value"><%= resumen.getPedidosListo() %></div>
         </div>
+        <% if (verPedidos) { %></a><% } %>
     </div>
 </div>
 
@@ -76,7 +98,7 @@
                 String cliente = p.getClienteNombre() != null ? p.getClienteNombre() : "Sin nombre";
         %>
         <tr>
-            <td>#<%= p.getId() %></td>
+            <td><% if (verPedidos) { %><a href="<%= ctx %>/app/pedidos?action=ver&id=<%= p.getId() %>">#<%= p.getId() %></a><% } else { %>#<%= p.getId() %><% } %></td>
             <td><%= cliente %></td>
             <td><span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : ("Invitado".equals(p.getTipoComprador()) ? "bg-warning text-dark" : "bg-secondary") %>"><%= p.getTipoComprador() %></span></td>
             <td><%= p.getTipoOrigen() %></td>

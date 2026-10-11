@@ -16,6 +16,16 @@
     </a>
 </div>
 
+<%
+    String filtroTitulo = (String) request.getAttribute("filtroTitulo");
+%>
+<% if (filtroTitulo != null) { %>
+<div class="alert alert-info d-flex justify-content-between align-items-center py-2">
+    <span><i class="bi bi-funnel"></i> Mostrando: <strong><%= filtroTitulo %></strong> (<%= pedidos.size() %>)</span>
+    <a href="<%= ctx %>/app/pedidos" class="btn btn-sm btn-outline-secondary">Ver todos</a>
+</div>
+<% } %>
+
 <div class="table-responsive">
     <table class="table table-hover align-middle bg-white">
         <thead>

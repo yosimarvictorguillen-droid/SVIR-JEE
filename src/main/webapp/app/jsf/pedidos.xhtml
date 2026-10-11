@@ -28,6 +28,13 @@
             </div>
         </h:form>
 
+        <h:form id="formFiltroRapido" rendered="#{not empty pedidoBean.tituloFiltroRapido}">
+            <div class="alert alert-info d-flex justify-content-between align-items-center py-2">
+                <span>Mostrando: <strong>#{pedidoBean.tituloFiltroRapido}</strong> (#{pedidoBean.total})</span>
+                <h:commandButton value="Ver todos" action="#{pedidoBean.quitarFiltroRapido}" styleClass="btn btn-sm btn-outline-secondary"/>
+            </div>
+        </h:form>
+
         <div class="card">
             <h:form id="formTabla">
                 <div class="table-responsive">

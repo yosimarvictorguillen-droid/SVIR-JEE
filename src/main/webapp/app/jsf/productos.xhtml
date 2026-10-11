@@ -31,6 +31,13 @@
         </h:form>
 
         <!-- Tabla de datos (h:dataTable) alimentada por ProductoDAO / JDBC, con paginacion -->
+        <h:form id="formFiltroRapido" rendered="#{not empty productoBean.tituloFiltroRapido}">
+            <div class="alert alert-info d-flex justify-content-between align-items-center py-2">
+                <span>Mostrando: <strong>#{productoBean.tituloFiltroRapido}</strong> (#{productoBean.total})</span>
+                <h:commandButton value="Ver todos" action="#{productoBean.quitarFiltroRapido}" styleClass="btn btn-sm btn-outline-secondary"/>
+            </div>
+        </h:form>
+
         <div class="card">
             <h:form id="formTabla">
                 <div class="table-responsive">

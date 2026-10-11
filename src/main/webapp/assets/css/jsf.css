@@ -44,3 +44,7 @@ body.svir-jsf { background: var(--svir-bg); color: #1f2937; }
 .navbar-svir .nav-link:hover,
 .navbar-svir .nav-link:focus { color: #fff; }
 .navbar-svir .navbar-text { color: rgba(255, 255, 255, .85); }
+
+/* Tarjetas del dashboard clicables */
+.stat-card:has(.stretched-link) { transition: box-shadow .15s, transform .15s; }
+.stat-card:has(.stretched-link):hover { box-shadow: 0 4px 12px rgba(15, 23, 42, .18); transform: translateY(-2px); }

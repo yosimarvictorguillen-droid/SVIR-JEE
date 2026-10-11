@@ -47,7 +47,12 @@ public class IngredienteServlet extends HttpServlet {
                 return;
             }
 
-            req.setAttribute("ingredientes", ingredienteDAO.listarTodos());
+            var ingredientes = ingredienteDAO.listarTodos();
+            if ("stockbajo".equals(req.getParameter("filtro"))) {
+                ingredientes = ingredientes.stream().filter(i -> i.isActivo() && i.isStockBajo()).toList();
+                req.setAttribute("filtroTitulo", "Ingredientes con stock bajo");
+            }
+            req.setAttribute("ingredientes", ingredientes);
             req.getRequestDispatcher("/WEB-INF/views/ingredientes.jsp").forward(req, resp);
         } catch (SQLException e) {
             throw new ServletException("Error accediendo a ingredientes", e);

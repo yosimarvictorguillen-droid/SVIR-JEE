@@ -19,6 +19,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -54,7 +56,30 @@ public class PedidoServlet extends HttpServlet {
                 return;
             }
 
-            req.setAttribute("pedidos", pedidoDAO.listarTodos());
+            // Filtros que llegan desde las tarjetas del dashboard (?filtro=hoy|mes|pendientes|listos).
+            List<Pedido> lista = pedidoDAO.listarTodos();
+            String filtro = req.getParameter("filtro");
+            LocalDate hoy = LocalDate.now();
+            String titulo = null;
+            if ("hoy".equals(filtro)) {
+                titulo = "Pedidos de hoy";
+                lista = lista.stream().filter(p -> p.getEstado() != EstadoPedido.CANCELADO
+                        && p.getCreatedAt().toLocalDate().equals(hoy)).toList();
+            } else if ("mes".equals(filtro)) {
+                titulo = "Pedidos del mes";
+                lista = lista.stream().filter(p -> p.getEstado() != EstadoPedido.CANCELADO
+                        && p.getCreatedAt().getYear() == hoy.getYear()
+                        && p.getCreatedAt().getMonth() == hoy.getMonth()).toList();
+            } else if ("pendientes".equals(filtro)) {
+                titulo = "Pedidos pendientes / en preparacion";
+                lista = lista.stream().filter(p -> p.getEstado() == EstadoPedido.PENDIENTE
+                        || p.getEstado() == EstadoPedido.PREPARACION).toList();
+            } else if ("listos".equals(filtro)) {
+                titulo = "Pedidos listos";
+                lista = lista.stream().filter(p -> p.getEstado() == EstadoPedido.LISTO).toList();
+            }
+            req.setAttribute("filtroTitulo", titulo);
+            req.setAttribute("pedidos", lista);
             req.getRequestDispatcher("/WEB-INF/views/pedidos.jsp").forward(req, resp);
         } catch (SQLException e) {
             throw new ServletException("Error accediendo a pedidos", e);

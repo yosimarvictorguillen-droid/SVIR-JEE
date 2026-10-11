@@ -12,38 +12,51 @@
         <div class="row g-3 mb-4">
             <div class="col-6 col-lg-3">
                 <div class="card stat-card h-100"><div class="card-body">
+                    <h:panelGroup rendered="#{menuBean.verVentas}"><a href="#{request.contextPath}/app/jsf/pedidos.xhtml?filtro=hoy" class="stretched-link" aria-label="Ver detalle: Ventas de hoy"></a></h:panelGroup>
                     <div class="text-muted small">Ventas de hoy</div>
                     <div class="stat-value">S/ <h:outputText value="#{dashboardBean.resumen.ventasHoy}"><f:convertNumber pattern="#,##0.00"/></h:outputText></div>
                 </div></div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="card stat-card h-100"><div class="card-body">
+                    <h:panelGroup rendered="#{menuBean.verVentas}"><a href="#{request.contextPath}/app/jsf/pedidos.xhtml?filtro=mes" class="stretched-link" aria-label="Ver detalle: Ventas del mes"></a></h:panelGroup>
                     <div class="text-muted small">Ventas del mes</div>
                     <div class="stat-value">S/ <h:outputText value="#{dashboardBean.resumen.ventasMes}"><f:convertNumber pattern="#,##0.00"/></h:outputText></div>
                 </div></div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="card stat-card h-100"><div class="card-body">
+                    <h:panelGroup rendered="#{menuBean.verVentas}"><a href="#{request.contextPath}/app/jsf/pedidos.xhtml?filtro=hoy" class="stretched-link" aria-label="Ver detalle: Pedidos de hoy"></a></h:panelGroup>
                     <div class="text-muted small">Pedidos de hoy</div>
                     <div class="stat-value">#{dashboardBean.resumen.pedidosHoy}</div>
                 </div></div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="card stat-card h-100"><div class="card-body">
-                    <div class="text-muted small">Pedidos pendientes</div>
-                    <div class="stat-value">#{dashboardBean.resumen.pedidosPendientes}</div>
+                    <h:panelGroup rendered="#{menuBean.verVentas}"><a href="#{request.contextPath}/app/jsf/pedidos.xhtml?filtro=pendientes" class="stretched-link" aria-label="Ver detalle: Pedidos pendientes"></a></h:panelGroup>
+                    <div class="text-muted small">Pedidos pendientes / en preparaciÃ³n</div>
+                    <div class="stat-value">#{dashboardBean.resumen.pedidosPendientes + dashboardBean.resumen.pedidosPreparacion}</div>
                 </div></div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="card stat-card stat-warn h-100"><div class="card-body">
+                    <h:panelGroup rendered="#{menuBean.verVentas}"><a href="#{request.contextPath}/app/jsf/productos.xhtml?filtro=stockbajo" class="stretched-link" aria-label="Ver detalle: Productos con stock bajo"></a></h:panelGroup>
                     <div class="text-muted small">Productos con stock bajo</div>
                     <div class="stat-value">#{dashboardBean.resumen.productosStockBajo} / #{dashboardBean.resumen.totalProductos}</div>
                 </div></div>
             </div>
             <div class="col-6 col-lg-3">
                 <div class="card stat-card stat-warn h-100"><div class="card-body">
+                    <h:panelGroup rendered="#{menuBean.verCocina}"><a href="#{request.contextPath}/app/jsf/ingredientes.xhtml?filtro=stockbajo" class="stretched-link" aria-label="Ver detalle: Ingredientes con stock bajo"></a></h:panelGroup>
                     <div class="text-muted small">Ingredientes con stock bajo</div>
                     <div class="stat-value">#{dashboardBean.resumen.ingredientesStockBajo} / #{dashboardBean.resumen.totalIngredientes}</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100"><div class="card-body">
+                    <h:panelGroup rendered="#{menuBean.verVentas}"><a href="#{request.contextPath}/app/jsf/pedidos.xhtml?filtro=listos" class="stretched-link" aria-label="Ver detalle: Pedidos listos"></a></h:panelGroup>
+                    <div class="text-muted small">Pedidos listos</div>
+                    <div class="stat-value">#{dashboardBean.resumen.pedidosListo}</div>
                 </div></div>
             </div>
         </div>
@@ -55,7 +68,8 @@
                              styleClass="table table-hover align-middle mb-0">
                     <h:column>
                         <f:facet name="header">#</f:facet>
-                        #{p.id}
+                        <h:panelGroup rendered="#{menuBean.verVentas}"><a href="#{request.contextPath}/app/jsf/pedidos.xhtml?ver=#{p.id}">#{p.id}</a></h:panelGroup>
+                        <h:panelGroup rendered="#{not menuBean.verVentas}">#{p.id}</h:panelGroup>
                     </h:column>
                     <h:column>
                         <f:facet name="header">Cliente</f:facet>

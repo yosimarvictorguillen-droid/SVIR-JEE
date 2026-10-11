@@ -318,3 +318,26 @@ body {
     padding: .4rem .7rem;
     font-size: .9rem;
 }
+
+/* Tarjetas del dashboard que llevan a la pantalla de detalle */
+a.stat-link {
+    display: block;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+}
+a.stat-link .stat-card {
+    transition: box-shadow .15s, transform .15s;
+    position: relative;
+}
+a.stat-link:hover .stat-card {
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    transform: translateY(-2px);
+}
+a.stat-link .stat-card::after {
+    content: "\2192";
+    position: absolute;
+    right: 1rem;
+    top: .9rem;
+    color: #a89684;
+}

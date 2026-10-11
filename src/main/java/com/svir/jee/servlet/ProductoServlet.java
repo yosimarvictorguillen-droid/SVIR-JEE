@@ -46,7 +46,12 @@ public class ProductoServlet extends HttpServlet {
                 return;
             }
 
-            req.setAttribute("productos", productoDAO.listarTodos());
+            var productos = productoDAO.listarTodos();
+            if ("stockbajo".equals(req.getParameter("filtro"))) {
+                productos = productos.stream().filter(p -> p.isActivo() && p.isStockBajo()).toList();
+                req.setAttribute("filtroTitulo", "Productos con stock bajo");
+            }
+            req.setAttribute("productos", productos);
             req.getRequestDispatcher("/WEB-INF/views/productos.jsp").forward(req, resp);
         } catch (SQLException e) {
             throw new ServletException("Error accediendo a productos", e);

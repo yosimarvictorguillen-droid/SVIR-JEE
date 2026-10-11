@@ -34,6 +34,7 @@ public class ProductoBean implements Serializable {
     private String filtro = "";
     private String filtroAplicado = "";
     private int primero = 0;
+    private boolean soloStockBajo; // viene de ?filtro=stockbajo (tarjeta del dashboard)
     private final int filas = 5;
 
     private boolean editando;
@@ -47,6 +48,7 @@ public class ProductoBean implements Serializable {
             String f = filtroAplicado.toLowerCase(Locale.ROOT);
             try {
                 cache = DAO.listarTodos().stream()
+                        .filter(p -> !soloStockBajo || (p.isActivo() && p.isStockBajo()))
                         .filter(p -> f.isEmpty() || p.getNombre().toLowerCase(Locale.ROOT).contains(f))
                         .collect(Collectors.toList());
             } catch (SQLException e) {
@@ -55,6 +57,22 @@ public class ProductoBean implements Serializable {
             }
         }
         return cache;
+    }
+
+    @jakarta.annotation.PostConstruct
+    void leerFiltroRapido() {
+        String f = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("filtro");
+        soloStockBajo = "stockbajo".equals(f);
+    }
+
+    public String getTituloFiltroRapido() {
+        return soloStockBajo ? "Productos con stock bajo" : null;
+    }
+
+    public void quitarFiltroRapido() {
+        soloStockBajo = false;
+        primero = 0;
+        cache = null;
     }
 
     // ---- filtro y paginacion ----

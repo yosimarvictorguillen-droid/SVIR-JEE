@@ -78,6 +78,49 @@ public class PedidoBean extends ListadoBase<Pedido> {
         return p.getId() + " " + texto(p.getClienteNombre()) + " " + p.getEstado() + " " + p.getTipoOrigen();
     }
 
+    // ---- filtros rapidos (tarjetas del dashboard) y apertura directa del detalle ----
+
+    @Override
+    protected String tituloFiltroRapido(String filtro) {
+        return switch (filtro) {
+            case "hoy" -> "Pedidos de hoy";
+            case "mes" -> "Pedidos del mes";
+            case "pendientes" -> "Pedidos pendientes / en preparaciÃ³n";
+            case "listos" -> "Pedidos listos";
+            default -> null;
+        };
+    }
+
+    @Override
+    protected boolean cumpleFiltroRapido(Pedido p, String filtro) {
+        java.time.LocalDate hoy = java.time.LocalDate.now();
+        boolean activo = p.getEstado() != EstadoPedido.CANCELADO;
+        return switch (filtro) {
+            case "hoy" -> activo && p.getCreatedAt().toLocalDate().equals(hoy);
+            case "mes" -> activo && p.getCreatedAt().getYear() == hoy.getYear()
+                    && p.getCreatedAt().getMonth() == hoy.getMonth();
+            case "pendientes" -> p.getEstado() == EstadoPedido.PENDIENTE || p.getEstado() == EstadoPedido.PREPARACION;
+            case "listos" -> p.getEstado() == EstadoPedido.LISTO;
+            default -> true;
+        };
+    }
+
+    /** Si la pagina se abre con ?ver=ID (desde "Pedidos recientes" del dashboard) muestra ese detalle. */
+    @jakarta.annotation.PostConstruct
+    void abrirDesdeEnlace() {
+        String id = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("ver");
+        if (id != null && id.matches("\\d{1,9}")) {
+            try {
+                DAO.buscarPorId(Integer.parseInt(id)).ifPresent(p -> {
+                    detalle = p;
+                    viendo = true;
+                });
+            } catch (SQLException e) {
+                Mensajes.error("No se pudo leer el detalle del pedido.");
+            }
+        }
+    }
+
     // ---- reglas de visibilidad de botones (mismas que el panel JSP) ----
 
     public boolean esTerminal(Pedido p) {
