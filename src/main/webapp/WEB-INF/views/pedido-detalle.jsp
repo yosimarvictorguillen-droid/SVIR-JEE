@@ -19,10 +19,8 @@
 
 <div class="card mb-3">
     <div class="card-body">
-        <p class="mb-1"><strong>Cliente:</strong> <%= pedido.getClienteNombre() != null ? pedido.getClienteNombre() : "Cliente general" %>
-            <% if (!"General".equals(pedido.getTipoComprador())) { %>
-            <span class="badge <%= "Cliente".equals(pedido.getTipoComprador()) ? "bg-info text-dark" : "bg-warning text-dark" %>"><%= pedido.getTipoComprador() %></span>
-            <% } %></p>
+        <p class="mb-1"><strong>Cliente:</strong> <%= pedido.getClienteNombre() != null ? pedido.getClienteNombre() : "Sin nombre" %>
+            <span class="badge <%= "Cliente".equals(pedido.getTipoComprador()) ? "bg-info text-dark" : "bg-warning text-dark" %>"><%= pedido.getTipoComprador() %></span></p>
         <p class="mb-1"><strong>Canal:</strong> <%= pedido.getTipoOrigen() %></p>
         <p class="mb-1"><strong>Estado:</strong> <span class="badge bg-secondary"><%= pedido.getEstado() %></span></p>
         <p class="mb-1"><strong>Atendido por:</strong> <%= pedido.getUsuarioNombre() != null ? pedido.getUsuarioNombre() : "-" %></p>

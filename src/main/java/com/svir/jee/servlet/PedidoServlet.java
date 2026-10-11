@@ -113,6 +113,11 @@ public class PedidoServlet extends HttpServlet {
         String clienteIdParam = req.getParameter("clienteId");
         if (clienteIdParam != null && !clienteIdParam.isBlank()) {
             pedido.setClienteId(Integer.parseInt(clienteIdParam));
+        } else {
+            String nombre = com.svir.jee.util.Textos.limpiar(req.getParameter("nombreInvitado"), 150);
+            if (!nombre.isEmpty()) {
+                pedido.setNombreInvitado(nombre);
+            }
         }
         pedido.setTipoOrigen(TipoOrigenPedido.valueOf(req.getParameter("tipoOrigen")));
         pedido.setObservacion(req.getParameter("observacion"));

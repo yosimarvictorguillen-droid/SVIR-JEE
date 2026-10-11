@@ -7,6 +7,7 @@ import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
+import com.svir.jee.util.Textos;
 
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -133,6 +134,10 @@ public class PosBean implements Serializable {
             obs.append(" | Cliente: ").append(razonSocial.trim());
         }
         pedido.setObservacion(obs.toString());
+        String nombreComprador = Textos.limpiar(razonSocial, 150);
+        if (!nombreComprador.isEmpty()) {
+            pedido.setNombreInvitado(nombreComprador);
+        }
 
         for (Item item : carrito) {
             if (item.cantidad == null || item.cantidad <= 0) {

@@ -41,7 +41,7 @@
                         </h:column>
                         <h:column>
                             <f:facet name="header">Cliente</f:facet>
-                            #{empty p.clienteNombre ? 'Cliente general' : p.clienteNombre}
+                            #{empty p.clienteNombre ? 'Sin nombre' : p.clienteNombre}
                         </h:column>
                     <h:column>
                         <f:facet name="header">Tipo de cliente</f:facet>
@@ -110,7 +110,7 @@
                             <div class="modal-body">
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <p class="mb-1"><strong>Cliente:</strong> #{empty pedidoBean.detalle.clienteNombre ? 'Cliente general' : pedidoBean.detalle.clienteNombre} <h:outputText value="#{pedidoBean.detalle.tipoComprador}" rendered="#{pedidoBean.detalle.tipoComprador ne 'General'}" styleClass="badge #{pedidoBean.detalle.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : 'bg-warning text-dark'}"/></p>
+                                        <p class="mb-1"><strong>Cliente:</strong> #{empty pedidoBean.detalle.clienteNombre ? 'Sin nombre' : pedidoBean.detalle.clienteNombre} <h:outputText value="#{pedidoBean.detalle.tipoComprador}" rendered="#{pedidoBean.detalle.tipoComprador ne 'General'}" styleClass="badge #{pedidoBean.detalle.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : 'bg-warning text-dark'}"/></p>
                                         <p class="mb-1"><strong>Origen:</strong> #{pedidoBean.detalle.tipoOrigen}</p>
                                         <p class="mb-0"><strong>Atendió:</strong> #{pedidoBean.detalle.usuarioNombre}</p>
                                     </div>
@@ -159,20 +159,25 @@
                             </div>
                             <div class="modal-body">
                                 <div class="row g-3 mb-3">
-                                    <div class="col-md-5">
+                                    <div class="col-md-4">
                                         <h:outputLabel for="cliente" value="Cliente" styleClass="form-label"/>
                                         <h:selectOneMenu id="cliente" value="#{pedidoBean.clienteId}" styleClass="form-select">
-                                            <f:selectItem itemLabel="Cliente general" itemValue="" noSelectionOption="true"/>
+                                            <f:selectItem itemLabel="Invitado (no registrado)" itemValue="" noSelectionOption="true"/>
                                             <f:selectItems value="#{pedidoBean.clientes}" var="c" itemValue="#{c.id}" itemLabel="#{c.nombre}"/>
                                         </h:selectOneMenu>
                                     </div>
                                     <div class="col-md-3">
+                                        <h:outputLabel for="nombreInvitado" value="Nombre del invitado" styleClass="form-label"/>
+                                        <h:inputText id="nombreInvitado" value="#{pedidoBean.nombreInvitado}" maxlength="150"
+                                                     styleClass="form-control" a:placeholder="Solo si no es cliente"/>
+                                    </div>
+                                    <div class="col-md-2">
                                         <h:outputLabel for="origen" value="Origen" styleClass="form-label"/>
                                         <h:selectOneMenu id="origen" value="#{pedidoBean.tipoOrigen}" styleClass="form-select">
                                             <f:selectItems value="#{pedidoBean.origenes}" var="o" itemValue="#{o}" itemLabel="#{o}"/>
                                         </h:selectOneMenu>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <h:outputLabel for="observacion" value="Observación" styleClass="form-label"/>
                                         <h:inputText id="observacion" value="#{pedidoBean.observacion}" maxlength="255" styleClass="form-control"/>
                                     </div>

@@ -34,7 +34,7 @@
         <%
             if (pedidos != null) {
                 for (Pedido p : pedidos) {
-                    String cliente = p.getClienteNombre() != null ? p.getClienteNombre() : "Cliente general";
+                    String cliente = p.getClienteNombre() != null ? p.getClienteNombre() : "Sin nombre";
                     boolean esTerminal = p.getEstado() == EstadoPedido.ENTREGADO || p.getEstado() == EstadoPedido.CANCELADO;
         %>
         <tr>

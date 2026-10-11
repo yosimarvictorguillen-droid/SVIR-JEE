@@ -20,7 +20,7 @@
         %>
         <tr>
             <td>#<%= p.getId() %></td>
-            <td><%= p.getClienteNombre() != null ? p.getClienteNombre() : "Cliente general" %></td>
+            <td><%= p.getClienteNombre() != null ? p.getClienteNombre() : "Sin nombre" %></td>
             <td>S/ <%= p.getTotal() %></td>
             <td><span class="badge bg-secondary"><%= p.getEstado() %></span></td>
             <td>

@@ -73,7 +73,7 @@
         <tbody>
         <%
             for (Pedido p : resumen.getPedidosRecientes()) {
-                String cliente = p.getClienteNombre() != null ? p.getClienteNombre() : "Cliente general";
+                String cliente = p.getClienteNombre() != null ? p.getClienteNombre() : "Sin nombre";
         %>
         <tr>
             <td>#<%= p.getId() %></td>

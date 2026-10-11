@@ -216,7 +216,7 @@
                                              styleClass="table table-sm align-middle mb-0">
                                     <h:column><f:facet name="header">#</f:facet>#{p.id}</h:column>
                                     <h:column><f:facet name="header">Cliente</f:facet>
-                                        #{empty p.clienteNombre ? 'Cliente general' : p.clienteNombre}</h:column>
+                                        #{empty p.clienteNombre ? 'Sin nombre' : p.clienteNombre}</h:column>
                                     <h:column><f:facet name="header">Total</f:facet>
                                         S/ <h:outputText value="#{p.total}"><f:convertNumber pattern="#,##0.00"/></h:outputText></h:column>
                                     <h:column><f:facet name="header">Estado</f:facet>

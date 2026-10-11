@@ -57,12 +57,9 @@ public class Pedido implements java.io.Serializable {
         this.nombreInvitado = nombreInvitado;
     }
 
-    /** "Cliente" (tiene cuenta), "Invitado" (compro sin cuenta dejando su nombre) o "General" (venta de mostrador). */
+    /** "Cliente" si esta registrado en el sistema; "Invitado" si no lo esta (con o sin nombre escrito). */
     public String getTipoComprador() {
-        if (clienteId != null) {
-            return "Cliente";
-        }
-        return nombreInvitado != null && !nombreInvitado.isBlank() ? "Invitado" : "General";
+        return clienteId != null ? "Cliente" : "Invitado";
     }
 
     public Integer getUsuarioId() {

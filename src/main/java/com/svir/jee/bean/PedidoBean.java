@@ -10,6 +10,7 @@ import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
+import com.svir.jee.util.Textos;
 
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -56,6 +57,7 @@ public class PedidoBean extends ListadoBase<Pedido> {
     // pedido nuevo
     private boolean creando;
     private Integer clienteId;
+    private String nombreInvitado;
     private TipoOrigenPedido tipoOrigen = TipoOrigenPedido.PRESENCIAL;
     private String observacion;
     private List<Linea> lineas = new ArrayList<>();
@@ -136,6 +138,7 @@ public class PedidoBean extends ListadoBase<Pedido> {
     public void nuevo() {
         Formularios.resetear("formPedido");
         clienteId = null;
+        nombreInvitado = null;
         tipoOrigen = TipoOrigenPedido.PRESENCIAL;
         observacion = null;
         lineas = new ArrayList<>();
@@ -167,6 +170,12 @@ public class PedidoBean extends ListadoBase<Pedido> {
 
         Pedido pedido = new Pedido();
         pedido.setClienteId(clienteId);
+        if (clienteId == null) {
+            String nombre = Textos.limpiar(nombreInvitado, 150);
+            if (!nombre.isEmpty()) {
+                pedido.setNombreInvitado(nombre);
+            }
+        }
         pedido.setTipoOrigen(tipoOrigen);
         pedido.setObservacion(observacion);
         for (Linea l : lineas) {
@@ -265,6 +274,8 @@ public class PedidoBean extends ListadoBase<Pedido> {
     public boolean isCreando() { return creando; }
     public Integer getClienteId() { return clienteId; }
     public void setClienteId(Integer clienteId) { this.clienteId = clienteId; }
+    public String getNombreInvitado() { return nombreInvitado; }
+    public void setNombreInvitado(String nombreInvitado) { this.nombreInvitado = nombreInvitado; }
     public TipoOrigenPedido getTipoOrigen() { return tipoOrigen; }
     public void setTipoOrigen(TipoOrigenPedido tipoOrigen) { this.tipoOrigen = tipoOrigen; }
     public String getObservacion() { return observacion; }

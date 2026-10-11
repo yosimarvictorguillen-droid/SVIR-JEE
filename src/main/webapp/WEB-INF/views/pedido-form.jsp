@@ -19,7 +19,7 @@
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Cliente (opcional)</label>
                     <select class="form-select" name="clienteId">
-                        <option value="">Cliente general (sin registrar)</option>
+                        <option value="">Invitado (no registrado)</option>
                         <%
                             if (clientes != null) {
                                 for (Cliente c : clientes) {
@@ -30,6 +30,10 @@
                             }
                         %>
                     </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nombre del invitado (solo si no es cliente)</label>
+                    <input type="text" class="form-control" name="nombreInvitado" maxlength="150" placeholder="Opcional">
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Canal</label>

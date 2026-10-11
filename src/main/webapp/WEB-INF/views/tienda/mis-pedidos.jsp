@@ -58,7 +58,7 @@
 <div class="card mb-4">
     <div class="card-body">
         <h5>Pedido #<%= pedidoBuscado.getId() %></h5>
-        <% if (!"General".equals(pedidoBuscado.getTipoComprador())) { %>
+        <% if (pedidoBuscado.getClienteNombre() != null) { %>
         <p class="mb-1"><strong>A nombre de:</strong> <%= pedidoBuscado.getClienteNombre() %>
             <span class="badge <%= "Cliente".equals(pedidoBuscado.getTipoComprador()) ? "bg-info text-dark" : "bg-warning text-dark" %>"><%= pedidoBuscado.getTipoComprador() %></span></p>
         <% } %>

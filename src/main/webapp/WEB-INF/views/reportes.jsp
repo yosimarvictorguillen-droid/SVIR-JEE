@@ -46,7 +46,7 @@
         %>
         <tr>
             <td>#<%= p.getId() %></td>
-            <td><%= p.getClienteNombre() != null ? p.getClienteNombre() : "Cliente general" %></td>
+            <td><%= p.getClienteNombre() != null ? p.getClienteNombre() : "Sin nombre" %></td>
             <td><span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : ("Invitado".equals(p.getTipoComprador()) ? "bg-warning text-dark" : "bg-secondary") %>"><%= p.getTipoComprador() %></span></td>
             <td><%= p.getTipoOrigen() %></td>
             <td>S/ <%= p.getTotal() %></td>

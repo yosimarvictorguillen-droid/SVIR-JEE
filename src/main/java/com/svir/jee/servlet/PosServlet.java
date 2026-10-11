@@ -83,6 +83,10 @@ public class PosServlet extends HttpServlet {
                 obs.append(" | Cliente: ").append(razonSocial.trim());
             }
             pedido.setObservacion(obs.toString());
+            String nombreComprador = com.svir.jee.util.Textos.limpiar(razonSocial, 150);
+            if (!nombreComprador.isEmpty()) {
+                pedido.setNombreInvitado(nombreComprador);
+            }
 
             for (int i = 0; i < productoIds.length; i++) {
                 int cantidad = Integer.parseInt(cantidades[i]);

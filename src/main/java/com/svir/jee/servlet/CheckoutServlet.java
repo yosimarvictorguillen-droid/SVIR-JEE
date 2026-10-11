@@ -15,6 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import static com.svir.jee.util.Textos.limpiar;
+
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -53,18 +55,6 @@ public class CheckoutServlet extends HttpServlet {
         } catch (SQLException e) {
             throw new ServletException("Error preparando el checkout", e);
         }
-    }
-
-    /**
-     * Texto libre que escribe quien compra (nombre, direccion...): se quitan los caracteres con los que
-     * se podria inyectar HTML en las pantallas del personal, se recorta y se limita el largo.
-     */
-    private static String limpiar(String texto, int maximo) {
-        if (texto == null) {
-            return "";
-        }
-        String limpio = texto.replaceAll("[<>&\"'`|]", "").trim();
-        return limpio.length() > maximo ? limpio.substring(0, maximo).trim() : limpio;
     }
 
     @Override
