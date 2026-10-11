@@ -34,7 +34,9 @@ public class ProductoBean implements Serializable {
     private String filtro = "";
     private String filtroAplicado = "";
     private int primero = 0;
-    private boolean soloStockBajo; // viene de ?filtro=stockbajo (tarjeta del dashboard)
+    // filtros adicionales: valores del formulario (sel) y los ya aplicados
+    private final java.util.Map<String, String> sel = new java.util.LinkedHashMap<>();
+    private java.util.Map<String, String> aplicado = new java.util.HashMap<>();
     private final int filas = 5;
 
     private boolean editando;
@@ -48,7 +50,7 @@ public class ProductoBean implements Serializable {
             String f = filtroAplicado.toLowerCase(Locale.ROOT);
             try {
                 cache = DAO.listarTodos().stream()
-                        .filter(p -> !soloStockBajo || (p.isActivo() && p.isStockBajo()))
+                        .filter(this::cumpleFiltros)
                         .filter(p -> f.isEmpty() || p.getNombre().toLowerCase(Locale.ROOT).contains(f))
                         .collect(Collectors.toList());
             } catch (SQLException e) {
@@ -59,31 +61,38 @@ public class ProductoBean implements Serializable {
         return cache;
     }
 
+    private boolean cumpleFiltros(Producto p) {
+        String estado = aplicado.get("estado") == null ? "" : aplicado.get("estado");
+        String stock = aplicado.get("stock") == null ? "" : aplicado.get("stock");
+        return (estado.isEmpty() || p.isActivo() == "ACTIVO".equals(estado)) && (stock.isEmpty() || p.isStockBajo());
+    }
+
+    /** Atajo ?filtro=stockbajo desde el dashboard: rellena el formulario y busca. */
     @jakarta.annotation.PostConstruct
-    void leerFiltroRapido() {
+    void leerAtajo() {
         String f = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("filtro");
-        soloStockBajo = "stockbajo".equals(f);
+        if ("stockbajo".equals(f)) {
+            sel.put("estado", "ACTIVO");
+            sel.put("stock", "BAJO");
+            buscar();
+        }
     }
 
-    public String getTituloFiltroRapido() {
-        return soloStockBajo ? "Productos con stock bajo" : null;
-    }
-
-    public void quitarFiltroRapido() {
-        soloStockBajo = false;
-        primero = 0;
-        cache = null;
+    public java.util.Map<String, String> getSel() {
+        return sel;
     }
 
     // ---- filtro y paginacion ----
 
     public void buscar() {
+        aplicado = new java.util.HashMap<>(sel);
         filtroAplicado = filtro == null ? "" : filtro.trim();
         primero = 0;
         cache = null;
     }
 
     public void limpiar() {
+        sel.clear();
         filtro = "";
         buscar();
     }

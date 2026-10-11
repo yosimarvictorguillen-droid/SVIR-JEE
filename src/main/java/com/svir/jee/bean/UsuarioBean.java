@@ -29,6 +29,14 @@ public class UsuarioBean extends ListadoBase<Usuario> {
     }
 
     @Override
+    protected boolean cumpleFiltros(Usuario u, java.util.Map<String, String> f) {
+        String rol = valor(f, "rol");
+        String estado = valor(f, "estado");
+        return (rol.isEmpty() || u.getRol().name().equals(rol))
+                && (estado.isEmpty() || u.isActivo() == "ACTIVO".equals(estado));
+    }
+
+    @Override
     protected String textoBusqueda(Usuario u) {
         return texto(u.getNombre()) + " " + texto(u.getEmail()) + " " + u.getRol();
     }

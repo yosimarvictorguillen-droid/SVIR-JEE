@@ -2,6 +2,7 @@
                 xmlns:h="jakarta.faces.html"
                 xmlns:f="jakarta.faces.core"
                 xmlns:ui="jakarta.faces.facelets"
+                xmlns:a="jakarta.faces.passthrough"
                 template="/WEB-INF/templates/layout.xhtml">
 
     <ui:define name="titulo">Movimientos</ui:define>
@@ -10,7 +11,46 @@
         <h1 class="h3 mb-1">Movimientos de stock <small class="text-muted fs-6">(versión JSF)</small></h1>
         <p class="text-muted">Auditoría de cada entrada, salida y ajuste de inventario.</p>
 
+        <h:form id="formFiltro" styleClass="card card-body mb-3">
+            <div class="row g-2">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small mb-1" for="formFiltro:q">Buscar</label>
+                    <h:inputText id="q" value="#{movimientoBean.q}" styleClass="form-control form-control-sm"
+                                 a:placeholder="Nombre del producto o ingrediente"/>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:tipo">Tipo</label>
+                    <h:selectOneMenu id="tipo" value="#{movimientoBean.tipo}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="ENTRADA" itemLabel="Entrada"/>
+                        <f:selectItem itemValue="SALIDA" itemLabel="Salida"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:ver">Mostrar</label>
+                    <h:selectOneMenu id="ver" value="#{movimientoBean.ver}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Productos e ingredientes"/>
+                        <f:selectItem itemValue="PRODUCTOS" itemLabel="Solo productos"/>
+                        <f:selectItem itemValue="INGREDIENTES" itemLabel="Solo ingredientes"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:desde">Desde</label>
+                    <h:inputText id="desde" value="#{movimientoBean.desde}" styleClass="form-control form-control-sm" a:type="date"/>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:hasta">Hasta</label>
+                    <h:inputText id="hasta" value="#{movimientoBean.hasta}" styleClass="form-control form-control-sm" a:type="date"/>
+                </div>
+                <div class="col-12 d-flex gap-2">
+                    <h:commandButton value="Buscar" action="#{movimientoBean.buscar}" styleClass="btn btn-sm btn-dark"/>
+                    <h:commandButton value="Limpiar" action="#{movimientoBean.limpiar}" styleClass="btn btn-sm btn-outline-secondary"/>
+                </div>
+            </div>
+        </h:form>
+
         <!-- Movimientos de productos (mismas columnas y colores que el panel JSP) -->
+        <ui:fragment rendered="#{movimientoBean.mostrarProductos}">
         <div class="card mb-4">
             <div class="card-header fw-semibold">Movimientos de productos</div>
             <h:form id="formProductos">
@@ -67,8 +107,10 @@
                 </div>
             </h:form>
         </div>
+        </ui:fragment>
 
         <!-- Movimientos de ingredientes -->
+        <ui:fragment rendered="#{movimientoBean.mostrarIngredientes}">
         <div class="card">
             <div class="card-header fw-semibold">Movimientos de ingredientes</div>
             <h:form id="formIngredientes">
@@ -125,5 +167,6 @@
                 </div>
             </h:form>
         </div>
+        </ui:fragment>
     </ui:define>
 </ui:composition>

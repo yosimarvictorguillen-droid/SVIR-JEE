@@ -5,8 +5,11 @@ import jakarta.faces.context.FacesContext;
 
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -23,38 +26,42 @@ public abstract class ListadoBase<T> implements Serializable {
     private int primero = 0;
     private final int filas = 5;
     private transient List<T> cache;
-    private String filtroRapido; // viene de ?filtro= (tarjetas del dashboard); null = sin filtro
 
     protected abstract List<T> cargar() throws SQLException;
 
     protected abstract String textoBusqueda(T item);
 
-    /** Titulo del filtro rapido indicado en ?filtro=, o null si ese valor no existe en este listado. */
-    protected String tituloFiltroRapido(String filtro) {
-        return null;
+    // ---- filtros adicionales (selects y fechas del formulario) ----
+
+    private final Map<String, String> sel = new LinkedHashMap<>();
+    private Map<String, String> aplicado = new HashMap<>();
+
+    /** Valores del formulario (#{bean.sel['estado']}); se aplican al pulsar Buscar. */
+    public Map<String, String> getSel() {
+        return sel;
     }
 
-    /** Si el item entra en el filtro rapido. */
-    protected boolean cumpleFiltroRapido(T item, String filtro) {
+    /** Si el item cumple los filtros adicionales ya aplicados. Cada listado redefine solo los que usa. */
+    protected boolean cumpleFiltros(T item, Map<String, String> filtros) {
         return true;
     }
 
+    protected static String valor(Map<String, String> filtros, String clave) {
+        String v = filtros.get(clave);
+        return v == null ? "" : v;
+    }
+
+    /** Atajos que llegan en ?filtro= desde las tarjetas del dashboard: rellenan el formulario. */
+    protected void aplicarAtajo(String atajo) {
+    }
+
     @PostConstruct
-    void leerFiltroRapido() {
+    void leerAtajo() {
         String f = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().get("filtro");
-        if (f != null && tituloFiltroRapido(f) != null) {
-            filtroRapido = f;
+        if (f != null) {
+            aplicarAtajo(f);
+            buscar();
         }
-    }
-
-    public String getTituloFiltroRapido() {
-        return filtroRapido == null ? null : tituloFiltroRapido(filtroRapido);
-    }
-
-    public void quitarFiltroRapido() {
-        filtroRapido = null;
-        primero = 0;
-        cache = null;
     }
 
     public List<T> getItems() {
@@ -62,7 +69,7 @@ public abstract class ListadoBase<T> implements Serializable {
             String f = filtroAplicado.toLowerCase(Locale.ROOT);
             try {
                 cache = cargar().stream()
-                        .filter(i -> filtroRapido == null || cumpleFiltroRapido(i, filtroRapido))
+                        .filter(i -> cumpleFiltros(i, aplicado))
                         .filter(i -> f.isEmpty() || textoBusqueda(i).toLowerCase(Locale.ROOT).contains(f))
                         .collect(Collectors.toList());
             } catch (SQLException e) {
@@ -83,12 +90,14 @@ public abstract class ListadoBase<T> implements Serializable {
     }
 
     public void buscar() {
+        aplicado = new HashMap<>(sel);
         filtroAplicado = filtro == null ? "" : filtro.trim();
         primero = 0;
         cache = null;
     }
 
     public void limpiar() {
+        sel.clear();
         filtro = "";
         buscar();
     }

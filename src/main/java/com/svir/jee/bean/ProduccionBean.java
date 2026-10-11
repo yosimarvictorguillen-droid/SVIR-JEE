@@ -83,6 +83,30 @@ public class ProduccionBean extends ListadoBase<Produccion> {
     }
 
     @Override
+    protected boolean cumpleFiltros(Produccion p, java.util.Map<String, String> f) {
+        String tipo = valor(f, "tipo");
+        String estado = valor(f, "estado");
+        if (!tipo.isEmpty() && !p.getTipo().name().equals(tipo)) {
+            return false;
+        }
+        if (!estado.isEmpty() && !p.getEstado().name().equals(estado)) {
+            return false;
+        }
+        java.time.LocalDate dia = p.getCreatedAt() == null ? null : p.getCreatedAt().toLocalDate();
+        try {
+            if (!valor(f, "desde").isEmpty() && (dia == null || dia.isBefore(java.time.LocalDate.parse(valor(f, "desde"))))) {
+                return false;
+            }
+            if (!valor(f, "hasta").isEmpty() && (dia == null || dia.isAfter(java.time.LocalDate.parse(valor(f, "hasta"))))) {
+                return false;
+            }
+        } catch (java.time.format.DateTimeParseException e) {
+            return true; // fecha mal escrita: se ignora ese filtro
+        }
+        return true;
+    }
+
+    @Override
     protected String textoBusqueda(Produccion p) {
         return p.getId() + " " + p.getTipo() + " " + p.getEstado() + " " + texto(p.getUsuarioNombre());
     }

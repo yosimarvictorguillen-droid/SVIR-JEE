@@ -26,6 +26,12 @@ public class ClienteBean extends ListadoBase<Cliente> {
     }
 
     @Override
+    protected boolean cumpleFiltros(Cliente c, java.util.Map<String, String> f) {
+        String estado = valor(f, "estado");
+        return estado.isEmpty() || c.isActivo() == "ACTIVO".equals(estado);
+    }
+
+    @Override
     protected String textoBusqueda(Cliente c) {
         return texto(c.getNombre()) + " " + texto(c.getDni()) + " " + texto(c.getRuc()) + " " + texto(c.getTelefono());
     }

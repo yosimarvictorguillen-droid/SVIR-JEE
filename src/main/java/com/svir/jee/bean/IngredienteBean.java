@@ -37,13 +37,18 @@ public class IngredienteBean extends ListadoBase<Ingrediente> {
     }
 
     @Override
-    protected String tituloFiltroRapido(String filtro) {
-        return "stockbajo".equals(filtro) ? "Ingredientes con stock bajo" : null;
+    protected void aplicarAtajo(String atajo) {
+        if ("stockbajo".equals(atajo)) {
+            getSel().put("estado", "ACTIVO");
+            getSel().put("stock", "BAJO");
+        }
     }
 
     @Override
-    protected boolean cumpleFiltroRapido(Ingrediente i, String filtro) {
-        return i.isActivo() && i.isStockBajo();
+    protected boolean cumpleFiltros(Ingrediente i, java.util.Map<String, String> f) {
+        String estado = valor(f, "estado");
+        return (estado.isEmpty() || i.isActivo() == "ACTIVO".equals(estado))
+                && (valor(f, "stock").isEmpty() || i.isStockBajo());
     }
 
     @Override

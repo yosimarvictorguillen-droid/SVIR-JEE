@@ -116,28 +116,23 @@ public class PedidoBean extends ListadoBase<Pedido> {
     // ---- filtros rapidos (tarjetas del dashboard) y apertura directa del detalle ----
 
     @Override
-    protected String tituloFiltroRapido(String filtro) {
-        return switch (filtro) {
-            case "hoy" -> "Pedidos de hoy";
-            case "mes" -> "Pedidos del mes";
-            case "pendientes" -> "Pedidos pendientes / en preparaciÃ³n";
-            case "listos" -> "Pedidos listos";
-            default -> null;
-        };
-    }
-
-    @Override
-    protected boolean cumpleFiltroRapido(Pedido p, String filtro) {
+    protected void aplicarAtajo(String atajo) {
         java.time.LocalDate hoy = java.time.LocalDate.now();
-        boolean activo = p.getEstado() != EstadoPedido.CANCELADO;
-        return switch (filtro) {
-            case "hoy" -> activo && p.getCreatedAt().toLocalDate().equals(hoy);
-            case "mes" -> activo && p.getCreatedAt().getYear() == hoy.getYear()
-                    && p.getCreatedAt().getMonth() == hoy.getMonth();
-            case "pendientes" -> p.getEstado() == EstadoPedido.PENDIENTE || p.getEstado() == EstadoPedido.PREPARACION;
-            case "listos" -> p.getEstado() == EstadoPedido.LISTO;
-            default -> true;
-        };
+        switch (atajo) {
+            case "hoy" -> {
+                desdeSel = hoy;
+                hastaSel = hoy;
+                estadoSel = "ACTIVOS";
+            }
+            case "mes" -> {
+                desdeSel = hoy.withDayOfMonth(1);
+                hastaSel = hoy.withDayOfMonth(hoy.lengthOfMonth());
+                estadoSel = "ACTIVOS";
+            }
+            case "pendientes" -> estadoSel = "ABIERTOS";
+            case "listos" -> estadoSel = "LISTO";
+            default -> { }
+        }
     }
 
     /** Si la pagina se abre con ?ver=ID (desde "Pedidos recientes" del dashboard) muestra ese detalle. */

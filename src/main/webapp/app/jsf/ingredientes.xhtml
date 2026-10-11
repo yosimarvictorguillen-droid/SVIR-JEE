@@ -17,21 +17,32 @@
             </h:form>
         </div>
 
-        <h:form id="formFiltro" styleClass="row g-2 mb-3">
-            <div class="col-12 col-md-6 col-lg-4">
-                <h:inputText id="filtro" value="#{ingredienteBean.filtro}" styleClass="form-control"
-                             a:placeholder="Buscar por nombre..."/>
-            </div>
-            <div class="col-auto">
-                <h:commandButton value="Buscar" action="#{ingredienteBean.buscar}" styleClass="btn btn-outline-dark"/>
-                <h:commandButton value="Limpiar" action="#{ingredienteBean.limpiar}" styleClass="btn btn-link"/>
-            </div>
-        </h:form>
-
-        <h:form id="formFiltroRapido" rendered="#{not empty ingredienteBean.tituloFiltroRapido}">
-            <div class="alert alert-info d-flex justify-content-between align-items-center py-2">
-                <span>Mostrando: <strong>#{ingredienteBean.tituloFiltroRapido}</strong> (#{ingredienteBean.total})</span>
-                <h:commandButton value="Ver todos" action="#{ingredienteBean.quitarFiltroRapido}" styleClass="btn btn-sm btn-outline-secondary"/>
+        <h:form id="formFiltro" styleClass="card card-body mb-3">
+            <div class="row g-2">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small mb-1" for="formFiltro:filtro">Buscar</label>
+                    <h:inputText id="filtro" value="#{ingredienteBean.filtro}" styleClass="form-control form-control-sm"
+                                 a:placeholder="Nombre del ingrediente"/>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:estado">Estado</label>
+                    <h:selectOneMenu id="estado" value="#{ingredienteBean.sel['estado']}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="ACTIVO" itemLabel="Activo"/>
+                        <f:selectItem itemValue="INACTIVO" itemLabel="Inactivo"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:stock">Stock</label>
+                    <h:selectOneMenu id="stock" value="#{ingredienteBean.sel['stock']}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="BAJO" itemLabel="Solo stock bajo"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                    <h:commandButton value="Buscar" action="#{ingredienteBean.buscar}" styleClass="btn btn-sm btn-dark"/>
+                    <h:commandButton value="Limpiar" action="#{ingredienteBean.limpiar}" styleClass="btn btn-sm btn-outline-secondary"/>
+                </div>
             </div>
         </h:form>
 

@@ -20,14 +20,43 @@
             </h:form>
         </div>
 
-        <h:form id="formFiltro" styleClass="row g-2 mb-3">
-            <div class="col-12 col-md-6 col-lg-4">
-                <h:inputText id="filtro" value="#{produccionBean.filtro}" styleClass="form-control"
-                             a:placeholder="Buscar por N°, tipo, estado o responsable..."/>
-            </div>
-            <div class="col-auto">
-                <h:commandButton value="Buscar" action="#{produccionBean.buscar}" styleClass="btn btn-outline-dark"/>
-                <h:commandButton value="Limpiar" action="#{produccionBean.limpiar}" styleClass="btn btn-link"/>
+        <h:form id="formFiltro" styleClass="card card-body mb-3">
+            <div class="row g-2">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small mb-1" for="formFiltro:filtro">Buscar</label>
+                    <h:inputText id="filtro" value="#{produccionBean.filtro}" styleClass="form-control form-control-sm"
+                                 a:placeholder="NÂ°, responsable..."/>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:tipo">Tipo</label>
+                    <h:selectOneMenu id="tipo" value="#{produccionBean.sel['tipo']}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="PEDIDO" itemLabel="Por pedido"/>
+                        <f:selectItem itemValue="STOCK" itemLabel="Para stock"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:estado">Estado</label>
+                    <h:selectOneMenu id="estado" value="#{produccionBean.sel['estado']}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="PENDIENTE" itemLabel="Pendiente"/>
+                        <f:selectItem itemValue="EN_PROCESO" itemLabel="En proceso"/>
+                        <f:selectItem itemValue="TERMINADO" itemLabel="Terminado"/>
+                        <f:selectItem itemValue="CANCELADO" itemLabel="Cancelado"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:desde">Desde</label>
+                    <h:inputText id="desde" value="#{produccionBean.sel['desde']}" styleClass="form-control form-control-sm" a:type="date"/>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:hasta">Hasta</label>
+                    <h:inputText id="hasta" value="#{produccionBean.sel['hasta']}" styleClass="form-control form-control-sm" a:type="date"/>
+                </div>
+                <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                    <h:commandButton value="Buscar" action="#{produccionBean.buscar}" styleClass="btn btn-sm btn-dark"/>
+                    <h:commandButton value="Limpiar" action="#{produccionBean.limpiar}" styleClass="btn btn-sm btn-outline-secondary"/>
+                </div>
             </div>
         </h:form>
 

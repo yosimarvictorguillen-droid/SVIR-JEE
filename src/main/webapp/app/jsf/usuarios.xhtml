@@ -17,14 +17,35 @@
             </h:form>
         </div>
 
-        <h:form id="formFiltro" styleClass="row g-2 mb-3">
-            <div class="col-12 col-md-6 col-lg-4">
-                <h:inputText id="filtro" value="#{usuarioBean.filtro}" styleClass="form-control"
-                             a:placeholder="Buscar por nombre, correo o rol..."/>
-            </div>
-            <div class="col-auto">
-                <h:commandButton value="Buscar" action="#{usuarioBean.buscar}" styleClass="btn btn-outline-dark"/>
-                <h:commandButton value="Limpiar" action="#{usuarioBean.limpiar}" styleClass="btn btn-link"/>
+        <h:form id="formFiltro" styleClass="card card-body mb-3">
+            <div class="row g-2">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small mb-1" for="formFiltro:filtro">Buscar</label>
+                    <h:inputText id="filtro" value="#{usuarioBean.filtro}" styleClass="form-control form-control-sm"
+                                 a:placeholder="Nombre, correo o rol"/>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:rol">Rol</label>
+                    <h:selectOneMenu id="rol" value="#{usuarioBean.sel['rol']}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="ADMIN" itemLabel="Admin"/>
+                        <f:selectItem itemValue="VENTAS" itemLabel="Ventas"/>
+                        <f:selectItem itemValue="COCINA" itemLabel="Cocina"/>
+                        <f:selectItem itemValue="REPARTIDOR" itemLabel="Repartidor"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-6 col-md-2">
+                    <label class="form-label small mb-1" for="formFiltro:estado">Estado</label>
+                    <h:selectOneMenu id="estado" value="#{usuarioBean.sel['estado']}" styleClass="form-select form-select-sm">
+                        <f:selectItem itemValue="" itemLabel="Todos"/>
+                        <f:selectItem itemValue="ACTIVO" itemLabel="Activo"/>
+                        <f:selectItem itemValue="INACTIVO" itemLabel="Inactivo"/>
+                    </h:selectOneMenu>
+                </div>
+                <div class="col-12 col-md-3 d-flex align-items-end gap-2">
+                    <h:commandButton value="Buscar" action="#{usuarioBean.buscar}" styleClass="btn btn-sm btn-dark"/>
+                    <h:commandButton value="Limpiar" action="#{usuarioBean.limpiar}" styleClass="btn btn-sm btn-outline-secondary"/>
+                </div>
             </div>
         </h:form>
 
