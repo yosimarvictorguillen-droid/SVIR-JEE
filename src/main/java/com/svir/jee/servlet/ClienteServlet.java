@@ -4,6 +4,8 @@ import com.svir.jee.dao.ClienteDAO;
 import com.svir.jee.model.Cliente;
 
 import com.svir.jee.util.Filtros;
+import com.svir.jee.util.Documentos;
+import com.svir.jee.util.Textos;
 import com.svir.jee.util.Pagina;
 
 import jakarta.servlet.ServletException;
@@ -19,6 +21,7 @@ import java.sql.SQLException;
 public class ClienteServlet extends HttpServlet {
 
     private final ClienteDAO clienteDAO = new ClienteDAO();
+    private final com.svir.jee.dao.InvitadoDAO invitadoDAO = new com.svir.jee.dao.InvitadoDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -79,19 +82,37 @@ public class ClienteServlet extends HttpServlet {
             if (idParam != null && !idParam.isBlank()) {
                 c.setId(Integer.parseInt(idParam));
             }
-            c.setNombre(req.getParameter("nombre"));
-            c.setDni(vacioANull(req.getParameter("dni")));
-            c.setRuc(vacioANull(req.getParameter("ruc")));
-            c.setTelefono(vacioANull(req.getParameter("telefono")));
-            c.setDireccion(vacioANull(req.getParameter("direccion")));
-            c.setEmail(vacioANull(req.getParameter("email")));
+            c.setNombre(Textos.limpiar(req.getParameter("nombre"), 100));
+            c.setTipoDocumento(Documentos.tipoValido(req.getParameter("tipoDocumento")));
+            c.setDni(Documentos.normalizar(Textos.limpiar(req.getParameter("documento"), 20)));
+            c.setRuc(vacioANull(Textos.limpiar(req.getParameter("ruc"), 11)));
+            c.setTelefono(vacioANull(Textos.limpiar(req.getParameter("telefono"), 30)));
+            c.setDireccion(vacioANull(Textos.limpiar(req.getParameter("direccion"), 255)));
+            c.setEmail(vacioANull(Textos.limpiar(req.getParameter("email"), 150)));
             c.setActivo(true);
 
-            if (c.getId() == null) {
-                clienteDAO.crear(c);
-            } else {
-                clienteDAO.actualizar(c);
+            // El documento es obligatorio y unico en todo el sistema (clientes e invitados).
+            String errorDoc = c.getNombre().isEmpty() ? "El nombre es obligatorio." : Documentos.validar(c.getTipoDocumento(), c.getDni());
+            if (errorDoc == null && clienteDAO.existeDocumento(c.getDni(), c.getId())) {
+                errorDoc = "Ese documento ya pertenece a otro cliente.";
             }
+            if (errorDoc == null && c.getId() != null
+                    && invitadoDAO.buscarPorDocumento(c.getDni()).filter(i -> !i.isConvertido()).isPresent()) {
+                errorDoc = "Ese documento pertenece a un invitado con pedidos. Registralo como cliente nuevo para vincular sus pedidos.";
+            }
+            if (errorDoc != null) {
+                req.setAttribute("error", errorDoc);
+                req.setAttribute("cliente", c);
+                req.getRequestDispatcher("/WEB-INF/views/cliente-form.jsp").forward(req, resp);
+                return;
+            }
+
+            if (c.getId() == null) {
+                int vinculados = clienteDAO.altaConVinculo(c, false, "PERSONAL");
+                resp.sendRedirect(req.getContextPath() + "/app/clientes" + (vinculados > 0 ? "?vinculados=" + vinculados : ""));
+                return;
+            }
+            clienteDAO.actualizar(c);
             resp.sendRedirect(req.getContextPath() + "/app/clientes");
         } catch (SQLException e) {
             throw new ServletException("Error guardando el cliente", e);

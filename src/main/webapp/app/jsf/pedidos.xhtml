@@ -22,17 +22,17 @@
                 <div class="col-12 col-md-4">
                     <label class="form-label small mb-1" for="formFiltro:filtro">Buscar</label>
                     <h:inputText id="filtro" value="#{pedidoBean.filtro}" styleClass="form-control form-control-sm"
-                                 a:placeholder="NÂ° de pedido, nombre, telÃ©fono o comprobante"/>
+                                 a:placeholder="N° de pedido, nombre, teléfono o comprobante"/>
                 </div>
                 <div class="col-6 col-md-2">
                     <label class="form-label small mb-1" for="formFiltro:estado">Estado</label>
                     <h:selectOneMenu id="estado" value="#{pedidoBean.estadoSel}" styleClass="form-select form-select-sm">
                         <f:selectItem itemValue="" itemLabel="Todos"/>
                         <f:selectItem itemValue="ACTIVOS" itemLabel="Activos (sin cancelados)"/>
-                        <f:selectItem itemValue="ABIERTOS" itemLabel="Pendientes / en preparaciÃ³n"/>
+                        <f:selectItem itemValue="ABIERTOS" itemLabel="Pendientes / en preparación"/>
                         <f:selectItem itemValue="PENDIENTE" itemLabel="Pendiente"/>
                         <f:selectItem itemValue="PARCIAL" itemLabel="Parcial"/>
-                        <f:selectItem itemValue="PREPARACION" itemLabel="En preparaciÃ³n"/>
+                        <f:selectItem itemValue="PREPARACION" itemLabel="En preparación"/>
                         <f:selectItem itemValue="LISTO" itemLabel="Listo"/>
                         <f:selectItem itemValue="EN_CAMINO" itemLabel="En camino"/>
                         <f:selectItem itemValue="ENTREGADO" itemLabel="Entregado"/>

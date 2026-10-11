@@ -15,6 +15,23 @@
 
 <h3 class="mb-4">Mis pedidos</h3>
 
+<%
+    // Invitacion a registrarse: solo para quien acaba de comprar como invitado en esta sesion.
+    String[] reciente = (String[]) session.getAttribute("invitadoReciente");
+    boolean sugerirRegistro = cliente == null && reciente != null && pedidoBuscado != null
+            && reciente[3].equals(String.valueOf(pedidoBuscado.getId()));
+%>
+<% if (sugerirRegistro) { %>
+<div class="alert alert-info d-flex flex-wrap justify-content-between align-items-center gap-2">
+    <span><strong>Gracias por tu compra!</strong> Crea tu cuenta con tu documento y veras todo tu historial de pedidos sin
+        volver a escribir tus datos. Este pedido quedara vinculado a tu cuenta.</span>
+    <button type="button" class="btn btn-sm btn-amber"
+            onclick="abrirRegistro('<%= reciente[0] %>', '<%= reciente[1] %>', '<%= reciente[2].replace("\\", "\\\\") %>', '<%= reciente[3] %>', '<%= reciente[4] %>')">
+        Crear mi cuenta
+    </button>
+</div>
+<% } %>
+
 <div class="card mb-4">
     <div class="card-body">
         <form method="get" action="<%= ctx %>/mis-pedidos" class="row g-2">

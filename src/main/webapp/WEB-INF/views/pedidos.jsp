@@ -45,7 +45,7 @@
         <div class="col-md-4">
             <label class="form-label small mb-1">Buscar</label>
             <input type="text" class="form-control form-control-sm" name="q" maxlength="100" value="<%= f.getTexto() %>"
-                   placeholder="NÂ° de pedido, nombre, telefono o comprobante">
+                   placeholder="N° de pedido, nombre, documento, telefono o comprobante">
         </div>
         <div class="col-md-2">
             <label class="form-label small mb-1">Estado</label>

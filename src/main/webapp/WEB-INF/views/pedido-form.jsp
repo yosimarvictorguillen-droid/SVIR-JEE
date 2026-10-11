@@ -32,8 +32,25 @@
                     </select>
                 </div>
                 <div class="col-md-6 mb-3" id="campoNombre">
-                    <label class="form-label">Nombre del invitado</label>
-                    <input type="text" class="form-control" name="nombreInvitado" id="nombreInvitado" maxlength="150" required placeholder="Nombre de quien compra">
+                    <div class="row g-2">
+                        <div class="col-5">
+                            <label class="form-label">Documento</label>
+                            <select class="form-select" name="compradorTipoDoc">
+                                <option value="DNI">DNI</option>
+                                <option value="CE">Carne ext.</option>
+                                <option value="PASAPORTE">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div class="col-7">
+                            <label class="form-label">Numero</label>
+                            <input type="text" class="form-control" name="compradorDoc" id="compradorDoc" maxlength="12" required>
+                        </div>
+                        <div class="col-12">
+                            <input type="text" class="form-control" name="nombreInvitado" id="nombreInvitado"
+                                   maxlength="150" required placeholder="Nombre de quien compra">
+                        </div>
+                    </div>
+                    <div class="form-text">Si el documento ya es de un cliente registrado, se usa su cuenta.</div>
                 </div>
                 <div class="col-md-3 mb-3">
                     <label class="form-label">Canal</label>
@@ -99,9 +116,11 @@
     function alternarNombre() {
         const hayCliente = document.getElementById("clienteId").value !== "";
         const input = document.getElementById("nombreInvitado");
+        const doc = document.getElementById("compradorDoc");
         document.getElementById("campoNombre").style.display = hayCliente ? "none" : "block";
         input.required = !hayCliente;
-        if (hayCliente) { input.value = ""; }
+        doc.required = !hayCliente;
+        if (hayCliente) { input.value = ""; doc.value = ""; }
     }
 </script>
 

@@ -1,7 +1,11 @@
 package com.svir.jee.servlet;
 
 import com.svir.jee.dao.ClienteDAO;
+import com.svir.jee.dao.InvitadoDAO;
 import com.svir.jee.model.Cliente;
+import com.svir.jee.model.Invitado;
+import com.svir.jee.util.Documentos;
+import com.svir.jee.util.LimiteIntentos;
 import com.svir.jee.util.PasswordUtil;
 import com.svir.jee.util.Textos;
 
@@ -13,14 +17,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.Optional;
 
-/** Autenticacion de clientes en la tienda web publica: registro, login y logout (sesion separada de "usuario"). */
+/**
+ * Autenticacion de clientes en la tienda web publica: registro, login y logout (sesion separada de "usuario").
+ * El documento (DNI, carne de extranjeria o pasaporte) es el usuario y es unico. Si quien se registra ya habia
+ * comprado como invitado con ese documento, debe demostrar que esas compras son suyas (numero y total de uno de sus
+ * pedidos) y entonces sus pedidos pasan a su cuenta.
+ */
 @WebServlet({"/cliente/login", "/cliente/registro", "/cliente/logout"})
 public class ClienteAuthServlet extends HttpServlet {
 
     private final ClienteDAO clienteDAO = new ClienteDAO();
+    private final InvitadoDAO invitadoDAO = new InvitadoDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -62,19 +73,21 @@ public class ClienteAuthServlet extends HttpServlet {
             throws IOException, SQLException {
         // Texto libre de la persona: se limpia para que no pueda inyectar HTML en las pantallas del personal.
         String nombre = Textos.limpiar(req.getParameter("nombre"), 150);
-        String dni = Textos.limpiar(req.getParameter("dni"), 20);
+        String tipo = Documentos.tipoValido(req.getParameter("tipoDocumento"));
+        String documento = Documentos.normalizar(Textos.limpiar(req.getParameter("documento"), 20));
         String password = req.getParameter("password");
 
         if (nombre.isEmpty()) {
             redirigirConError(req, resp, volverA, "El nombre es obligatorio.");
             return;
         }
-        if (dni.isEmpty()) {
-            redirigirConError(req, resp, volverA, "El DNI es obligatorio.");
+        String errorDocumento = Documentos.validar(tipo, documento);
+        if (errorDocumento != null) {
+            redirigirConError(req, resp, volverA, errorDocumento);
             return;
         }
-        if (clienteDAO.existeDni(dni)) {
-            redirigirConError(req, resp, volverA, "Ya existe una cuenta con ese DNI. Intenta iniciar sesion.");
+        if (clienteDAO.existeDni(documento)) {
+            redirigirConError(req, resp, volverA, "Ya existe una cuenta con ese documento. Intenta iniciar sesion.");
             return;
         }
         if (password == null || password.length() < 6) {
@@ -82,34 +95,80 @@ public class ClienteAuthServlet extends HttpServlet {
             return;
         }
 
+        // Si ya compro como invitado, debe demostrar que esas compras son suyas antes de vincularlas a la cuenta.
+        String validacion = "SIN_HISTORIAL";
+        Optional<Invitado> invitado = invitadoDAO.buscarPorDocumento(documento);
+        if (invitado.isPresent() && !invitado.get().isConvertido()) {
+            int pedidosPrevios = invitadoDAO.contarPedidos(invitado.get().getId());
+            if (pedidosPrevios > 0) {
+                String clave = "registro:" + documento;
+                if (LimiteIntentos.bloqueado(clave)) {
+                    redirigirConError(req, resp, volverA,
+                            "Demasiados intentos. Espera unos minutos o comunicate con la tienda.");
+                    return;
+                }
+                Integer pedidoRef = parsearEntero(req.getParameter("pedidoRef"));
+                BigDecimal totalRef = parsearMonto(req.getParameter("totalRef"));
+                if (pedidoRef == null || totalRef == null
+                        || !invitadoDAO.verificarPedido(invitado.get().getId(), pedidoRef, totalRef)) {
+                    LimiteIntentos.fallo(clave);
+                    redirigirConError(req, resp, volverA, "Ya compraste como invitado con este documento ("
+                            + pedidosPrevios + " pedido(s)). Para vincularlos a tu cuenta escribe el numero y el total "
+                            + "de uno de tus pedidos, tal como figuran en tu comprobante.");
+                    return;
+                }
+                LimiteIntentos.limpiar(clave);
+                validacion = "PEDIDO_ANTERIOR";
+            }
+        }
+
         Cliente c = new Cliente();
         c.setNombre(nombre);
-        c.setDni(dni);
+        c.setTipoDocumento(tipo);
+        c.setDni(documento);
         c.setTelefono(Textos.limpiar(req.getParameter("telefono"), 30));
         c.setDireccion(Textos.limpiar(req.getParameter("direccion"), 255));
         c.setEmail(Textos.limpiar(req.getParameter("email"), 150));
         c.setPasswordHash(PasswordUtil.hash(password));
-        clienteDAO.registrar(c);
+        int vinculados = clienteDAO.altaConVinculo(c, true, validacion);
 
-        req.getSession(true).setAttribute("cliente", c);
-        resp.sendRedirect(req.getContextPath() + volverA);
+        HttpSession session = req.getSession(true);
+        session.setAttribute("cliente", c);
+        session.removeAttribute("invitadoReciente");
+        resp.sendRedirect(req.getContextPath() + volverA + (volverA.contains("?") ? "&" : "?") + "bienvenida=" + vinculados);
     }
 
     private void login(HttpServletRequest req, HttpServletResponse resp, String volverA)
             throws IOException, SQLException {
-        String dni = req.getParameter("dni");
+        String documento = Documentos.normalizar(req.getParameter("documento"));
         String password = req.getParameter("password");
 
-        Optional<Cliente> encontrado = clienteDAO.buscarPorDni(dni);
+        Optional<Cliente> encontrado = clienteDAO.buscarPorDni(documento);
         if (encontrado.isEmpty() || encontrado.get().getPasswordHash() == null
                 || !PasswordUtil.verificar(password, encontrado.get().getPasswordHash())
                 || !encontrado.get().isActivo()) {
-            redirigirConError(req, resp, volverA, "DNI o contrasena incorrectos.");
+            redirigirConError(req, resp, volverA, "Documento o contrasena incorrectos.");
             return;
         }
 
         req.getSession(true).setAttribute("cliente", encontrado.get());
         resp.sendRedirect(req.getContextPath() + volverA);
+    }
+
+    private static Integer parsearEntero(String valor) {
+        try {
+            return valor == null ? null : Integer.valueOf(valor.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private static BigDecimal parsearMonto(String valor) {
+        try {
+            return valor == null || valor.isBlank() ? null : new BigDecimal(valor.trim().replace(',', '.'));
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private void redirigirConError(HttpServletRequest req, HttpServletResponse resp, String volverA, String mensaje)

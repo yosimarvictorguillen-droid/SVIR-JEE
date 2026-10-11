@@ -11,6 +11,9 @@ public class Pedido implements java.io.Serializable {
     private Integer clienteId;
     private String clienteNombre; // solo para mostrar en pantalla (join)
     private String nombreInvitado; // nombre que escribio quien compra sin cuenta
+    private Integer invitadoId; // registro del invitado (si compro sin cuenta); se conserva tras convertirse en cliente
+    private String clienteDocumento; // solo para mostrar (join)
+    private String invitadoDocumento; // solo para mostrar (join)
     private Integer usuarioId;
     private String usuarioNombre; // solo para mostrar en pantalla (join)
     private BigDecimal total;
@@ -59,6 +62,32 @@ public class Pedido implements java.io.Serializable {
 
     public void setNombreInvitado(String nombreInvitado) {
         this.nombreInvitado = nombreInvitado;
+    }
+
+    public Integer getInvitadoId() {
+        return invitadoId;
+    }
+
+    public void setInvitadoId(Integer invitadoId) {
+        this.invitadoId = invitadoId;
+    }
+
+    public void setClienteDocumento(String clienteDocumento) {
+        this.clienteDocumento = clienteDocumento;
+    }
+
+    public void setInvitadoDocumento(String invitadoDocumento) {
+        this.invitadoDocumento = invitadoDocumento;
+    }
+
+    /** Documento de quien compro (del cliente o del invitado); null en pedidos antiguos sin documento. */
+    public String getDocumentoComprador() {
+        return clienteDocumento != null ? clienteDocumento : invitadoDocumento;
+    }
+
+    /** Pedido hecho cuando la persona aun era invitada y hoy ya es cliente. */
+    public boolean isAntesInvitado() {
+        return clienteId != null && invitadoId != null;
     }
 
     /** "Cliente" si esta registrado en el sistema; "Invitado" si no lo esta (con o sin nombre escrito). */

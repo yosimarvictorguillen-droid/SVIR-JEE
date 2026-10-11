@@ -25,7 +25,7 @@
     <div class="row g-2">
         <div class="col-md-3">
             <label class="form-label small mb-1">Buscar</label>
-            <input type="text" class="form-control form-control-sm" name="q" maxlength="100" value="<%= Filtros.attr(request, "fq") %>" placeholder="NÂ° de produccion, pedido o responsable">
+            <input type="text" class="form-control form-control-sm" name="q" maxlength="100" value="<%= Filtros.attr(request, "fq") %>" placeholder="N° de produccion, pedido o responsable">
         </div>
         <div class="col-md-2">
             <label class="form-label small mb-1">Tipo</label>

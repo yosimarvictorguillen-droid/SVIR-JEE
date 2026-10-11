@@ -29,7 +29,8 @@ CREATE TABLE usuarios (
 CREATE TABLE clientes (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
     nombre              VARCHAR(100)  NOT NULL,
-    dni                 VARCHAR(8)    NULL,
+    tipo_documento      VARCHAR(12)   NOT NULL DEFAULT 'DNI' COMMENT 'DNI, CE (carne de extranjeria) o PASAPORTE',
+    dni                 VARCHAR(12)   NULL COMMENT 'Numero de documento, unico en todo el sistema',
     ruc                 VARCHAR(11)   NULL,
     telefono            VARCHAR(20)   NULL,
     direccion           VARCHAR(255)  NULL,
@@ -38,6 +39,40 @@ CREATE TABLE clientes (
     activo              TINYINT(1)    NOT NULL DEFAULT 1,
     created_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+,
+    UNIQUE KEY uq_cliente_documento (dni)
+) ENGINE=InnoDB;
+
+-- ------------------------------------------------------------
+-- invitados: compradores sin cuenta, identificados por su documento (unico).
+-- Al registrarse como cliente pasan a CONVERTIDO (se conserva para la trazabilidad).
+-- ------------------------------------------------------------
+CREATE TABLE invitados (
+    id                  INT AUTO_INCREMENT PRIMARY KEY,
+    tipo_documento      VARCHAR(12)   NOT NULL DEFAULT 'DNI',
+    documento           VARCHAR(12)   NOT NULL,
+    nombre              VARCHAR(150)  NOT NULL,
+    telefono            VARCHAR(30)   NULL,
+    estado              ENUM('ACTIVO','CONVERTIDO') NOT NULL DEFAULT 'ACTIVO',
+    cliente_id          INT NULL,
+    fecha_conversion    DATETIME NULL,
+    created_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_invitado_documento (documento),
+    CONSTRAINT fk_invitado_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+) ENGINE=InnoDB;
+
+-- ------------------------------------------------------------
+-- conversiones_invitado: registro de cuando un invitado paso a ser cliente
+-- ------------------------------------------------------------
+CREATE TABLE conversiones_invitado (
+    id                  INT AUTO_INCREMENT PRIMARY KEY,
+    invitado_id         INT NOT NULL,
+    cliente_id          INT NOT NULL,
+    pedidos_vinculados  INT NOT NULL DEFAULT 0,
+    validacion          VARCHAR(30) NOT NULL COMMENT 'PEDIDO_ANTERIOR, SIN_HISTORIAL o PERSONAL',
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_conv_invitado FOREIGN KEY (invitado_id) REFERENCES invitados(id),
+    CONSTRAINT fk_conv_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 ) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
@@ -91,6 +126,7 @@ CREATE TABLE recetas (
 CREATE TABLE pedidos (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id          INT NULL,
+    invitado_id         INT NULL,
     nombre_invitado     VARCHAR(150) NULL,
     usuario_id          INT NULL,
     total               DECIMAL(10,2) NOT NULL DEFAULT 0.00,
@@ -105,6 +141,7 @@ CREATE TABLE pedidos (
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_pedido_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+    CONSTRAINT fk_pedido_invitado FOREIGN KEY (invitado_id) REFERENCES invitados(id),
     CONSTRAINT fk_pedido_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     UNIQUE KEY uq_pedido_comprobante (comprobante_numero)
 ) ENGINE=InnoDB;

@@ -18,4 +18,13 @@ public final class Textos {
         String limpio = texto.replaceAll("[<>&\"'`|]", "").trim();
         return limpio.length() > maximo ? limpio.substring(0, maximo).trim() : limpio;
     }
+
+    /** Escapa HTML para imprimir en una pagina texto que NO paso por {@link #limpiar} (por ejemplo parametros de la URL). */
+    public static String escapar(String texto) {
+        if (texto == null) {
+            return "";
+        }
+        return texto.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+                .replace("\"", "&quot;").replace("'", "&#39;");
+    }
 }

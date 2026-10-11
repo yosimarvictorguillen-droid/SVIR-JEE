@@ -7,6 +7,8 @@ import com.svir.jee.model.DetallePedido;
 import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
+import com.svir.jee.util.Compradores;
+import com.svir.jee.util.Documentos;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -79,7 +81,20 @@ public class CheckoutServlet extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/checkout?errorNombre=1");
                 return;
             } else {
-                pedido.setNombreInvitado(nombreInvitado);
+                // Documento unico: si ya tiene cuenta debe iniciar sesion; si ya compro como invitado se reutiliza su registro.
+                String telefonoEntrega = "delivery".equals(req.getParameter("modoEntrega")) ? req.getParameter("telefono") : null;
+                try {
+                    Compradores.Comprador comprador = Compradores.resolver(req.getParameter("tipoDocumento"),
+                            req.getParameter("documento"), nombreInvitado, telefonoEntrega, false);
+                    pedido.setInvitadoId(comprador.invitadoId);
+                    pedido.setNombreInvitado(comprador.nombre);
+                } catch (Compradores.ClienteExistenteException e) {
+                    resp.sendRedirect(req.getContextPath() + "/checkout?errorDoc=cuenta");
+                    return;
+                } catch (Compradores.ValidacionException e) {
+                    resp.sendRedirect(req.getContextPath() + "/checkout?errorDoc=formato");
+                    return;
+                }
             }
 
             String modoEntrega = req.getParameter("modoEntrega");
@@ -135,6 +150,12 @@ public class CheckoutServlet extends HttpServlet {
             }
 
             Pedido creado = pedidoDAO.crear(pedido, null);
+            if (cliente == null) {
+                // Para invitar a registrarse tras la primera compra (solo se guarda en la sesion de quien compro).
+                session.setAttribute("invitadoReciente", new String[]{Documentos.tipoValido(req.getParameter("tipoDocumento")),
+                        Documentos.normalizar(req.getParameter("documento")), nombreInvitado,
+                        String.valueOf(creado.getId()), creado.getTotal().toPlainString()});
+            }
             carrito.clear();
             resp.sendRedirect(req.getContextPath() + "/mis-pedidos?id=" + creado.getId());
         } catch (SQLException e) {

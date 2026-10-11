@@ -8,6 +8,7 @@ import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
+import com.svir.jee.util.Compradores;
 import com.svir.jee.util.Textos;
 
 import jakarta.servlet.ServletException;
@@ -60,14 +61,9 @@ public class PosServlet extends HttpServlet {
                 return;
             }
 
-            // El comprador es obligatorio: un cliente registrado o el nombre de un invitado.
+            // El comprador es obligatorio: un cliente registrado o un invitado identificado por su documento.
             String clienteIdParam = req.getParameter("clienteId");
             boolean hayCliente = clienteIdParam != null && !clienteIdParam.isBlank();
-            String nombreInvitado = Textos.limpiar(req.getParameter("nombreComprador"), 150);
-            if (!hayCliente && nombreInvitado.isEmpty()) {
-                mostrarFormulario(req, resp, "El nombre del comprador es obligatorio (elige un cliente registrado o escribe el nombre del invitado).");
-                return;
-            }
 
             // Boleta con DNI exige 8 digitos y factura 11 (RUC); se valida antes de registrar la venta.
             String tipoComprobante = req.getParameter("tipoComprobante");
@@ -85,11 +81,6 @@ public class PosServlet extends HttpServlet {
 
             Pedido pedido = new Pedido();
             pedido.setTipoOrigen(TipoOrigenPedido.PRESENCIAL);
-            if (hayCliente) {
-                pedido.setClienteId(Integer.parseInt(clienteIdParam));
-            } else {
-                pedido.setNombreInvitado(nombreInvitado);
-            }
 
             for (int i = 0; i < productoIds.length; i++) {
                 int cantidad = Integer.parseInt(cantidades[i]);
@@ -110,6 +101,23 @@ public class PosServlet extends HttpServlet {
             if (pedido.getDetalles().isEmpty()) {
                 mostrarFormulario(req, resp, "El carrito esta vacio.");
                 return;
+            }
+
+            if (hayCliente) {
+                pedido.setClienteId(Integer.parseInt(clienteIdParam));
+            } else {
+                try {
+                    Compradores.Comprador comprador = Compradores.resolver(req.getParameter("compradorTipoDoc"),
+                            req.getParameter("compradorDoc"), req.getParameter("nombreComprador"), null, true);
+                    pedido.setClienteId(comprador.clienteId);
+                    pedido.setInvitadoId(comprador.invitadoId);
+                    if (comprador.clienteId == null) {
+                        pedido.setNombreInvitado(comprador.nombre);
+                    }
+                } catch (Compradores.ValidacionException e) {
+                    mostrarFormulario(req, resp, e.getMessage());
+                    return;
+                }
             }
 
             Usuario usuario = (Usuario) req.getSession().getAttribute("usuario");

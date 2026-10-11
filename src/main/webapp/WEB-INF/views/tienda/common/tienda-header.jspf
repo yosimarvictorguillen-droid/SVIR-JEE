@@ -1,5 +1,6 @@
 <%@ page import="com.svir.jee.model.Cliente" %>
 <%@ page import="java.util.Map" %>
+<%@ page import="com.svir.jee.util.Textos" %>
 <%
     // Fragmento compartido de la tienda web publica (sin autenticacion de
     // personal). Se incluye de forma estatica al inicio de cada pantalla.
@@ -75,9 +76,25 @@
     </div>
 </nav>
 
+<%
+    // Mensaje tras crear la cuenta: ?bienvenida=N (N = pedidos de cuando era invitado que se vincularon).
+    int vinculadosBienvenida = -1;
+    try {
+        vinculadosBienvenida = Integer.parseInt(request.getParameter("bienvenida"));
+    } catch (NumberFormatException ignored) {
+        // sin parametro: no se muestra nada
+    }
+%>
+<% if (vinculadosBienvenida >= 0) { %>
+<div class="container mt-3">
+    <div class="alert alert-success">Cuenta creada correctamente.
+        <%= vinculadosBienvenida > 0 ? "Vinculamos " + vinculadosBienvenida + " pedido(s) de cuando comprabas como invitado a tu cuenta." : "" %></div>
+</div>
+<% } %>
+
 <% if (authError != null) { %>
 <div class="container mt-3">
-    <div class="alert alert-danger"><%= authError %></div>
+    <div class="alert alert-danger"><%= Textos.escapar(authError) %></div>
 </div>
 <% } %>
 

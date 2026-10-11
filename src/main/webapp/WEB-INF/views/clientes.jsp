@@ -2,6 +2,7 @@
 <%@ page import="com.svir.jee.model.Cliente" %>
 <%@ page import="java.util.List" %>
 <%@ page import="com.svir.jee.util.Filtros" %>
+<%@ page import="com.svir.jee.util.Textos" %>
 <%
     request.setAttribute("tituloPagina", "Clientes");
     request.setAttribute("paginaActiva", "clientes");
@@ -16,11 +17,23 @@
     </a>
 </div>
 
+<%
+    int vinculadosAlta = 0;
+    try {
+        vinculadosAlta = Integer.parseInt(request.getParameter("vinculados"));
+    } catch (NumberFormatException ignored) {
+        // sin parametro
+    }
+%>
+<% if (vinculadosAlta > 0) { %>
+<div class="alert alert-success">Cliente creado. Se vincularon <%= vinculadosAlta %> pedido(s) de cuando compraba como invitado.</div>
+<% } %>
+
 <form method="get" action="<%= ctx %>/app/clientes" class="card card-body mb-3">
     <div class="row g-2">
         <div class="col-md-4">
             <label class="form-label small mb-1">Buscar</label>
-            <input type="text" class="form-control form-control-sm" name="q" maxlength="100" value="<%= Filtros.attr(request, "fq") %>" placeholder="Nombre, DNI, telefono o email">
+            <input type="text" class="form-control form-control-sm" name="q" maxlength="100" value="<%= Filtros.attr(request, "fq") %>" placeholder="Nombre, documento, telefono o email">
         </div>
         <div class="col-md-2">
             <label class="form-label small mb-1">Estado</label>
@@ -42,7 +55,7 @@
         <thead>
         <tr>
             <th>Nombre</th>
-            <th>DNI</th>
+            <th>Documento</th>
             <th>Telefono</th>
             <th>Direccion</th>
             <th>Estado</th>
@@ -54,8 +67,12 @@
             for (Cliente c : clientes) {
         %>
         <tr>
-            <td><%= c.getNombre() %></td>
-            <td><%= c.getDni() != null ? c.getDni() : "-" %></td>
+            <td><%= c.getNombre() %>
+                <% if (c.isAntesInvitado()) { %>
+                <span class="badge bg-secondary" title="Compraba como invitado y se registro el <%= c.getFechaConversionInvitado().toLocalDate() %>">Antes invitado <%= c.getFechaConversionInvitado().toLocalDate() %></span>
+                <% } %>
+            </td>
+            <td><% if (c.getDni() != null) { %><span class="small text-muted"><%= c.getTipoDocumento() %></span> <%= c.getDni() %><% } else { %>-<% } %></td>
             <td><%= c.getTelefono() != null ? c.getTelefono() : "-" %></td>
             <td><%= c.getDireccion() != null ? c.getDireccion() : "-" %></td>
             <td>

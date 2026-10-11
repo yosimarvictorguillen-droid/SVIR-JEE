@@ -24,7 +24,7 @@
                     <div class="tab-pane fade show active" id="tabLogin">
                         <form method="post" action="<%= ctx %>/cliente/login">
                             <input type="hidden" name="volverA" value="<%= rutaActual %>">
-                            <div class="mb-2"><label class="form-label">DNI</label><input class="form-control" name="dni" maxlength="8" required></div>
+                            <div class="mb-2"><label class="form-label">Documento (DNI, carne de extranjeria o pasaporte)</label><input class="form-control" name="documento" maxlength="12" required></div>
                             <div class="mb-3"><label class="form-label">Contrasena</label><input type="password" class="form-control" name="password" required></div>
                             <button class="btn btn-dark w-100">Ingresar</button>
                         </form>
@@ -32,8 +32,26 @@
                     <div class="tab-pane fade" id="tabRegistro">
                         <form method="post" action="<%= ctx %>/cliente/registro">
                             <input type="hidden" name="volverA" value="<%= rutaActual %>">
-                            <div class="mb-2"><label class="form-label">Nombre</label><input class="form-control" name="nombre" required></div>
-                            <div class="mb-2"><label class="form-label">DNI</label><input class="form-control" name="dni" maxlength="8" required></div>
+                            <div class="mb-2"><label class="form-label">Nombre</label><input class="form-control" name="nombre" id="regNombre" required></div>
+                            <div class="mb-2">
+                                <label class="form-label">Documento (unico)</label>
+                                <div class="input-group">
+                                    <select class="form-select" name="tipoDocumento" id="regTipoDoc" style="max-width:9rem;">
+                                        <option value="DNI">DNI</option>
+                                        <option value="CE">Carne ext.</option>
+                                        <option value="PASAPORTE">Pasaporte</option>
+                                    </select>
+                                    <input class="form-control" name="documento" id="regDoc" maxlength="12" required>
+                                </div>
+                            </div>
+                            <details class="mb-2" id="regPrevio">
+                                <summary class="small">Ya compraste antes como invitado?</summary>
+                                <div class="form-text mb-1">Para vincular tus pedidos a tu cuenta escribe el numero y el total de uno de ellos, como figuran en tu comprobante.</div>
+                                <div class="row g-2">
+                                    <div class="col-6"><input class="form-control" name="pedidoRef" id="regPedidoRef" placeholder="N° de pedido" inputmode="numeric"></div>
+                                    <div class="col-6"><input class="form-control" name="totalRef" id="regTotalRef" placeholder="Total (S/)" inputmode="decimal"></div>
+                                </div>
+                            </details>
                             <div class="mb-2"><label class="form-label">Telefono</label><input class="form-control" name="telefono"></div>
                             <div class="mb-2"><label class="form-label">Direccion</label><input class="form-control" name="direccion"></div>
                             <div class="mb-2"><label class="form-label">Email</label><input type="email" class="form-control" name="email"></div>
@@ -49,6 +67,17 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Abre el registro con los datos de una compra reciente como invitado (los trae el servidor desde la sesion).
+    function abrirRegistro(tipo, documento, nombre, pedido, total) {
+        document.getElementById('regTipoDoc').value = tipo;
+        document.getElementById('regDoc').value = documento;
+        document.getElementById('regNombre').value = nombre;
+        document.getElementById('regPedidoRef').value = pedido;
+        document.getElementById('regTotalRef').value = total;
+        document.getElementById('regPrevio').open = true;
+        mostrarTabAuth('tabRegistro');
+        new bootstrap.Modal(document.getElementById('authModal')).show();
+    }
     function mostrarTabAuth(idTab) {
         const boton = document.querySelector('#authModal button[data-bs-target="#' + idTab + '"]');
         if (boton && window.bootstrap) {

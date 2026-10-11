@@ -6,6 +6,7 @@ public class Cliente implements java.io.Serializable {
 
     private Integer id;
     private String nombre;
+    private String tipoDocumento = "DNI";
     private String dni;
     private String ruc;
     private String telefono;
@@ -15,6 +16,7 @@ public class Cliente implements java.io.Serializable {
     private boolean activo;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime fechaConversionInvitado; // si antes compraba como invitado: cuando se registro
 
     public Cliente() {
     }
@@ -33,6 +35,26 @@ public class Cliente implements java.io.Serializable {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getTipoDocumento() {
+        return tipoDocumento;
+    }
+
+    public void setTipoDocumento(String tipoDocumento) {
+        this.tipoDocumento = tipoDocumento;
+    }
+
+    public LocalDateTime getFechaConversionInvitado() {
+        return fechaConversionInvitado;
+    }
+
+    public void setFechaConversionInvitado(LocalDateTime fechaConversionInvitado) {
+        this.fechaConversionInvitado = fechaConversionInvitado;
+    }
+
+    public boolean isAntesInvitado() {
+        return fechaConversionInvitado != null;
     }
 
     public String getDni() {

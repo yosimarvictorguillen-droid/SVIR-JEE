@@ -10,6 +10,7 @@ import com.svir.jee.model.Pedido;
 import com.svir.jee.model.Producto;
 import com.svir.jee.model.TipoOrigenPedido;
 import com.svir.jee.model.Usuario;
+import com.svir.jee.util.Compradores;
 import com.svir.jee.util.Textos;
 
 import jakarta.servlet.ServletException;
@@ -223,19 +224,9 @@ public class PedidoServlet extends HttpServlet {
 
         Pedido pedido = new Pedido();
         String clienteIdParam = req.getParameter("clienteId");
-        if (clienteIdParam != null && !clienteIdParam.isBlank()) {
+        boolean hayCliente = clienteIdParam != null && !clienteIdParam.isBlank();
+        if (hayCliente) {
             pedido.setClienteId(Integer.parseInt(clienteIdParam));
-        } else {
-            // Sin cliente registrado el nombre del invitado es obligatorio.
-            String nombre = com.svir.jee.util.Textos.limpiar(req.getParameter("nombreInvitado"), 150);
-            if (nombre.isEmpty()) {
-                req.setAttribute("error", "El nombre del comprador es obligatorio (elige un cliente registrado o escribe el nombre del invitado).");
-                req.setAttribute("productos", productoDAO.listarActivos());
-                req.setAttribute("clientes", clienteDAO.listarActivos());
-                req.getRequestDispatcher("/WEB-INF/views/pedido-form.jsp").forward(req, resp);
-                return;
-            }
-            pedido.setNombreInvitado(nombre);
         }
         pedido.setTipoOrigen(TipoOrigenPedido.valueOf(req.getParameter("tipoOrigen")));
         pedido.setObservacion(req.getParameter("observacion"));
@@ -267,6 +258,25 @@ public class PedidoServlet extends HttpServlet {
             req.setAttribute("clientes", clienteDAO.listarActivos());
             req.getRequestDispatcher("/WEB-INF/views/pedido-form.jsp").forward(req, resp);
             return;
+        }
+
+        // Sin cliente registrado: el comprador se identifica por su documento (unico) y su nombre.
+        if (!hayCliente) {
+            try {
+                Compradores.Comprador comprador = Compradores.resolver(req.getParameter("compradorTipoDoc"),
+                        req.getParameter("compradorDoc"), req.getParameter("nombreInvitado"), null, true);
+                pedido.setClienteId(comprador.clienteId);
+                pedido.setInvitadoId(comprador.invitadoId);
+                if (comprador.clienteId == null) {
+                    pedido.setNombreInvitado(comprador.nombre);
+                }
+            } catch (Compradores.ValidacionException e) {
+                req.setAttribute("error", e.getMessage());
+                req.setAttribute("productos", productoDAO.listarActivos());
+                req.setAttribute("clientes", clienteDAO.listarActivos());
+                req.getRequestDispatcher("/WEB-INF/views/pedido-form.jsp").forward(req, resp);
+                return;
+            }
         }
 
         Usuario usuario = (Usuario) req.getSession().getAttribute("usuario");

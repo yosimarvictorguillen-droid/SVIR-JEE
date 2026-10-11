@@ -16,6 +16,12 @@
 <% if (request.getParameter("errorNombre") != null) { %>
 <div class="alert alert-danger">Escribe tu nombre para poder registrar el pedido.</div>
 <% } %>
+<% if ("cuenta".equals(request.getParameter("errorDoc"))) { %>
+<div class="alert alert-warning">Ese documento ya tiene una cuenta. Inicia sesion para continuar con tu compra.
+    <button type="button" class="btn btn-sm btn-dark ms-2" data-bs-toggle="modal" data-bs-target="#authModal" onclick="mostrarTabAuth('tabLogin')">Ingresar</button></div>
+<% } else if ("formato".equals(request.getParameter("errorDoc"))) { %>
+<div class="alert alert-danger">El documento no es valido para el tipo elegido (DNI: 8 digitos; carne de extranjeria: 9 a 12; pasaporte: 6 a 12 letras o numeros).</div>
+<% } %>
 
 <div class="row">
     <div class="col-md-7">
@@ -42,6 +48,18 @@
                     <div class="mb-3">
                         <label class="form-label">Tu nombre</label>
                         <input type="text" class="form-control" name="nombre" placeholder="Nombre para el pedido" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Documento</label>
+                        <div class="input-group">
+                            <select class="form-select" name="tipoDocumento" style="max-width:9rem;">
+                                <option value="DNI">DNI</option>
+                                <option value="CE">Carne ext.</option>
+                                <option value="PASAPORTE">Pasaporte</option>
+                            </select>
+                            <input type="text" class="form-control" name="documento" maxlength="12" required placeholder="Numero de documento">
+                        </div>
+                        <div class="form-text">Identifica tus pedidos. Si ya tienes cuenta, <a href="#" data-bs-toggle="modal" data-bs-target="#authModal" onclick="mostrarTabAuth('tabLogin')">inicia sesion</a>.</div>
                     </div>
                     <% } %>
 

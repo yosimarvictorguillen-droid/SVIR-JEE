@@ -35,6 +35,9 @@
         </div>
         <hr>
         <div class="small mb-1"><strong><%= pedido.getTipoComprador().toUpperCase() %>:</strong> <%= pedido.getClienteNombre() != null ? pedido.getClienteNombre() : "Sin nombre" %></div>
+        <% if (pedido.getDocumentoComprador() != null) { %>
+        <div class="small mb-1"><strong>DOC.:</strong> <%= pedido.getDocumentoComprador() %></div>
+        <% } %>
         <% if (pedido.getComprobanteDocumento() != null) { %>
         <div class="small mb-2"><strong><%= "FACTURA".equals(pedido.getComprobanteTipo()) ? "RUC" : "DNI" %>:</strong> <%= pedido.getComprobanteDocumento() %></div>
         <% } else if (!pedido.isTieneComprobante() && pedido.getObservacion() != null && !pedido.getObservacion().isBlank()) { %>

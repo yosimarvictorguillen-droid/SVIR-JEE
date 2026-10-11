@@ -34,6 +34,7 @@ public class AppStartupListener implements ServletContextListener {
 
         asegurarColumnaNombreInvitado();
         asegurarColumnasComprobante();
+        asegurarModeloDocumentos();
 
         UsuarioDAO usuarioDAO = new UsuarioDAO();
         try {
@@ -105,6 +106,79 @@ public class AppStartupListener implements ServletContextListener {
             }
         } catch (SQLException e) {
             LOG.log(Level.SEVERE, "No se pudieron crear las columnas de comprobante en pedidos.", e);
+        }
+    }
+
+    /**
+     * Migracion automatica del modelo de documentos: tipo de documento en clientes (y dni ampliado a 12 caracteres),
+     * tabla de invitados, registro de conversiones invitado -> cliente, pedidos.invitado_id e indice unico del documento.
+     */
+    private void asegurarModeloDocumentos() {
+        try (Connection con = ConexionBD.getInstancia().obtenerConexion();
+             Statement ddl = con.createStatement()) {
+            if (!existeColumna(con, "clientes", "tipo_documento")) {
+                ddl.executeUpdate("ALTER TABLE clientes "
+                        + "ADD COLUMN tipo_documento VARCHAR(12) NOT NULL DEFAULT 'DNI' AFTER nombre, "
+                        + "MODIFY COLUMN dni VARCHAR(12) NULL");
+                LOG.info("Migracion: clientes.tipo_documento creado y clientes.dni ampliado a 12 caracteres.");
+            }
+            ddl.executeUpdate("CREATE TABLE IF NOT EXISTS invitados ("
+                    + "id INT AUTO_INCREMENT PRIMARY KEY, "
+                    + "tipo_documento VARCHAR(12) NOT NULL DEFAULT 'DNI', "
+                    + "documento VARCHAR(12) NOT NULL, "
+                    + "nombre VARCHAR(150) NOT NULL, "
+                    + "telefono VARCHAR(30) NULL, "
+                    + "estado ENUM('ACTIVO','CONVERTIDO') NOT NULL DEFAULT 'ACTIVO', "
+                    + "cliente_id INT NULL, "
+                    + "fecha_conversion DATETIME NULL, "
+                    + "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+                    + "UNIQUE KEY uq_invitado_documento (documento), "
+                    + "CONSTRAINT fk_invitado_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id)"
+                    + ") ENGINE=InnoDB");
+            ddl.executeUpdate("CREATE TABLE IF NOT EXISTS conversiones_invitado ("
+                    + "id INT AUTO_INCREMENT PRIMARY KEY, "
+                    + "invitado_id INT NOT NULL, "
+                    + "cliente_id INT NOT NULL, "
+                    + "pedidos_vinculados INT NOT NULL DEFAULT 0, "
+                    + "validacion VARCHAR(30) NOT NULL, "
+                    + "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+                    + "CONSTRAINT fk_conv_invitado FOREIGN KEY (invitado_id) REFERENCES invitados(id), "
+                    + "CONSTRAINT fk_conv_cliente FOREIGN KEY (cliente_id) REFERENCES clientes(id)"
+                    + ") ENGINE=InnoDB");
+            if (!existeColumna(con, "pedidos", "invitado_id")) {
+                ddl.executeUpdate("ALTER TABLE pedidos ADD COLUMN invitado_id INT NULL AFTER cliente_id, "
+                        + "ADD CONSTRAINT fk_pedido_invitado FOREIGN KEY (invitado_id) REFERENCES invitados(id)");
+                LOG.info("Migracion: pedidos.invitado_id creado.");
+            }
+            if (!existeIndice(con, "clientes", "uq_cliente_documento")) {
+                try {
+                    ddl.executeUpdate("ALTER TABLE clientes ADD UNIQUE KEY uq_cliente_documento (dni)");
+                    LOG.info("Migracion: indice unico del documento de clientes creado.");
+                } catch (SQLException e) {
+                    LOG.log(Level.WARNING, "No se pudo crear el indice unico clientes.dni (hay documentos repetidos). "
+                            + "Corrige los clientes duplicados; la aplicacion igual valida la unicidad.", e);
+                }
+            }
+        } catch (SQLException e) {
+            LOG.log(Level.SEVERE, "No se pudo migrar el modelo de documentos e invitados.", e);
+        }
+    }
+
+    private boolean existeColumna(Connection con, String tabla, String columna) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM information_schema.COLUMNS "
+                + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '" + tabla + "' AND COLUMN_NAME = '" + columna + "'";
+        try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            rs.next();
+            return rs.getInt(1) > 0;
+        }
+    }
+
+    private boolean existeIndice(Connection con, String tabla, String indice) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM information_schema.STATISTICS "
+                + "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '" + tabla + "' AND INDEX_NAME = '" + indice + "'";
+        try (Statement st = con.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            rs.next();
+            return rs.getInt(1) > 0;
         }
     }
 
