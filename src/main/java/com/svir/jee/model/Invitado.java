@@ -29,6 +29,11 @@ public class Invitado implements Serializable {
     private LocalDateTime ultimoPedido;
     private Integer pedidosVinculados;
 
+    // compradores de antes de pedir documento (solo tenian un nombre en el pedido)
+    private boolean sinDocumento;
+    private Integer clienteSugeridoId;
+    private String clienteSugeridoNombre;
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getTipoDocumento() { return tipoDocumento; }
@@ -57,6 +62,13 @@ public class Invitado implements Serializable {
     public void setUltimoPedido(LocalDateTime ultimoPedido) { this.ultimoPedido = ultimoPedido; }
     public Integer getPedidosVinculados() { return pedidosVinculados; }
     public void setPedidosVinculados(Integer pedidosVinculados) { this.pedidosVinculados = pedidosVinculados; }
+
+    public boolean isSinDocumento() { return sinDocumento; }
+    public void setSinDocumento(boolean sinDocumento) { this.sinDocumento = sinDocumento; }
+    public Integer getClienteSugeridoId() { return clienteSugeridoId; }
+    public void setClienteSugeridoId(Integer clienteSugeridoId) { this.clienteSugeridoId = clienteSugeridoId; }
+    public String getClienteSugeridoNombre() { return clienteSugeridoNombre; }
+    public void setClienteSugeridoNombre(String clienteSugeridoNombre) { this.clienteSugeridoNombre = clienteSugeridoNombre; }
 
     public boolean isConvertido() {
         return "CONVERTIDO".equals(estado);

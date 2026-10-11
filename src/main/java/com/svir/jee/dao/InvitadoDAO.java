@@ -3,6 +3,7 @@ package com.svir.jee.dao;
 import com.svir.jee.db.ConexionBD;
 import com.svir.jee.model.Cliente;
 import com.svir.jee.model.Invitado;
+import com.svir.jee.util.Textos;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -152,7 +153,129 @@ public class InvitadoDAO {
                 lista.add(i);
             }
         }
+        lista.addAll(listarAntiguos());
         return lista;
+    }
+
+    /**
+     * Compradores de antes de pedir documento: pedidos sin cliente ni invitado registrado, agrupados por el nombre
+     * que escribieron. Si hay un cliente activo con ese mismo nombre se sugiere vincularlos (lo confirma el personal).
+     */
+    private List<Invitado> listarAntiguos() throws SQLException {
+        String sql = "SELECT p.nombre_invitado AS nombre, COUNT(*) AS total_pedidos, "
+                + "COALESCE(SUM(CASE WHEN p.estado <> 'CANCELADO' THEN p.total ELSE 0 END), 0) AS total_comprado, "
+                + "MAX(p.created_at) AS ultimo_pedido "
+                + "FROM pedidos p WHERE p.invitado_id IS NULL AND p.cliente_id IS NULL "
+                + "GROUP BY p.nombre_invitado ORDER BY ultimo_pedido DESC";
+        List<Cliente> clientes = new ClienteDAO().listarActivos();
+        List<Invitado> lista = new ArrayList<>();
+        try (Connection con = ConexionBD.getInstancia().obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Invitado i = new Invitado();
+                String nombre = rs.getString("nombre");
+                i.setSinDocumento(true);
+                i.setNombre(nombre == null || nombre.isBlank() ? "Sin nombre" : nombre);
+                i.setTotalPedidos(rs.getInt("total_pedidos"));
+                i.setTotalComprado(rs.getBigDecimal("total_comprado"));
+                Timestamp ultimo = rs.getTimestamp("ultimo_pedido");
+                if (ultimo != null) {
+                    i.setUltimoPedido(ultimo.toLocalDateTime());
+                }
+                if (nombre != null && !nombre.isBlank()) {
+                    List<Cliente> coinciden = clientes.stream()
+                            .filter(c -> c.getDni() != null && Textos.mismoNombre(c.getNombre(), nombre)).toList();
+                    if (coinciden.size() == 1) {
+                        i.setClienteSugeridoId(coinciden.get(0).getId());
+                        i.setClienteSugeridoNombre(coinciden.get(0).getNombre());
+                    }
+                }
+                lista.add(i);
+            }
+        }
+        return lista;
+    }
+
+    /**
+     * El personal confirma que los pedidos antiguos de un nombre (sin documento) son de un cliente: se vinculan a su
+     * cuenta y queda el registro de conversion con el documento del cliente. Devuelve cuantos pedidos se vincularon.
+     */
+    public int vincularAntiguo(String nombre, int clienteId) throws SQLException {
+        Connection con = null;
+        try {
+            con = ConexionBD.getInstancia().obtenerConexion();
+            con.setAutoCommit(false);
+
+            String tipo;
+            String documento;
+            try (PreparedStatement ps = con.prepareStatement("SELECT tipo_documento, dni FROM clientes WHERE id = ?")) {
+                ps.setInt(1, clienteId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next() || rs.getString("dni") == null) {
+                        throw new SQLException("El cliente no tiene documento registrado.");
+                    }
+                    tipo = rs.getString("tipo_documento");
+                    documento = rs.getString("dni");
+                }
+            }
+
+            Optional<Invitado> existente = buscarPorDocumento(con, documento, true);
+            int invitadoId;
+            if (existente.isPresent()) {
+                if (!existente.get().isConvertido()) {
+                    throw new SQLException("Ese documento ya es de un invitado con pedidos; se vincula desde el registro del cliente.");
+                }
+                invitadoId = existente.get().getId();
+            } else {
+                try (PreparedStatement ps = con.prepareStatement(
+                        "INSERT INTO invitados (tipo_documento, documento, nombre, estado, cliente_id, fecha_conversion) "
+                                + "VALUES (?, ?, ?, 'CONVERTIDO', ?, NOW())", Statement.RETURN_GENERATED_KEYS)) {
+                    ps.setString(1, tipo);
+                    ps.setString(2, documento);
+                    ps.setString(3, nombre);
+                    ps.setInt(4, clienteId);
+                    ps.executeUpdate();
+                    try (ResultSet keys = ps.getGeneratedKeys()) {
+                        keys.next();
+                        invitadoId = keys.getInt(1);
+                    }
+                }
+            }
+
+            int vinculados;
+            try (PreparedStatement ps = con.prepareStatement(
+                    "UPDATE pedidos SET invitado_id = ?, cliente_id = ? "
+                            + "WHERE invitado_id IS NULL AND cliente_id IS NULL AND nombre_invitado = ?")) {
+                ps.setInt(1, invitadoId);
+                ps.setInt(2, clienteId);
+                ps.setString(3, nombre);
+                vinculados = ps.executeUpdate();
+            }
+            if (vinculados == 0) {
+                throw new SQLException("No hay pedidos antiguos con ese nombre.");
+            }
+            try (PreparedStatement ps = con.prepareStatement(
+                    "INSERT INTO conversiones_invitado (invitado_id, cliente_id, pedidos_vinculados, validacion) "
+                            + "VALUES (?, ?, ?, 'PERSONAL_NOMBRE')")) {
+                ps.setInt(1, invitadoId);
+                ps.setInt(2, clienteId);
+                ps.setInt(3, vinculados);
+                ps.executeUpdate();
+            }
+            con.commit();
+            return vinculados;
+        } catch (SQLException e) {
+            if (con != null) {
+                con.rollback();
+            }
+            throw e;
+        } finally {
+            if (con != null) {
+                con.setAutoCommit(true);
+                con.close();
+            }
+        }
     }
 
     private Invitado mapear(ResultSet rs) throws SQLException {

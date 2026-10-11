@@ -14,6 +14,18 @@
     <span class="text-muted small">Compradores sin cuenta, identificados por su documento. Al registrarse pasan a Clientes.</span>
 </div>
 
+<%
+    int vinculados = 0;
+    try {
+        vinculados = Integer.parseInt(request.getParameter("vinculados"));
+    } catch (NumberFormatException ignored) {
+        // sin parametro
+    }
+%>
+<% if (vinculados > 0) { %>
+<div class="alert alert-success">Listo: se vincularon <%= vinculados %> pedido(s) a la cuenta del cliente.</div>
+<% } %>
+
 <form method="get" action="<%= ctx %>/app/invitados" class="card card-body mb-3">
     <div class="row g-2">
         <div class="col-md-4">
@@ -53,7 +65,7 @@
         <tbody>
         <% if (invitados != null) { for (Invitado i : invitados) { %>
         <tr>
-            <td><span class="small text-muted"><%= i.getTipoDocumento() %></span> <%= i.getDocumento() %></td>
+            <td><% if (i.isSinDocumento()) { %><span class="text-muted small">Sin documento</span><% } else { %><span class="small text-muted"><%= i.getTipoDocumento() %></span> <%= i.getDocumento() %><% } %></td>
             <td><%= i.getNombre() %></td>
             <td><%= i.getTelefono() != null ? i.getTelefono() : "-" %></td>
             <td><%= i.getTotalPedidos() %></td>
@@ -63,7 +75,7 @@
                 <% if (i.isConvertido()) { %>
                 <span class="badge bg-secondary">Convertido</span>
                 <% } else { %>
-                <span class="badge bg-warning text-dark">Invitado</span>
+                <span class="badge bg-warning text-dark">Invitado</span><% if (i.isSinDocumento()) { %> <span class="badge bg-light text-dark border" title="Compro antes de que se pidiera documento">sin documento</span><% } %>
                 <% } %>
             </td>
             <td>
@@ -73,10 +85,24 @@
                     <% if (i.getPedidosVinculados() != null) { %>(<%= i.getPedidosVinculados() %> pedido(s) vinculados)<% } %></span>
                 <% } else { %>-<% } %>
             </td>
-            <td>
+            <td class="text-nowrap">
+                <% if (i.isSinDocumento() && !"Sin nombre".equals(i.getNombre())) { %>
+                <a href="<%= ctx %>/app/pedidos?q=<%= java.net.URLEncoder.encode(i.getNombre(), "UTF-8") %>" class="btn btn-sm btn-outline-secondary" title="Ver pedidos">
+                    <i class="bi bi-receipt"></i>
+                </a>
+                <% if (i.getClienteSugeridoId() != null) { %>
+                <form method="post" action="<%= ctx %>/app/invitados" class="d-inline"
+                      onsubmit="return confirm('Vincular los pedidos antiguos de este nombre con el cliente <%= i.getClienteSugeridoNombre() %>?');">
+                    <input type="hidden" name="nombre" value="<%= i.getNombre() %>">
+                    <input type="hidden" name="clienteId" value="<%= i.getClienteSugeridoId() %>">
+                    <button type="submit" class="btn btn-sm btn-outline-success" title="Hay un cliente con este nombre">Vincular con <%= i.getClienteSugeridoNombre() %></button>
+                </form>
+                <% } %>
+                <% } else if (!i.isSinDocumento()) { %>
                 <a href="<%= ctx %>/app/pedidos?q=<%= java.net.URLEncoder.encode(i.getDocumento(), "UTF-8") %>" class="btn btn-sm btn-outline-secondary" title="Ver pedidos">
                     <i class="bi bi-receipt"></i>
                 </a>
+                <% } %>
             </td>
         </tr>
         <% } } %>

@@ -26,6 +26,17 @@ public class InvitadoBean extends ListadoBase<Invitado> {
         return DAO.listarConResumen();
     }
 
+    /** El personal confirma que los pedidos antiguos de este nombre son del cliente sugerido. */
+    public void vincular(Invitado i) {
+        try {
+            int n = DAO.vincularAntiguo(i.getNombre(), i.getClienteSugeridoId());
+            Mensajes.info("Se vincularon " + n + " pedido(s) con el cliente " + i.getClienteSugeridoNombre() + ".");
+            recargar();
+        } catch (SQLException e) {
+            Mensajes.error("No se pudo vincular: " + e.getMessage());
+        }
+    }
+
     @Override
     protected boolean cumpleFiltros(Invitado i, Map<String, String> f) {
         String estado = valor(f, "estado");

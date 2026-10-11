@@ -115,7 +115,7 @@
         <tr>
             <td>#<%= p.getId() %></td>
             <td><%= cliente %></td>
-            <td><span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : ("Invitado".equals(p.getTipoComprador()) ? "bg-warning text-dark" : "bg-secondary") %>"><%= p.getTipoComprador() %></span></td>
+            <td><span class="badge <%= "Cliente".equals(p.getTipoComprador()) ? "bg-info text-dark" : ("Invitado".equals(p.getTipoComprador()) ? "bg-warning text-dark" : "bg-secondary") %>"><%= p.getTipoComprador() %></span><% if (p.isAntesInvitado()) { %><div class="small text-muted">antes invitado</div><% } %></td>
             <td><%= p.getTipoOrigen() %></td>
             <td>S/ <%= p.getTotal() %></td>
             <td><span class="badge bg-secondary badge-estado"><%= p.getEstado() %></span></td>

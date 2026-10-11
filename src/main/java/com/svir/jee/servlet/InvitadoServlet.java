@@ -4,6 +4,7 @@ import com.svir.jee.dao.InvitadoDAO;
 import com.svir.jee.model.Invitado;
 import com.svir.jee.util.Filtros;
 import com.svir.jee.util.Pagina;
+import com.svir.jee.util.Textos;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -22,6 +23,23 @@ import java.sql.SQLException;
 public class InvitadoServlet extends HttpServlet {
 
     private final InvitadoDAO invitadoDAO = new InvitadoDAO();
+
+    /** Vincula los pedidos antiguos (solo con nombre) de un invitado con el cliente que el personal confirma. */
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        try {
+            String nombre = Textos.limpiar(req.getParameter("nombre"), 150);
+            int clienteId = Integer.parseInt(req.getParameter("clienteId"));
+            int vinculados = invitadoDAO.vincularAntiguo(nombre, clienteId);
+            resp.sendRedirect(req.getContextPath() + "/app/invitados?vinculados=" + vinculados);
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/app/invitados");
+        } catch (SQLException e) {
+            req.setAttribute("error", e.getMessage());
+            doGet(req, resp);
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)

@@ -99,6 +99,7 @@
                     <h:column>
                         <f:facet name="header">Tipo de cliente</f:facet>
                         <h:outputText value="#{p.tipoComprador}" styleClass="badge #{p.tipoComprador eq 'Cliente' ? 'bg-info text-dark' : (p.tipoComprador eq 'Invitado' ? 'bg-warning text-dark' : 'bg-secondary')}"/>
+                        <h:panelGroup rendered="#{p.antesInvitado}" layout="block" styleClass="small text-muted">antes invitado</h:panelGroup>
                     </h:column>
                         <h:column>
                             <f:facet name="header">Origen</f:facet>

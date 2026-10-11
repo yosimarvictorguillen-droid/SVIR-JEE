@@ -44,7 +44,8 @@
                                  rendered="#{invitadoBean.total gt 0}">
                         <h:column>
                             <f:facet name="header">Documento</f:facet>
-                            <span class="small text-muted">#{i.tipoDocumento}</span> #{i.documento}
+                            <h:panelGroup rendered="#{i.sinDocumento}"><span class="text-muted small">Sin documento</span></h:panelGroup>
+                            <h:panelGroup rendered="#{not i.sinDocumento}"><span class="small text-muted">#{i.tipoDocumento}</span> #{i.documento}</h:panelGroup>
                         </h:column>
                         <h:column>
                             <f:facet name="header">Nombre</f:facet>
@@ -75,6 +76,13 @@
                                 <div class="small text-muted">Cliente: #{i.clienteNombre}
                                     <h:outputText value=" (#{i.pedidosVinculados} pedido(s) vinculados)" rendered="#{not empty i.pedidosVinculados}"/></div>
                             </h:panelGroup>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header"></f:facet>
+                            <h:commandButton value="Vincular con #{i.clienteSugeridoNombre}" action="#{invitadoBean.vincular(i)}"
+                                             rendered="#{i.sinDocumento and not empty i.clienteSugeridoId}"
+                                             onclick="return confirm('Vincular los pedidos antiguos de este nombre con el cliente sugerido?');"
+                                             styleClass="btn btn-sm btn-outline-success"/>
                         </h:column>
                     </h:dataTable>
                 </div>
