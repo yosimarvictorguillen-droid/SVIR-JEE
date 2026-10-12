@@ -13,7 +13,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Auditoria de movimientos de stock de ingredientes. JDBC puro. */
+/** Auditoria de movimientos de stock de ingredientes. JDBC puro */
 public class MovimientoIngredienteDAO {
 
     /** Inserta el movimiento dentro de una transaccion ya abierta (no cierra la conexion). */
