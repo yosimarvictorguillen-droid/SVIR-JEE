@@ -27,7 +27,7 @@ import java.util.Optional;
  * Acceso a datos de pedidos y su detalle. Concentra la logica transaccional
  * de venta: descuenta stock de producto y registra el movimiento de
  * auditoria dentro de la MISMA transaccion JDBC que crea el pedido, de modo
- * que si algo falla a mitad de camino, todo se revierte (rollback).
+ * que si algo falla a mitad de camino, todo se revierte (rollback)
  */
 public class PedidoDAO {
 
