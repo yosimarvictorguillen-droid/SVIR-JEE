@@ -53,7 +53,7 @@
             </exclusions>
         </dependency>
 
-        <!-- CDI (Weld) - necesario para los Managed Beans con @Named y sus scopes en Tomcat -->
+        <!-- CDI (Weld) - Necesario para los Managed Beans con @Named y sus Scopes en Tomcat -->
         <dependency>
             <groupId>org.jboss.weld.servlet</groupId>
             <artifactId>weld-servlet-shaded</artifactId>
@@ -67,14 +67,14 @@
             <version>${mysql.version}</version>
         </dependency>
 
-        <!-- Hash de contraseñas (BCrypt) -->
+        <!-- Hash de Contraseñas (BCrypt) -->
         <dependency>
             <groupId>org.mindrot</groupId>
             <artifactId>jbcrypt</artifactId>
             <version>${jbcrypt.version}</version>
         </dependency>
 
-        <!-- Pruebas unitarias de los DAO (JDBC) -->
+        <!-- Pruebas Unitarias de los DAO (JDBC) -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
