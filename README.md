@@ -76,7 +76,7 @@ queda a medias en la base de datos.
 
 ---
 
-## Estructura del proyecto
+## Estructura del proyecto 
 
 ```
 SVIR-JEE/
@@ -119,7 +119,7 @@ Esto crea la base `reposteria_jee` con las 11 tablas, datos semilla
 tabla `usuarios` vacía a propósito: el usuario **ADMIN** se crea solo, la
 primera vez que arranca la aplicación (ver más abajo).
 
-### 2. Configurar la conexión
+### 2. Configurar la conexión 
 
 ```bash
 cp src/main/resources/db.properties.example src/main/resources/db.properties
