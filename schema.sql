@@ -1,5 +1,5 @@
 -- ============================================================
--- SVIR-JEE - Sistema de Ventas e Inventario para Reposteria
+-- SVIR-JEE - Sistema de Ventas e Inventario para Repostería
 -- DER normalizado - MySQL 8
 -- ============================================================
 
@@ -121,7 +121,7 @@ CREATE TABLE recetas (
 ) ENGINE=InnoDB;
 
 -- ------------------------------------------------------------
--- pedidos: cabecera de una venta / pedido
+-- pedidos: Cabecera de una Venta / Pedido
 -- ------------------------------------------------------------
 CREATE TABLE pedidos (
     id                  INT AUTO_INCREMENT PRIMARY KEY,
