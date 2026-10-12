@@ -6,6 +6,6 @@ target/
 nbproject/private/
 nb-configuration.xml
 
-# Credenciales locales reales: no se suben al repo publico.
+# Credenciales Locales Reales: no se suben al Repo Público.
 # Copia db.properties.example a db.properties y pon tu password real.
 src/main/resources/db.properties
