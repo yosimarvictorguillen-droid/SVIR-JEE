@@ -15,7 +15,7 @@ import java.util.Optional;
 
 /**
  * Acceso a datos de la tabla clientes. JDBC puro. La columna "dni" guarda el numero de documento (DNI, carne de
- * extranjeria o pasaporte; el tipo esta en tipo_documento) y es unica en todo el sistema
+ * extranjeria o pasaporte; el tipo esta en tipo_documento) y es unica en todo el sistema.
  */
 public class ClienteDAO {
 
