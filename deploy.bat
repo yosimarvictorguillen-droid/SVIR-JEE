@@ -24,7 +24,7 @@ echo Copiando el nuevo .war...
 copy /y "%WAR_FILE%" "%TOMCAT_HOME%\webapps\svir-jee.war" >nul
 
 echo.
-echo Listo. Si Tomcat ya esta corriendo, espera unos segundos y abre:
+echo Listo. Si Tomcat ya esta Corriendo, espera unos segundos y abre:
 echo   http://localhost:8080/svir-jee/
 echo.
 echo Si Tomcat NO esta corriendo, se abrira ahora...
