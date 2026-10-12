@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/** Acceso a datos de la tabla productos. JDBC puro (PreparedStatement). */
+/** Acceso a datos de la tabla productos. JDBC puro (PreparedStatement) */
 public class ProductoDAO {
 
     public List<Producto> listarTodos() throws SQLException {
