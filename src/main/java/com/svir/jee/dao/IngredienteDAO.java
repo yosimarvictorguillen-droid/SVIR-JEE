@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/** Acceso a datos de la tabla ingredientes. JDBC puro. */
+/** Acceso a datos de la tabla ingredientes. JDBC puro */
 public class IngredienteDAO {
 
     public List<Ingrediente> listarTodos() throws SQLException {
