@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-/** Acceso a datos de invitados (compradores sin cuenta) y de su paso a cliente. JDBC puro. */
+/** Acceso a datos de invitados (compradores sin cuenta) y de su paso a cliente. JDBC puro*/
 public class InvitadoDAO {
 
     public Optional<Invitado> buscarPorDocumento(String documento) throws SQLException {
